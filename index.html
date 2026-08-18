@@ -68,6 +68,9 @@
   .tl-row .bar-wrap { flex: 1; height: 20px; background: #f2f6f3; border-radius: 6px; overflow: hidden; position: relative; }
   .tl-row .bar { height: 100%; border-radius: 6px 0 0 6px; background: var(--blue2); min-width: 0; }
   .tl-row .v { width: 74px; text-align: right; font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; flex-shrink: 0; }
+  .tl-row .v2 { width: 86px; text-align: right; font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; flex-shrink: 0; display: flex; flex-direction: column; line-height: 1.25; }
+  .tl-row .v2 span { color: var(--ink); }
+  .tl-row.zero .v2 span { color: #b3beb6; font-weight: 500; }
   .tl-row .v small { font-weight: 500; color: var(--sub); font-size: 10px; }
   .tl-row.zero .v { color: #b3beb6; font-weight: 500; }
   .tl-row.now-row { background: #f4faf5; margin: 0 -6px; padding: 4px 6px; border-radius: 8px; }
@@ -149,10 +152,11 @@
 'use strict';
 const JMA = 'https://www.jma.go.jp/bosai/';
 const THR = { rainHr: 10, wind: 10, rainEvent: 50, gapHours: 3, temp1: 30, temp2: 35 };
-const LS = { lines: 'twv_lines', sel: 'twv_sel', amedas: 'twv_amedastable', amedasAt: 'twv_amedastable_at' };
+const LS = { lines: 'twv_lines', euc: 'twv_euc', sel: 'twv_sel', amedas: 'twv_amedastable', amedasAt: 'twv_amedastable_at' };
 
 let state = {
-  lines: null,          // {lines:[{id,name,towers:[{no,lat,lon}]}]}
+  lines: null,          // {lines:[{name,towers:[{no,lat,lon,mesh}]}]}
+  euc: null,            // {hours:[Date], mesh:{meshId:{rain:[],wind:[],temp:[],rh:[],sr:[]}}, exported}
   lineIdx: 0, towerIdx: 0, tab: 'tower',
   data: null,           // 取得結果
   fetching: false, lastFetch: 0, error: '',
@@ -197,11 +201,43 @@ function loadLines() {
     return d;
   } catch (e) { return null; }
 }
+function loadEuc() {
+  try {
+    const raw = localStorage.getItem(LS.euc);
+    if (!raw) return null;
+    const d = JSON.parse(raw);
+    if (!d.hours || !d.mesh) return null;
+    d.hoursD = d.hours.map(h => parseEucHour(h));
+    return d;
+  } catch (e) { return null; }
+}
+// "2026-08-14 05" → Date（Safari対応のため自前で読む）
+function parseEucHour(h) {
+  const m = String(h).match(/(\d{4})-(\d{2})-(\d{2})[ T](\d{2})/);
+  if (!m) return null;
+  return new Date(+m[1], +m[2] - 1, +m[3], +m[4], 0, 0);
+}
+function storeEuc(euc) {
+  try { localStorage.setItem(LS.euc, JSON.stringify(euc)); } catch (e) {}
+  euc.hoursD = euc.hours.map(h => parseEucHour(h));
+  state.euc = euc;
+}
 function importFile(file) {
   const rd = new FileReader();
   rd.onload = () => {
     try {
       const d = JSON.parse(rd.result);
+      // EUCのみのファイル
+      if (d.kind === 'euc' && d.euc) {
+        storeEuc({ hours: d.euc.hours, mesh: d.euc.mesh, exported: d.exported || '' });
+        alert('EUCデータを読み込みました（' + d.euc.hours.length + '時間ぶん）');
+        render();
+        return;
+      }
+      // セット一括（線路+EUC）
+      if (d.euc && d.euc.hours) {
+        storeEuc({ hours: d.euc.hours, mesh: d.euc.mesh, exported: d.exported || '' });
+      }
       const lines = d.lines || (d.towers ? [d] : null);
       if (!lines || !lines.length || !lines[0].towers || !lines[0].towers.length) throw new Error('形式が違います');
       for (const ln of lines) {
@@ -333,7 +369,7 @@ async function fetchAll() {
     let strikes = 0;
     for (const p of liden.pts) { if (kmDist2(t.lat, t.lon, p[1], p[0]) <= 400) strikes++; }
     return {
-      no: t.no, lat: t.lat, lon: t.lon,
+      no: t.no, lat: t.lat, lon: t.lon, mesh: t.mesh,
       st: { code: bc, name: table[bc] ? table[bc].n : '', km: Math.sqrt(bd) },
       temp: num('temp'), wind: num('wind'), rain: r10 == null ? null : r10 * 6, strikes,
     };
@@ -342,6 +378,33 @@ async function fetchAll() {
   out.lidenTime = liden.time;
   out.rainHours = rainHours;   // [{end:Date, vals:[per tower mm/h], member}]
   return out;
+}
+
+/* ---------- EUC参照 ---------- */
+// 鉄塔のメッシュのEUC値。時刻(そのhourの開始)→値
+function eucValFor(tower, item, hourStart) {
+  if (!state.euc || !tower.mesh) return null;
+  const md = state.euc.mesh[tower.mesh];
+  if (!md) return null;
+  const hs = state.euc.hoursD;
+  for (let i = 0; i < hs.length; i++) {
+    if (hs[i] && hs[i].getTime() === hourStart.getTime()) {
+      const v = md[item] ? md[item][i] : null;
+      return (v == null || !isFinite(v)) ? null : v;
+    }
+  }
+  return null;
+}
+// EUCからWBGT（環境省の屋外推定式）
+function eucWbgtFor(tower, hourStart) {
+  const t = eucValFor(tower, 'temp', hourStart);
+  const rh = eucValFor(tower, 'rh', hourStart);
+  const sr = eucValFor(tower, 'sr', hourStart);
+  if (t == null || rh == null || sr == null) return null;
+  let ws = eucValFor(tower, 'wind', hourStart);
+  if (ws == null) ws = 0;
+  const srk = sr / 3.6;
+  return Math.round((0.735 * t + 0.0374 * rh + 0.00292 * t * rh + 7.619 * srk - 4.557 * srk * srk - 0.0572 * ws - 4.064) * 10) / 10;
 }
 
 /* ---------- 判定ロジック ---------- */
@@ -355,8 +418,23 @@ function eventReach(hourVals) {
   }
   return null;
 }
+// 今日0時〜3日後23時の96時間軸で、雨の予測（気象庁＋EUC）を並べる
 function towerHours(i) {
-  return state.data.rainHours.map(h => ({ end: h.end, v: h.vals[i] }));
+  const tower = state.lines.lines[state.lineIdx].towers[i];
+  const jma = new Map();
+  for (const h of state.data.rainHours) jma.set(h.end.getTime(), h.vals[i]);
+  const out = [];
+  const day0 = new Date(); day0.setHours(0, 0, 0, 0);
+  for (let k = 0; k < 96; k++) {
+    const hs = new Date(day0.getTime() + k * 36e5);       // hourの開始
+    const he = new Date(hs.getTime() + 36e5);             // hourの終わり（気象庁のキー）
+    const vJma = jma.has(he.getTime()) ? jma.get(he.getTime()) : null;
+    const vEuc = eucValFor(tower, 'rain', hs);
+    // 判定用の値: 気象庁があれば気象庁、無ければEUC
+    const v = (vJma != null) ? vJma : (vEuc != null ? vEuc : 0);
+    out.push({ end: he, start: hs, v, vJma, vEuc, hasAny: (vJma != null || vEuc != null) });
+  }
+  return out;
 }
 
 /* ---------- 画面 ---------- */
@@ -371,11 +449,13 @@ function render() {
         <p>読み込んだデータは<b>この端末の中だけ</b>に保存されます。<br>次回からは開くだけで使えます。</p>
         <button class="btn" onclick="document.getElementById('filePick').click()">📂 鉄塔データを読み込む</button>
         <div class="steps">
-          <b>ファイルの作り方</b><br>
+          <b>ファイルの作り方（どちらでもOK）</b><br>
           ① パソコンで <b>鉄塔気象予測_Ver自動.xlsm</b> を開く<br>
-          ② 自動取得カードの「<b>スマホ用書き出し</b>」を押す<br>
+          ② 「<b>スマホ書き出し</b>」を押して、<b>セット一括</b>（線路＋EUCを1ファイル）か<br>
+          　 <b>別々</b>（鉄塔ファイル＋EUCファイル）を選ぶ<br>
           ③ できたファイルを OneDrive・メール等で iPhone へ送る<br>
-          ④ 上のボタンからそのファイルを選ぶ
+          ④ 上のボタンから読み込む（別々の場合は2つとも順に選ぶ）<br>
+          ※ EUCは最新の予測に入れ替えたいときに、EUCファイルだけ読み込み直せます
         </div>
       </div>`;
     $('status').textContent = '未設定';
@@ -428,25 +508,30 @@ function renderTower() {
     <div class="now-meta">中止基準: 強風≧${THR.wind}m/s ・ 大雨(1回の降雨量)≧${THR.rainEvent}mm　※大雪・雷指令は自動判定できません</div>
   </div>`;
 
-  // 雨予報タイムライン
+  // 雨予報タイムライン（今日〜3日後。気象庁＝直近15時間、EUC＝72時間）
   const nowT = Date.now();
-  html += `<div class="card"><h2>雨の予測（気象庁・${hours.length ? Math.round((hours[hours.length-1].end - nowT) / 36e5) : 0}時間先まで）<span class="hint">1時間ごと・10分毎更新</span></h2>`;
-  if (!hours.length) {
-    html += `<div class="loading">予報データが取得できませんでした</div>`;
+  const withData = hours.filter(h => h.hasAny);
+  html += `<div class="card"><h2>雨の予測（今日〜3日後）<span class="hint">気＝気象庁 ／ E＝EUC</span></h2>`;
+  if (!withData.length) {
+    html += `<div class="loading">予報データがありません（EUCを読み込むと3日先まで見られます）</div>`;
   } else {
-    let cum = 0, dry = 0;
+    let cum = 0, dry = 0, shown = 0;
     for (const h of hours) {
       const val = h.v || 0;
       if (val > 0) { cum += val; dry = 0; } else { dry++; if (dry >= THR.gapHours) cum = 0; }
+      if (!h.hasAny) continue;
+      shown++;
       const isStop = cum >= THR.rainEvent;
       const w = Math.min(100, val / Math.max(maxV, THR.rainHr) * 100);
       const bg = val >= THR.rainHr ? 'var(--purple)' : val >= 1 ? 'var(--blue3)' : 'var(--blue2)';
       const isPast = h.end.getTime() < nowT;
-      const dd = h.end.getHours() === 0 ? `<span class="d">${h.end.getMonth()+1}/${h.end.getDate()}</span>` : '';
+      const dd = h.start.getHours() === 0 ? `<span class="d">${h.start.getMonth()+1}/${h.start.getDate()}</span>` : '';
+      const sJ = h.vJma != null ? h.vJma.toFixed(1) : '−';
+      const sE = h.vEuc != null ? h.vEuc.toFixed(1) : '−';
       html += `<div class="tl-row ${val === 0 ? 'zero' : ''} ${isStop ? 'stop' : ''}" style="${isPast ? 'opacity:.45' : ''}">
-        <div class="t">${dd}${h.end.getHours()}時</div>
+        <div class="t">${dd}${h.start.getHours()}時</div>
         <div class="bar-wrap">${val > 0 ? `<div class="bar" style="width:${w}%;background:${bg}"></div>` : ''}</div>
-        <div class="v">${val > 0 ? val.toFixed(1) : '0'}<small> mm/h</small>${isStop ? ' ⚠' : ''}</div>
+        <div class="v2"><span>気 ${sJ}</span><span>E ${sE}</span></div>
       </div>`;
     }
     if (reach) {
@@ -457,10 +542,46 @@ function renderTower() {
   }
   html += `</div>`;
 
+  html += renderEucSummary(tw);
+
   html += `<div class="card" style="font-size:12px;color:var(--sub)">
-    風・気温・WBGTの数値予報は気象庁の無料公開に無いため、このページの予測は雨のみです（72時間先まではExcel版のEUC予測で確認）。
+    雨＝気象庁（直近15時間・10分毎更新）とEUC（72時間）を並べて表示。風・気温・WBGTの3日先まではEUC予測（Excelの「スマホ書き出し」で更新）。
     落雷は実況のみ（雷ナウキャストの予報は数値公開なし）。
   </div>`;
+  return html;
+}
+
+// この先3日のEUC予測サマリ（風・気温・WBGT）
+function renderEucSummary(tower) {
+  if (!state.euc) {
+    return `<div class="card" style="font-size:12.5px;color:var(--sub)">
+      EUCデータが未読み込みです。Excelの「スマホ書き出し」→セット一括（またはEUCファイル）を読み込むと、
+      風・気温・WBGTの3日先までの予測がここに表示されます。</div>`;
+  }
+  const day0 = new Date(); day0.setHours(0, 0, 0, 0);
+  let mxW = null, mxWt = null, mxT = null, mxTt = null, mxG = null, mxGt = null;
+  for (let k = 0; k < 96; k++) {
+    const hs = new Date(day0.getTime() + k * 36e5);
+    if (hs.getTime() < Date.now() - 36e5) continue;
+    const vw = eucValFor(tower, 'wind', hs);
+    const vt = eucValFor(tower, 'temp', hs);
+    const vg = eucWbgtFor(tower, hs);
+    if (vw != null && (mxW == null || vw > mxW)) { mxW = vw; mxWt = hs; }
+    if (vt != null && (mxT == null || vt > mxT)) { mxT = vt; mxTt = hs; }
+    if (vg != null && (mxG == null || vg > mxG)) { mxG = vg; mxGt = hs; }
+  }
+  const f = (v, t, unit, thr1, thr2) => {
+    if (v == null) return '<div class="now-item"><div class="v">−</div></div>';
+    const cls = v >= thr2 ? 'danger' : v >= thr1 ? 'warn' : '';
+    return `<div class="now-item ${cls}"><div class="v">${v.toFixed(1)}<small>${unit}</small></div>
+      <div class="k">${t.getMonth()+1}/${t.getDate()} ${t.getHours()}時</div></div>`;
+  };
+  let html = `<div class="card"><h2>この先3日のピーク予測（EUC）<span class="hint">${esc(state.euc.exported || '')} 書き出し</span></h2>
+    <div class="now-grid" style="grid-template-columns:repeat(3,1fr)">`;
+  html += f(mxW, mxWt || new Date(), 'm/s', THR.wind * 0.8, THR.wind);
+  html += f(mxT, mxTt || new Date(), '℃', THR.temp1, THR.temp2);
+  html += f(mxG, mxGt || new Date(), '', 28, 31);
+  html += `</div><div class="now-meta">左から: 風速の最大 ／ 気温の最大 ／ WBGTの最大（時刻はピークの時間）</div></div>`;
   return html;
 }
 
@@ -529,8 +650,8 @@ $('filePick').addEventListener('change', e => { if (e.target.files[0]) importFil
 $('btnReimport').addEventListener('click', () => $('filePick').click());
 $('btnClear').addEventListener('click', () => {
   if (confirm('この端末に保存した鉄塔データを消しますか？')) {
-    localStorage.removeItem(LS.lines); localStorage.removeItem(LS.sel);
-    state.lines = null; state.data = null; render();
+    localStorage.removeItem(LS.lines); localStorage.removeItem(LS.sel); localStorage.removeItem(LS.euc);
+    state.lines = null; state.euc = null; state.data = null; render();
   }
 });
 $('selLine').addEventListener('change', e => {
@@ -543,6 +664,7 @@ $('selTower').addEventListener('change', e => {
 });
 
 state.lines = loadLines();
+state.euc = loadEuc();
 try {
   const s = JSON.parse(localStorage.getItem(LS.sel) || '{}');
   if (state.lines) {
