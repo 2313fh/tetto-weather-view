@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
-<meta name="description" content="九州電力送配電カラーイメージの電子シール式アンケート集約。入力者ごとにIDで端末内に保存し、保存一覧から再開。日別・対象別の自動集計、CSV出力、バックアップ・取り込み・合算に対応。データは外部へ送信しません。">
+<meta name="description" content="九州電力送配電カラーイメージの電子シール式アンケート集約。入力者ごとにIDで端末内に保存し、保存一覧から再開。日別・対象別の自動集計、CSV出力、共有サーバー（Googleスプレッドシート）での全員分の集約・合算に対応。共有サーバーに接続した場合だけ送信します。">
 <meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#0060ae">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230060ae'/%3E%3Ccircle cx='22' cy='24' r='8' fill='%23fff'/%3E%3Ccircle cx='42' cy='24' r='8' fill='%23fff'/%3E%3Ccircle cx='22' cy='44' r='8' fill='%23fff'/%3E%3Ccircle cx='42' cy='44' r='8' fill='%23ffc293'/%3E%3C/svg%3E">
@@ -132,11 +132,21 @@ html[data-day="2"]{--artifact-control-active:var(--artifact-control-orange)}
 .vote-hit{-webkit-touch-callout:none}
 .vote-hit.readonly .empty-mark{border-color:var(--artifact-transparent);font-size:15px}
 .vote-hit:disabled.readonly{opacity:1}
+.sync-panel{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px}
+.sync-panel .sync-text{font-size:13px;line-height:1.6;flex:1 1 280px;min-width:0}
+.sync-panel .sync-text strong{font-size:15px}
+.sync-panel .button-row{margin:0}
+.sync-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:7px;background:var(--artifact-muted);vertical-align:1px}
+.sync-dot.on{background:#1a7a43}.sync-dot.problem{background:var(--artifact-warn)}
+.sync-chip{font-size:12px;line-height:1.5;color:var(--artifact-muted);padding:3px 0 0}
+.sync-chip.ok{color:#1a7a43}.sync-chip.problem{color:var(--artifact-warn);font-weight:700}
+.sync-ok{color:#1a7a43;font-weight:650}.sync-wait{color:var(--artifact-warn);font-weight:650}
+.preview-text.link-text{min-height:76px;font-size:13px;word-break:break-all}
 @media screen and (max-width:900px){.start-grid{grid-template-columns:1fr 1fr}.start-grid .start-submit{grid-column:1 / -1}}
 @media screen and (max-width:720px){.session-brand{display:none}.panel{padding:14px}.home-hero{margin-top:12px}.list-head{margin-top:18px}.bulk-actions .btn{flex:1 1 calc(50% - 9px)}.session-bar{padding-top:8px}.session-bar strong{font-size:15px}}
 @media screen and (max-width:560px){.start-grid{grid-template-columns:1fr}.app-header .brand-company{font-size:15px}.home-tools .btn{padding:8px 10px;font-size:12px}}
 @media screen and (max-width:380px){.header-tools .btn,.back-btn{padding:8px 8px;font-size:12px}.save-state{max-width:88px}}
-@media print{#home-view,.back-btn,#state-banner,.home-tools{display:none!important}.session-bar{font-size:10px;padding:4px 0 0}.session-bar strong{font-size:12px}}
+@media print{#home-view,.back-btn,#state-banner,.home-tools,#sync-chip{display:none!important}.session-bar{font-size:10px;padding:4px 0 0}.session-bar strong{font-size:12px}}
 </style>
 </head>
 <body>
@@ -148,7 +158,8 @@ html[data-day="2"]{--artifact-control-active:var(--artifact-control-orange)}
   <div class="home-tools"><button type="button" id="home-help" class="btn">使い方</button></div>
  </header>
  <div id="home-warning" class="warning" role="alert" hidden></div>
- <div class="home-hero"><h1>展示アンケート集約</h1><p>入力者ごとにIDを付けて、この端末に別々に保存します。続きは下の「保存一覧」から再開できます。</p></div>
+ <div class="home-hero"><h1>展示アンケート集約</h1><p>入力者ごとにIDを付けて保存します。続きは下の「保存一覧」から再開できます。</p></div>
+ <section id="sync-panel" class="panel sync-panel" aria-label="共有サーバー"></section>
  <section class="panel" aria-labelledby="start-heading">
   <h2 id="start-heading">新しく集約を始める</h2>
   <p class="panel-lead">入力者名・会社名・日付を入れて「開始」を押すと、IDが発行されます。</p>
@@ -166,12 +177,12 @@ html[data-day="2"]{--artifact-control-active:var(--artifact-control-orange)}
  </section>
  <section class="panel" aria-labelledby="bulk-heading">
   <h2 id="bulk-heading">まとめて扱う（複数人・複数端末）</h2>
-  <p class="panel-lead">別の端末のデータは、その端末で「バックアップ」を保存し、集める端末で「データを取り込む」を使います。同じIDのデータは重複せず、新しい方に置き換わります。</p>
+  <p class="panel-lead">この端末に保存されたデータをまとめて扱います。共有サーバーを使わずに集めるときは、各端末で「バックアップ」を保存し、集める端末で「データを取り込む」を使います。同じIDのデータは重複せず、新しい方に置き換わります。</p>
   <div class="bulk-actions"><button type="button" class="btn primary" id="sum-button">合算を見る</button><button type="button" class="btn" id="bulk-csv-button">全件CSV</button><button type="button" class="btn" id="bulk-json-button">全件バックアップ</button><button type="button" class="btn" id="import-button">データを取り込む</button></div>
  </section>
  <ul class="home-notes">
-  <li>保存先はこの端末・このブラウザーの中です。別の端末とは自動で同期しません。外部へは送信しません。</li>
-  <li>iPhone・iPadでは、しばらく開かないとサイトのデータが消えることがあります。終了時・休憩時は「バックアップ」を保存してください。</li>
+  <li>入力はこの端末・このブラウザーの中に保存されます。共有サーバーに接続している場合は、代表者のGoogleスプレッドシートにも自動で送られます（それ以外の外部送信はありません）。</li>
+  <li>iPhone・iPadでは、しばらく開かないとサイトのデータが消えることがあります。共有サーバーを使わない場合は、終了時・休憩時に「バックアップ」を保存してください。</li>
  </ul>
 </div>
 
@@ -181,6 +192,7 @@ html[data-day="2"]{--artifact-control-active:var(--artifact-control-orange)}
   <div class="header-tools"><div id="save-state" class="save-state" role="status" aria-live="polite">起動中…</div><button type="button" id="manage-button" class="btn">保存・CSV</button></div>
  </header>
  <div id="session-bar" class="session-bar"></div>
+ <div id="sync-chip" class="sync-chip" role="status" aria-live="polite" hidden></div>
  <nav class="controls" aria-label="日別・対象・画面の切り替え">
   <div class="control-group"><span class="control-label">日別</span><div class="segmented" role="group" aria-label="日別"><button type="button" data-select-day="1" aria-pressed="true"><span class="day-dot" aria-hidden="true"></span>1日目</button><button type="button" data-select-day="2" aria-pressed="false"><span class="day-dot orange" aria-hidden="true"></span>2日目</button></div></div>
   <div class="control-group"><span class="control-label">対象</span><div class="segmented" role="group" aria-label="回答対象"><button type="button" data-select-type="student" aria-pressed="true">学生</button><button type="button" data-select-type="adult" aria-pressed="false">一般・社会人</button></div></div>
@@ -216,13 +228,186 @@ html[data-day="2"]{--artifact-control-active:var(--artifact-control-orange)}
    <div class="button-row interactive-only"><button type="button" class="btn primary" id="summary-export-button">CSV・バックアップを保存</button></div>
   </section>
  </main>
- <p class="small-note">入力のたびにこの端末内へ自動保存します。別の端末とは自動同期しません。終了時は「保存・CSV」からバックアップを保存してください。</p>
+ <p class="small-note">入力のたびにこの端末内へ自動保存します。共有サーバーに接続中なら、数秒ごとにまとめて自動送信します。接続していない場合は、終了時に「保存・CSV」からバックアップを保存してください。</p>
 </div>
 
 <div id="app-modal" class="modal-backdrop" hidden><section id="modal-content" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="modal-header"><h2 id="modal-title">保存・CSV・使い方</h2><button type="button" class="close-btn" id="modal-close" aria-label="閉じる">×</button></div><div id="modal-body"></div></section></div>
 <div id="toast" class="toast" hidden role="status" aria-live="polite" aria-atomic="true"></div>
 <input type="file" id="restore-file" class="sr-file" accept=".json,application/json" tabindex="-1" aria-hidden="true">
 <input type="file" id="import-file" class="sr-file" accept=".json,application/json" multiple tabindex="-1" aria-hidden="true">
+<script type="text/plain" id="gas-code">
+/**
+ * 展示アンケート集約 — 共有サーバー（Google Apps Script）
+ *
+ * 設定手順（PCのブラウザー推奨・約5分。代表者が1回だけ）
+ *  1. https://script.google.com を開き「新しいプロジェクト」を作る
+ *  2. 最初からあるコードを全部消して、このコードを貼り付けて保存（Ctrl+S / ⌘+S）
+ *  3. 右上「デプロイ」→「新しいデプロイ」→ 種類の選択（歯車）で「ウェブアプリ」
+ *       次のユーザーとして実行：自分
+ *       アクセスできるユーザー：全員
+ *     →「デプロイ」→「アクセスを承認」（「詳細」→「…（安全ではないページ）に移動」→「許可」）
+ *  4. 表示された「ウェブアプリ」のURL（…/exec）をコピーし、アプリの「共有サーバー」に貼り付けて「接続」
+ *
+ * データは、あなたのGoogleドライブに自動で作られるスプレッドシート
+ * 「展示アンケート集約データ」に、入力者ごと（ID単位）に1行で保存されます。
+ * 同じIDは新しい内容で上書きされ、行が重複することはありません。
+ * 集計から外したい行は「除外」列に何か入力してください（例：除外）。
+ * コードを直したときは「デプロイ」→「デプロイを管理」→ 編集 →「新バージョン」で更新します（URLは変わりません）。
+ */
+var APP = 'kyudentd-seal-survey';
+var SHEET_NAME = 'データ';
+var BOOK_NAME = '展示アンケート集約データ';
+var HEADER = ['ID', '入力者', '会社名', '日付', '①合計', '②合計', '最終更新', '保存番号', '受信日時', '除外', 'データ'];
+var ID_RE = /^\d{8}-[0-9A-HJKMNP-TV-Z]{6}$/;
+
+function doGet(e) {
+  var p = (e && e.parameter) || {};
+  try {
+    if (p.action === 'list') return out_(listAll_());
+    return out_({ok: true, app: APP, version: 1, time: new Date().toISOString()});
+  } catch (err) { return out_({ok: false, error: String(err && err.message || err)}); }
+}
+
+function doPost(e) {
+  var req;
+  try { req = JSON.parse(e && e.postData ? e.postData.contents : ''); }
+  catch (err) { return out_({ok: false, error: 'JSONを読み取れません'}); }
+  try {
+    if (!req || typeof req !== 'object') return out_({ok: false, error: 'データがありません'});
+    if (req.action === 'put') return out_(put_(req.sessions));
+    if (req.action === 'exclude') return out_(exclude_(req.ids, req.exclude !== false));
+    if (req.action === 'list') return out_(listAll_());
+    if (req.action === 'ping') return out_({ok: true, app: APP, version: 1, time: new Date().toISOString()});
+    return out_({ok: false, error: '不明な操作です'});
+  } catch (err) { return out_({ok: false, error: String(err && err.message || err)}); }
+}
+
+/** エディタで一度実行すると、保存先のスプレッドシートを作ってURLをログに出します（任意）。 */
+function setup() {
+  var url = withLock_(function () { return {ok: true, url: sheet_().getParent().getUrl()}; }).url;
+  Logger.log('保存先: ' + url);
+}
+
+function out_(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+}
+
+function withLock_(fn) {
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(25000)) return {ok: false, busy: true, error: '混み合っています。少し待ってから自動で再送します'};
+  try { return fn(); } finally { lock.releaseLock(); }
+}
+
+function sheet_() {
+  var props = PropertiesService.getScriptProperties();
+  var id = props.getProperty('SHEET_ID'), ss = null, created = false;
+  if (id) { try { ss = SpreadsheetApp.openById(id); } catch (err) { ss = null; } }
+  if (!ss) { try { ss = SpreadsheetApp.getActiveSpreadsheet(); } catch (err) { ss = null; } }
+  if (!ss) { ss = SpreadsheetApp.create(BOOK_NAME); created = true; }
+  if (ss.getId() !== id) props.setProperty('SHEET_ID', ss.getId());
+  var sh = ss.getSheetByName(SHEET_NAME);
+  if (!sh) {
+    sh = created ? ss.getSheets()[0].setName(SHEET_NAME) : ss.insertSheet(SHEET_NAME);
+    sh.getRange('A:D').setNumberFormat('@');
+    sh.getRange('G:H').setNumberFormat('@');
+    sh.getRange('J:K').setNumberFormat('@');
+    sh.getRange(1, 1, 1, HEADER.length).setValues([HEADER]).setFontWeight('bold');
+    sh.setFrozenRows(1);
+  }
+  return sh;
+}
+
+function readRows_(sh) {
+  var last = sh.getLastRow();
+  if (last < 2) return [];
+  return sh.getRange(2, 1, last - 1, HEADER.length).getValues().map(function (r) {
+    var d = null;
+    try { d = JSON.parse(r[10]); } catch (err) { d = null; }
+    return {id: String(r[0]).replace(/^'/, ''), data: d, excluded: r[9]};
+  });
+}
+
+function safe_(s) { s = String(s); return /^[=+\-@\t\r]/.test(s) ? "'" + s : s; }
+function stamp_(s) { return (s && s.updatedAt) || ''; }
+function newer_(a, b) { return stamp_(a) > stamp_(b) || (stamp_(a) === stamp_(b) && a.revision > b.revision); }
+function same_(a, b) { return stamp_(a) === stamp_(b) && a.revision === b.revision; }
+
+function check_(s) {
+  if (!s || typeof s !== 'object' || s.format !== APP || s.version !== 2 || !ID_RE.test(String(s.id))) return null;
+  var m = s.meta;
+  if (!m || typeof m.name !== 'string' || typeof m.company !== 'string' || typeof m.date !== 'string' || typeof m.createdAt !== 'string') return null;
+  if (!m.name || !m.company || m.name.length > 80 || m.company.length > 120 || !/^\d{4}-\d{2}-\d{2}$/.test(m.date)) return null;
+  if (typeof s.revision !== 'number' || s.revision < 0 || Math.floor(s.revision) !== s.revision) return null;
+  if (JSON.stringify(s).length > 40000) return null;
+  var q1 = 0, q2 = 0, ok = true;
+  var nonNeg = function (v) { return typeof v === 'number' && v >= 0 && Math.floor(v) === v && v <= 1000000; };
+  ['1', '2'].forEach(function (k) {
+    var d = s.days && s.days[k];
+    if (!d) { ok = false; return; }
+    ['student', 'adult'].forEach(function (t) {
+      var f = d[t];
+      if (!f || !Array.isArray(f.matrix) || !Array.isArray(f.q2) || !nonNeg(f.unknown)) { ok = false; return; }
+      f.matrix.forEach(function (row) { if (!Array.isArray(row)) { ok = false; return; } row.forEach(function (v) { if (!nonNeg(v)) ok = false; else q1 += v; }); });
+      q1 += f.unknown;
+      f.q2.forEach(function (v) { if (!nonNeg(v)) ok = false; else q2 += v; });
+    });
+  });
+  return ok ? {q1: q1, q2: q2} : null;
+}
+
+function put_(sessions) {
+  if (!Array.isArray(sessions)) return {ok: false, error: 'データがありません'};
+  return withLock_(function () {
+    var sh = sheet_(), rows = readRows_(sh), index = {}, results = [];
+    rows.forEach(function (r, i) { index[r.id] = i; });
+    sessions.slice(0, 100).forEach(function (s) {
+      var v = check_(s);
+      if (!v) { results.push({id: s && s.id ? String(s.id).slice(0, 40) : '', status: 'invalid'}); return; }
+      var i = index[s.id];
+      var row = [s.id, safe_(s.meta.name), safe_(s.meta.company), s.meta.date, v.q1, v.q2, stamp_(s), String(s.revision), new Date(), '', JSON.stringify(s)];
+      if (i === undefined) {
+        sh.appendRow(row);
+        index[s.id] = rows.length;
+        rows.push({id: s.id, data: s, excluded: ''});
+        results.push({id: s.id, status: 'saved', revision: s.revision});
+        return;
+      }
+      var cur = rows[i].data;
+      if (cur && cur.meta && cur.meta.createdAt !== s.meta.createdAt) { results.push({id: s.id, status: 'conflict'}); return; }
+      if (cur && !newer_(s, cur)) { results.push({id: s.id, status: same_(s, cur) ? 'saved' : 'stale', revision: cur.revision}); return; }
+      row[9] = rows[i].excluded;
+      sh.getRange(i + 2, 1, 1, row.length).setValues([row]);
+      rows[i].data = s;
+      results.push({id: s.id, status: 'saved', revision: s.revision});
+    });
+    return {ok: true, results: results, time: new Date().toISOString()};
+  });
+}
+
+function listAll_() {
+  return withLock_(function () {
+    var sessions = [], excluded = 0;
+    readRows_(sheet_()).forEach(function (r) {
+      if (!r.data) return;
+      if (String(r.excluded || '').trim()) { excluded++; return; }
+      sessions.push(r.data);
+    });
+    return {ok: true, sessions: sessions, excluded: excluded, time: new Date().toISOString()};
+  });
+}
+
+function exclude_(ids, flag) {
+  if (!Array.isArray(ids)) return {ok: false, error: 'IDがありません'};
+  return withLock_(function () {
+    var sh = sheet_(), rows = readRows_(sh), want = {}, changed = 0;
+    ids.slice(0, 500).forEach(function (id) { if (ID_RE.test(String(id))) want[id] = true; });
+    rows.forEach(function (r, i) {
+      if (want[r.id]) { sh.getRange(i + 2, 10).setValue(flag ? '除外' : ''); changed++; }
+    });
+    return {ok: true, changed: changed, time: new Date().toISOString()};
+  });
+}
+</script>
 <script>
 /* KYUDEN T&D electronic-seal survey core (Ver.2) — pure logic, no DOM, no network. */
 (function (global) {
@@ -601,6 +786,11 @@ html[data-day="2"]{--artifact-control-active:var(--artifact-control-orange)}
  var undoStacks = {}, lastTaps = {}, renderedType = '', cellButtons = [], toastTimer = null, lastFocus = null, activeExport = null;
  var pendingRestore = null, pendingImport = null, pendingMeta = null, pendingV1 = null, modalBack = null;
  var exportScope = 'all', exportKind = 'detail', heartbeatTimer = null, homeTimer = null, sumTimer = null, persistAsked = false, navSeq = 0, unloading = false;
+ var SYNC_KEY = C.PREFIX + 'sync.config', SYNC_STATE = C.PREFIX + 'sync.state.', SERVER_CACHE = C.PREFIX + 'server.cache', SUM_SEL = C.PREFIX + 'sum';
+ var SYNC_URL_RE = /^https:\/\/script\.google\.com\/(?:a\/macros\/[A-Za-z0-9.\-]+\/|macros\/)s\/[A-Za-z0-9_\-]{20,200}\/exec$/;
+ var SYNC_DEBOUNCE = 8000, SYNC_MAXWAIT = 45000, SYNC_RETRY = [15000, 30000, 60000, 120000, 300000];
+ var sync = {url:'', timer:null, firstDirtyAt:0, busy:false, busyPromise:null, again:false, lastOkAt:null, lastError:'', failures:0, retryTimer:null, conflicts:{}, cache:null, loadToken:0, mem:{}};
+ var pendingSyncUrl = '';
 
  /* ---------- small helpers ---------- */
  function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
@@ -622,6 +812,203 @@ html[data-day="2"]{--artifact-control-active:var(--artifact-control-orange)}
  function canEdit(){ return S.route === 'session' && !!data && !S.readOnly && !S.lost && !S.blocked; }
  function restorable(){ return S.route === 'session' && !!data && !S.readOnly && !S.lost; }
  function selectOptions(values, current){ return values.map(function(v){ return '<option value="' + esc(v[0]) + '"' + (current === v[0] ? ' selected' : '') + '>' + esc(v[1]) + '</option>'; }).join(''); }
+ /* ---------- shared server (Google Apps Script + Sheets) ---------- */
+ function fmtTime(iso){ var d = new Date(iso); return isNaN(d.getTime()) ? '' : pad(d.getHours()) + ':' + pad(d.getMinutes()); }
+ function shortUrl(u){ var m = /\/s\/([A-Za-z0-9_\-]+)\/exec$/.exec(u || ''); return m ? 'script.google.com/…/s/' + m[1].slice(0, 6) + '…' + m[1].slice(-4) + '/exec' : String(u || ''); }
+ function loadSyncConfig(){ sync.url = ''; try { var v = JSON.parse(storage && storage.getItem(SYNC_KEY) || 'null'); if (v && typeof v.url === 'string' && SYNC_URL_RE.test(v.url)) sync.url = v.url; } catch (ignore) {} if (!sync.url && sync.memUrl) sync.url = sync.memUrl; }
+ function setSyncUrl(url){
+   sync.url = url || ''; sync.memUrl = sync.url; sync.lastError = ''; sync.failures = 0; sync.cache = null; sync.conflicts = {}; sync.mem = {};
+   clearTimeout(sync.timer); sync.timer = null; clearTimeout(sync.retryTimer); sync.retryTimer = null;
+   try { if (storage) { if (url) storage.setItem(SYNC_KEY, JSON.stringify({url:url, at:now()})); else storage.removeItem(SYNC_KEY); } } catch (ignore) {}
+   try { sessionStorage.removeItem(SERVER_CACHE); } catch (ignore) {}
+ }
+ function syncedRev(id){ try { var v = JSON.parse(storage && storage.getItem(SYNC_STATE + id) || 'null'); if (v && Number.isSafeInteger(v.rev)) return v.rev; } catch (ignore) {} return sync.mem[id] === undefined ? -1 : sync.mem[id]; }
+ function setSyncedRev(id, rev){ sync.mem[id] = rev; try { if (storage) storage.setItem(SYNC_STATE + id, JSON.stringify({rev:rev, at:now()})); } catch (ignore) {} }
+ function clearSyncedRev(id){ delete sync.mem[id]; delete sync.conflicts[id]; try { if (storage) storage.removeItem(SYNC_STATE + id); } catch (ignore) {} }
+ function clearAllSyncedRev(){ sync.mem = {}; sync.conflicts = {}; if (!storage) return; try { var keys = []; for (var i = 0; i < storage.length; i++) { var k = storage.key(i); if (k && k.indexOf(SYNC_STATE) === 0) keys.push(k); } keys.forEach(function(k){ storage.removeItem(k); }); } catch (ignore) {} }
+ function pendingSessions(){ if (!sync.url) return []; return validSessions().filter(function(s){ return syncedRev(s.id) < s.revision; }); }
+ function fetchJson(url, opts){
+   var ctrl = typeof AbortController === 'function' ? new AbortController() : null, timer = null;
+   if (ctrl) { opts.signal = ctrl.signal; timer = setTimeout(function(){ ctrl.abort(); }, 30000); }
+   return fetch(url, opts).then(function(r){
+     if (timer) clearTimeout(timer);
+     if (!r.ok) throw new Error('共有サーバーのエラー（' + r.status + '）');
+     return r.text();
+   }, function(e){ if (timer) clearTimeout(timer); throw new Error(e && e.name === 'AbortError' ? '共有サーバーの応答がありません（時間切れ）' : '共有サーバーに接続できません'); })
+   .then(function(t){
+     var j; try { j = JSON.parse(t); } catch (e) { throw new Error('共有サーバーの応答を読めません（URLと「アクセスできるユーザー：全員」の設定を確認してください）'); }
+     if (!j || typeof j !== 'object') throw new Error('共有サーバーの応答が不正です');
+     return j;
+   });
+ }
+ function serverPost(payload, url){ return fetchJson(url || sync.url, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(payload), redirect:'follow', credentials:'omit', cache:'no-store'}); }
+ function serverGet(action, url){ var u = url || sync.url; return fetchJson(u + '?action=' + encodeURIComponent(action) + '&t=' + Date.now(), {method:'GET', redirect:'follow', credentials:'omit', cache:'no-store'}); }
+ function scheduleSync(){
+   if (!sync.url) return;
+   var t = Date.now();
+   if (!sync.firstDirtyAt) sync.firstDirtyAt = t;
+   var wait = Math.max(0, Math.min(SYNC_DEBOUNCE, sync.firstDirtyAt + SYNC_MAXWAIT - t));
+   clearTimeout(sync.timer); sync.timer = setTimeout(function(){ sync.timer = null; syncNow(); }, wait);
+   renderSyncState();
+ }
+ function scheduleRetry(){ clearTimeout(sync.retryTimer); var d = SYNC_RETRY[Math.min(Math.max(sync.failures, 1), SYNC_RETRY.length) - 1]; sync.retryTimer = setTimeout(function(){ sync.retryTimer = null; syncNow(); }, d); }
+ function syncNow(){
+   if (!sync.url) return Promise.resolve({ok:false, off:true});
+   if (sync.busy) { sync.again = true; return sync.busyPromise; }
+   clearTimeout(sync.timer); sync.timer = null;
+   var list = pendingSessions();
+   if (!list.length) { sync.firstDirtyAt = 0; renderSyncState(); return Promise.resolve({ok:true, sent:0}); }
+   clearTimeout(sync.retryTimer); sync.retryTimer = null;
+   if (navigator.onLine === false) { sync.failures++; sync.lastError = 'オフライン'; scheduleRetry(); renderSyncState(); return Promise.resolve({ok:false, error:'オフライン'}); }
+   var batch = list.slice(0, 40).map(function(x){ return C.normalizeSession(x); }), url = sync.url;
+   sync.busy = true; renderSyncState();
+   sync.busyPromise = serverPost({action:'put', sessions:batch}, url).then(function(res){
+     if (!res.ok) throw new Error(res.error || '共有サーバーに保存できませんでした');
+     if (url !== sync.url) return {ok:false, error:'接続先が変わりました'};
+     var byId = {}, problems = 0; batch.forEach(function(x){ byId[x.id] = x; });
+     (res.results || []).forEach(function(r){
+       var x = byId[r.id]; if (!x) return;
+       if (r.status !== 'saved') { problems++; sync.conflicts[x.id] = r.status; } else delete sync.conflicts[x.id];
+       setSyncedRev(x.id, x.revision);
+     });
+     sync.lastOkAt = now(); sync.lastError = ''; sync.failures = 0; sync.firstDirtyAt = 0;
+     return {ok:true, sent:batch.length, problems:problems};
+   }).catch(function(e){ sync.failures++; sync.lastError = e.message || '送信できませんでした'; scheduleRetry(); return {ok:false, error:sync.lastError}; })
+   .then(function(r){
+     sync.busy = false; sync.busyPromise = null;
+     var again = sync.again; sync.again = false;
+     if (r.ok && (again || pendingSessions().length)) { clearTimeout(sync.timer); sync.timer = setTimeout(function(){ sync.timer = null; syncNow(); }, again ? SYNC_DEBOUNCE : 800); }
+     renderSyncState(); if (S.route === 'home') scheduleHomeRender();
+     return r;
+   });
+   return sync.busyPromise;
+ }
+ function syncAll(){ return syncNow().then(function(r){ return r.ok && pendingSessions().length ? syncNow() : r; }); }
+ function flushOnHide(){
+   if (!sync.url) return;
+   var list = pendingSessions(); if (!list.length) return;
+   var body = JSON.stringify({action:'put', sessions:list.slice(0, 20).map(function(x){ return C.normalizeSession(x); })});
+   if (body.length > 60000) return;
+   try { if (navigator.sendBeacon && navigator.sendBeacon(sync.url, new Blob([body], {type:'text/plain;charset=UTF-8'}))) return; } catch (ignore) {}
+   try { fetch(sync.url, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:body, keepalive:true, credentials:'omit', mode:'no-cors'}).catch(function(){}); } catch (ignore) {}
+ }
+ function syncSummary(){
+   if (!sync.url) return {text:'', cls:''};
+   var pend = pendingSessions().length;
+   if (sync.busy) return {text:'共有サーバーへ送信中…', cls:''};
+   if (pend && sync.lastError) return {text:'共有サーバーに未送信 ' + pend + '件（' + sync.lastError + '。自動で再送します）', cls:'problem'};
+   if (pend) return {text:'共有サーバーへ送信待ち ' + pend + '件', cls:''};
+   return {text:'共有サーバーに送信済み' + (sync.lastOkAt ? ' ' + fmtTime(sync.lastOkAt) : ''), cls:'ok'};
+ }
+ function renderSyncState(){
+   var chip = $('sync-chip');
+   if (chip) { var s = S.route === 'session' ? syncSummary() : {text:''}; chip.textContent = s.text; chip.className = 'sync-chip ' + (s.cls || ''); chip.hidden = !s.text; }
+   if (S.route === 'home') renderSyncPanel();
+ }
+ function renderSyncPanel(){
+   var host = $('sync-panel'); if (!host) return;
+   var html;
+   if (!sync.url) html = '<div class="sync-text"><strong><span class="sync-dot"></span>共有サーバー：未接続</strong><br>全員の入力を1か所（代表者のGoogleスプレッドシート）に自動で集められます。代表者が1回だけ設定し、入力する人には「共有リンク」を送ります。</div><div class="button-row"><button type="button" class="btn primary" data-sync="setup">共有サーバーを設定</button></div>';
+   else { var s = syncSummary(); html = '<div class="sync-text"><strong><span class="sync-dot ' + (s.cls === 'problem' ? 'problem' : 'on') + '"></span>共有サーバー：接続中</strong><br><span class="' + (s.cls === 'problem' ? 'danger-text' : 'secondary-text') + '">' + esc(s.text) + '</span></div><div class="button-row"><button type="button" class="btn primary" data-sync="list">全員分を見る</button><button type="button" class="btn" data-sync="share">共有リンクを送る</button><button type="button" class="btn" data-sync="setup">設定</button></div>'; }
+   host.innerHTML = html;
+ }
+ function gasCode(){ var el = $('gas-code'); return el ? el.textContent.replace(/^\s+/, '') : ''; }
+ function copyText(text){
+   var p = navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(text).then(function(){ return true; }, function(){ return false; }) : Promise.resolve(false);
+   return p.then(function(ok){ if (ok) return true; try { var ta = document.createElement('textarea'); ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.left = '-9999px'; document.body.appendChild(ta); ta.select(); var r = document.execCommand('copy'); document.body.removeChild(ta); return !!r; } catch (e) { return false; } });
+ }
+ function shareLink(){ return location.origin + location.pathname + '?sync=' + encodeURIComponent(sync.url); }
+ function syncSetupPrompt(){
+   var connected = !!sync.url;
+   modal('共有サーバーの設定',
+     (connected ? '<div class="local-status-box">接続中：<span class="session-id">' + esc(shortUrl(sync.url)) + '</span><br>' + esc(syncSummary().text) + '</div><div class="button-row"><button type="button" class="btn primary" data-action="sync-share">共有リンクを送る</button><button type="button" class="btn" data-action="sync-now">今すぐ送信</button><button type="button" class="btn danger" data-action="sync-disconnect">接続を解除</button></div>' : '') +
+     '<p>全員の入力を、代表者のGoogleスプレッドシートに自動で集めます（無料）。設定は代表者が1回だけ行います（PCがおすすめ）。入力する人は、代表者から届く「共有リンク」を開くだけです。</p>' +
+     '<h3>設定の手順（約5分）</h3><ol>' +
+     '<li><a href="https://script.google.com/home" target="_blank" rel="noopener noreferrer">script.google.com</a> を開き、「新しいプロジェクト」を押します（Googleにログイン）。</li>' +
+     '<li>下の「スクリプトをコピー」を押し、エディタの中身を全部消して貼り付け、保存します。</li>' +
+     '<li>右上「デプロイ」→「新しいデプロイ」→ 種類の選択（歯車）で「ウェブアプリ」。次のユーザーとして実行：<strong>自分</strong>、アクセスできるユーザー：<strong>全員</strong> →「デプロイ」→ アクセスを承認します（「詳細」→「…に移動」→「許可」）。</li>' +
+     '<li>表示された「ウェブアプリ」のURL（…/exec で終わる）をコピーし、下に貼り付けて「接続」を押します。</li>' +
+     '<li>「共有リンクを送る」で、入力する人にリンクを送ります。</li></ol>' +
+     '<div class="button-row"><button type="button" class="btn" data-action="gas-copy">スクリプトをコピー</button><button type="button" class="btn" data-action="gas-show">スクリプトを表示</button></div>' +
+     '<label class="field"><span>ウェブアプリのURL</span><input id="sync-url" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://script.google.com/macros/s/…/exec" value="' + esc(sync.url) + '"></label>' +
+     '<div class="button-row"><button type="button" class="btn primary" data-action="sync-connect">接続</button><button type="button" class="btn" data-action="close">閉じる</button></div>' +
+     '<p class="secondary-text">データは代表者のGoogleドライブの「展示アンケート集約データ」に、入力者ごと（ID単位）に1行で保存されます。同じIDは上書きされ、重複しません。共有リンクを知っている人は全員分を読み書きできるため、関係者以外に送らないでください。各端末にも今までどおり保存されます。</p>');
+ }
+ function gasShow(){
+   modal('共有サーバー用スクリプト', '<p>Apps Scriptのエディタに、この内容をそのまま貼り付けます。</p><textarea id="gas-text" class="preview-text" readonly spellcheck="false" aria-label="スクリプト"></textarea><div class="button-row"><button type="button" class="btn primary" data-action="gas-copy">スクリプトをコピー</button><button type="button" class="btn" data-action="sync-setup">設定に戻る</button></div>');
+   $('gas-text').value = gasCode();
+ }
+ function syncConnect(){
+   var input = $('sync-url'), url = (input && input.value || '').trim();
+   if (!SYNC_URL_RE.test(url)) { toast('「https://script.google.com/…/exec」の形のURLを貼り付けてください'); return; }
+   var btn = document.querySelector('[data-action="sync-connect"]'); if (btn) { btn.disabled = true; btn.textContent = '接続を確認中…'; }
+   serverGet('ping', url).then(function(res){
+     if (!res.ok || res.app !== 'kyudentd-seal-survey') throw new Error('このアンケート用の共有サーバーではありません');
+     setSyncUrl(url); clearAllSyncedRev(); renderHome(); toast('共有サーバーに接続しました'); shareLinkPrompt(true); syncNow();
+   }).catch(function(e){ if (btn && btn.isConnected) { btn.disabled = false; btn.textContent = '接続'; } toast('接続できません：' + e.message); });
+ }
+ function shareLinkPrompt(justConnected){
+   if (!sync.url) return;
+   modal('共有リンク', (justConnected ? '<p><strong>接続できました。</strong>この端末の入力は、自動で共有サーバーに送られます。</p>' : '') +
+     '<p>このリンクを、入力する人全員に送ってください。開くと共有サーバーにつながり、以後は自動で集まります（各端末で1回開けばOK）。</p>' +
+     '<textarea id="share-link" class="preview-text link-text" readonly spellcheck="false" aria-label="共有リンク"></textarea>' +
+     '<div class="button-row"><button type="button" class="btn primary" data-action="share-link-copy">リンクをコピー</button>' + (navigator.share ? '<button type="button" class="btn" data-action="share-link-send">LINE・メールで送る</button>' : '') + '</div>' +
+     '<p class="secondary-text">リンクを知っている人は全員分を読み書きできます。関係者以外に送らないでください。</p><div class="button-row"><button type="button" class="btn" data-action="close">閉じる</button></div>');
+   $('share-link').value = shareLink();
+ }
+ function handleSyncParam(){
+   var q; try { q = new URLSearchParams(location.search); } catch (e) { return; }
+   var url = q.get('sync'); if (url === null) return;
+   q.delete('sync'); var rest = q.toString();
+   try { history.replaceState(history.state, '', location.pathname + (rest ? '?' + rest : '') + location.hash); } catch (ignore) {}
+   url = url.trim();
+   if (!SYNC_URL_RE.test(url)) { toast('共有リンクの接続先が正しくありません'); return; }
+   if (url === sync.url) { toast('共有サーバーに接続済みです'); return; }
+   pendingSyncUrl = url;
+   modal('共有サーバーに接続しますか？', '<p>このリンクは、展示アンケートの入力を代表者の共有サーバー（Googleスプレッドシート）に集めるためのものです。接続すると、この端末の入力（入力者名・会社名・票数）が自動で送られます。</p><p class="secondary-text">接続先：' + esc(shortUrl(url)) + '</p>' + (sync.url ? '<p class="danger-text">いまは別の共有サーバーに接続しています。切り替えると、以後の送信先が変わります。</p>' : '') + '<div class="button-row"><button type="button" class="btn primary" data-action="sync-accept">接続する</button><button type="button" class="btn" data-action="close">接続しない</button></div>');
+ }
+ function syncAccept(){
+   var url = pendingSyncUrl; pendingSyncUrl = ''; closeModal(true);
+   if (!url) return;
+   toast('接続先を確認しています…');
+   serverGet('ping', url).then(function(res){
+     if (!res.ok || res.app !== 'kyudentd-seal-survey') throw Object.assign(new Error('このアンケート用の共有サーバーではありません'), {fatal:true});
+     return true;
+   }).catch(function(e){ if (e && e.fatal) throw e; return false; }).then(function(verified){
+     setSyncUrl(url); clearAllSyncedRev(); if (S.route === 'home') renderHome(); renderSyncState();
+     toast(verified ? '共有サーバーに接続しました' : '接続先を確認できませんでした。電波のある所で自動的に送信します');
+     syncNow();
+   }, function(e){ toast('接続しませんでした：' + e.message); });
+ }
+ function saveServerCache(){ try { if (sync.cache) sessionStorage.setItem(SERVER_CACHE, JSON.stringify(sync.cache)); } catch (ignore) {} }
+ function loadServerCache(){ try { var v = JSON.parse(sessionStorage.getItem(SERVER_CACHE) || 'null'); if (v && Array.isArray(v.sessions)) { var list = []; v.sessions.forEach(function(x){ try { list.push(C.normalizeSession(x)); } catch (ignore) {} }); sync.cache = {at:v.at, sessions:list, excluded:v.excluded || 0}; } } catch (ignore) {} }
+ function serverListPrompt(){
+   if (!sync.url) { syncSetupPrompt(); return; }
+   var token = ++sync.loadToken;
+   modal('全員分（共有サーバー）', '<p>共有サーバーから全員分を読み込んでいます…</p><p class="secondary-text">この端末の未送信分を先に送ってから読み込みます。</p>');
+   syncAll().then(function(){ return serverGet('list'); }).then(function(res){
+     if (token !== sync.loadToken || $('app-modal').hidden) return;
+     if (!res.ok || !Array.isArray(res.sessions)) throw new Error(res.error || '共有サーバーの応答が不正です');
+     var list = [], bad = 0;
+     res.sessions.forEach(function(x){ try { list.push(C.normalizeSession(x)); } catch (e) { bad++; } });
+     sync.cache = {at:now(), sessions:list, excluded:res.excluded || 0, bad:bad}; saveServerCache();
+     renderServerList();
+   }).catch(function(e){
+     if (token !== sync.loadToken || $('app-modal').hidden) return;
+     modal('全員分（共有サーバー）', '<p class="danger-text">読み込めませんでした：' + esc(e.message) + '</p>' + (sync.cache ? '<p>前回（' + esc(fmtDateTime(sync.cache.at)) + '）に読み込んだ内容なら表示できます。</p><div class="button-row"><button type="button" class="btn" data-action="server-show-cache">前回の内容を表示</button></div>' : '') + '<div class="button-row"><button type="button" class="btn primary" data-action="server-list">再読み込み</button><button type="button" class="btn" data-action="close">閉じる</button></div>');
+   });
+ }
+ function renderServerList(){
+   var c = sync.cache; if (!c) return;
+   var items = c.sessions.slice().sort(bySessionOrder), counts = {}, q1 = 0, q2 = 0;
+   items.forEach(function(x){ var k = C.identityKey(x.meta), t = C.sessionTotals(x); counts[k] = (counts[k] || 0) + 1; q1 += t.q1; q2 += t.q2; });
+   var rows = items.map(function(x){ var t = C.sessionTotals(x), dup = counts[C.identityKey(x.meta)] > 1; return '<label class="check-row"><input type="checkbox" class="server-check" value="' + esc(x.id) + '" checked><span><span class="who">' + esc(x.meta.name) + '</span>（' + esc(x.meta.company) + '）' + (dup ? ' <span class="badge warn">同じ入力者・日付が複数</span>' : '') + '<br><span class="secondary-text">' + esc(fmtDate(x.meta.date)) + '・ID ' + esc(x.id) + '・①' + num(t.q1) + '人・②' + num(t.q2) + '票・更新 ' + esc(fmtDateTime(x.updatedAt)) + '</span></span></label>'; }).join('');
+   modal('全員分（共有サーバー）', '<p><strong>' + items.length + '件</strong>（①合計 ' + num(q1) + '人・②合計 ' + num(q2) + '票）／ 読み込み ' + esc(fmtDateTime(c.at)) + (c.excluded ? '／ 除外 ' + c.excluded + '件' : '') + '</p>' +
+     (items.length ? '<div class="button-row"><button type="button" class="btn primary" data-action="server-sum">合算を表示</button><button type="button" class="btn" data-action="server-csv">全員分CSV</button><button type="button" class="btn" data-action="server-json">全員分バックアップ</button><button type="button" class="btn" data-action="server-list">再読み込み</button></div><p class="secondary-text">チェックしたデータだけを合算・出力します。同じ票を2つのデータに入力していないか確認してください。</p><div class="button-row"><button type="button" class="btn" data-action="server-all">すべて選択</button><button type="button" class="btn" data-action="server-none">すべて解除</button></div><div class="check-list">' + rows + '</div>'
+       : '<p>共有サーバーにはまだデータがありません。</p><div class="button-row"><button type="button" class="btn" data-action="server-list">再読み込み</button></div>') +
+     '<div class="button-row"><button type="button" class="btn" data-action="close">閉じる</button></div>');
+ }
+ function serverSelected(){ var set = {}; Array.prototype.slice.call(document.querySelectorAll('.server-check:checked')).forEach(function(x){ set[x.value] = 1; }); return (sync.cache ? sync.cache.sessions : []).filter(function(x){ return set[x.id]; }); }
  function askPersist(){ if (persistAsked) return; persistAsked = true; try { if (navigator.storage && navigator.storage.persisted && navigator.storage.persist) navigator.storage.persisted().then(function(p){ if (!p) return navigator.storage.persist(); }).catch(function(){}); } catch (ignore) {} }
 
  /* ---------- saved sessions on this device ---------- */
@@ -667,9 +1054,12 @@ html[data-day="2"]{--artifact-control-active:var(--artifact-control-orange)}
    if (it.status === 'recovered') badges.push('<span class="badge danger">保存データの確認が必要</span>');
    if (s.importedAt) badges.push('<span class="badge info">他の端末から取り込み</span>');
    if (counts[C.identityKey(m)] > 1) badges.push('<span class="badge warn">同じ入力者・日付のデータが複数</span>');
+   if (sync.url && sync.conflicts[s.id] === 'stale') badges.push('<span class="badge warn">共有サーバーの方が新しい内容</span>');
+   if (sync.url && sync.conflicts[s.id] === 'conflict') badges.push('<span class="badge danger">共有サーバーに同じIDの別データ</span>');
+   if (sync.url && sync.conflicts[s.id] === 'invalid') badges.push('<span class="badge danger">共有サーバーが受け付けません</span>');
    return '<article class="session-card' + (inUse ? ' in-use' : '') + (it.status === 'recovered' ? ' broken' : '') + '" data-id="' + id + '">' +
      '<div class="card-top"><div><div class="session-name">' + esc(m.name) + '</div><div class="session-company">' + esc(m.company) + '</div></div><div class="session-date">' + esc(fmtDate(m.date)) + '</div></div>' +
-     '<div class="session-meta"><span>ID <span class="session-id">' + id + '</span></span><span>最終更新 ' + esc(fmtDateTime(s.updatedAt)) + '</span></div>' +
+     '<div class="session-meta"><span>ID <span class="session-id">' + id + '</span></span><span>最終更新 ' + esc(fmtDateTime(s.updatedAt)) + '</span>' + (sync.url ? '<span class="' + (syncedRev(s.id) >= s.revision ? 'sync-ok' : 'sync-wait') + '">' + (syncedRev(s.id) >= s.revision ? '共有済み' : '共有へ送信待ち') + '</span>' : '') + '</div>' +
      '<div class="session-totals">①合計<strong>' + num(t.q1) + '</strong>人　②合計<strong>' + num(t.q2) + '</strong>票</div>' +
      (badges.length ? '<div class="badges">' + badges.join('') + '</div>' : '') +
      '<div class="card-actions"><button type="button" class="btn primary" data-act="resume" data-id="' + id + '">' + (inUse ? '状況を確認' : '再開') + '</button><button type="button" class="btn" data-act="backup" data-id="' + id + '">バックアップ</button><button type="button" class="btn danger" data-act="delete" data-id="' + id + '"' + (inUse ? ' disabled' : '') + '>削除</button></div></article>';
@@ -690,7 +1080,7 @@ html[data-day="2"]{--artifact-control-active:var(--artifact-control-orange)}
    else if (!shown.length) html = '<div class="empty-list">「' + esc(qRaw.trim()) + '」に一致するデータはありません。</div>';
    else html = '<div class="session-list">' + shown.map(function(it){ return cardHtml(it, counts); }).join('') + '</div>';
    $('session-list-host').innerHTML = html;
-   updateHomeWarning();
+   updateHomeWarning(); renderSyncPanel();
  }
  function scheduleHomeRender(){ clearTimeout(homeTimer); homeTimer = setTimeout(renderHome, 120); }
  function showStartError(msg){ var e = $('start-error'); e.textContent = msg || ''; e.hidden = !msg; }
@@ -712,7 +1102,7 @@ html[data-day="2"]{--artifact-control-active:var(--artifact-control-orange)}
    if (days) Object.keys(days).forEach(function(k){ session.days[k] = C.clone(days[k]); });
    var saved = store.save(session);
    if (!saved.ok) unsavedCache[id] = session;
-   askPersist();
+   askPersist(); scheduleSync();
    return {id:id, saved:saved};
  }
  function openNew(meta){
@@ -750,14 +1140,16 @@ html[data-day="2"]{--artifact-control-active:var(--artifact-control-orange)}
    var label = it.session ? '<strong>' + esc(who(it.session.meta)) + '・' + esc(fmtDate(it.session.meta.date)) + '</strong>（ID ' + esc(id) + '）' : '読み取れないデータ（ID ' + esc(id) + '）';
    modal('データの削除', '<p>' + label + ' をこの端末から削除します。' + (t ? '①合計 ' + num(t.q1) + '人・②合計 ' + num(t.q2) + '票。' : '') + '</p><p class="danger-text">元に戻せません。先にバックアップを保存してください。</p><div class="button-row">' +
      (it.session ? '<button type="button" class="btn" data-action="delete-backup" data-id="' + esc(id) + '">バックアップを保存</button>' : '<button type="button" class="btn" data-action="raw-one" data-id="' + esc(id) + '">内容を退避</button>') +
-     '</div><label class="field"><span>削除してよければ「削除」と入力</span><input id="delete-confirm-text" type="text" autocomplete="off" maxlength="4" placeholder="削除"></label><div class="button-row"><button type="button" class="btn danger" data-action="delete-confirm" data-id="' + esc(id) + '">削除する</button><button type="button" class="btn" data-action="close">キャンセル</button></div>');
+     '</div>' + (sync.url && it.session ? '<label class="check-inline"><input type="checkbox" id="delete-exclude">共有サーバーの集計からも外す</label><p class="secondary-text">チェックしない場合、共有サーバーのデータはそのまま残ります（この端末からだけ削除）。</p>' : '') + '<label class="field"><span>削除してよければ「削除」と入力</span><input id="delete-confirm-text" type="text" autocomplete="off" maxlength="4" placeholder="削除"></label><div class="button-row"><button type="button" class="btn danger" data-action="delete-confirm" data-id="' + esc(id) + '">削除する</button><button type="button" class="btn" data-action="close">キャンセル</button></div>');
  }
  function deleteConfirm(id){
    if ($('delete-confirm-text').value.trim() !== '削除') { toast('確認欄に「削除」と入力してください'); return; }
    if (store.lockState(id, TAB_ID, Date.now(), LOCK_STALE).state === 'held') { closeModal(); renderHome(); toast('別の画面で入力中のため削除できません'); return; }
-   var r = store.remove(id); delete unsavedCache[id]; delete importedOk[id];
-   S.sumIds = S.sumIds.filter(function(x){ return x !== id; }); saveSumSelection();
+   var exclude = !!($('delete-exclude') && $('delete-exclude').checked && sync.url);
+   var r = store.remove(id); delete unsavedCache[id]; delete importedOk[id]; clearSyncedRev(id);
+   if (S.sumSource !== 'server') { S.sumIds = S.sumIds.filter(function(x){ return x !== id; }); saveSumSelection(); }
    closeModal(); renderHome(); toast(r.ok || !storage ? 'データを削除しました' : '削除できませんでした：' + r.error);
+   if (exclude) serverPost({action:'exclude', ids:[id]}).then(function(res){ toast(res.ok && res.changed ? '共有サーバーの集計からも外しました' : res.ok ? '共有サーバーにこのデータはありませんでした' : '共有サーバーで外せませんでした：' + (res.error || '')); }, function(e){ toast('共有サーバーで外せませんでした：' + e.message); });
  }
  function backupOne(id, back){
    var it = findItem(id); if (!it || !it.session) { toast('データを読み込めません'); return; }
@@ -862,10 +1254,10 @@ html[data-day="2"]{--artifact-control-active:var(--artifact-control-orange)}
      if (p.status === 'new' && store.load(p.id).status !== 'missing') { skipped++; return; }
      s.importedAt = stamp;
      var r = store.save(s);
-     if (r.ok) { taken[s.id] = 1; delete importedOk[s.id]; if (p.status === 'replace') updated++; else added++; }
+     if (r.ok) { taken[s.id] = 1; delete importedOk[s.id]; clearSyncedRev(s.id); if (p.status === 'replace') updated++; else added++; }
      else failed.push(who(s.meta) + '：' + r.error);
    });
-   closeModal(); renderHome();
+   closeModal(); renderHome(); if (added || updated) scheduleSync();
    toast((added || updated ? (added ? added + '件を追加' : '') + (updated ? (added ? '・' : '') + updated + '件を更新' : '') + 'しました' : '取り込んだデータはありません') + (skipped ? '（' + skipped + '件スキップ）' : ''));
    if (failed.length) modal('取り込めなかったデータ', '<p class="danger-text">次のデータは保存できませんでした。</p><ul>' + failed.map(function(f){ return '<li>' + esc(f) + '</li>'; }).join('') + '</ul><div class="button-row"><button type="button" class="btn" data-action="close">閉じる</button></div>');
  }
@@ -888,12 +1280,14 @@ html[data-day="2"]{--artifact-control-active:var(--artifact-control-orange)}
  }
 
  /* ---------- combined (read-only) view ---------- */
- function saveSumSelection(){ try { sessionStorage.setItem(C.PREFIX + 'sum', JSON.stringify(S.sumIds)); } catch (ignore) {} }
- function readSumSelection(){ try { var v = JSON.parse(sessionStorage.getItem(C.PREFIX + 'sum') || '[]'); return Array.isArray(v) ? v.filter(function(x){ return typeof x === 'string' && C.ID_RE.test(x); }) : []; } catch (e) { return []; } }
+ function saveSumSelection(){ try { sessionStorage.setItem(SUM_SEL, JSON.stringify({source:S.sumSource || 'local', ids:S.sumIds})); } catch (ignore) {} }
+ function readSumSelection(){ try { var v = JSON.parse(sessionStorage.getItem(SUM_SEL) || 'null'); if (v && Array.isArray(v.ids)) { if (!S.sumSource) S.sumSource = v.source === 'server' ? 'server' : 'local'; return v.ids.filter(function(x){ return typeof x === 'string' && C.ID_RE.test(x); }); } } catch (e) {} return []; }
+ function sumPool(){ if (S.sumSource === 'server') { if (!sync.cache) loadServerCache(); return sync.cache ? sync.cache.sessions.map(function(x){ return {id:x.id, session:x}; }) : []; } return listSessions().filter(function(it){ return it.session; }); }
  function sumPrompt(){
+   if (S.route === 'sum' && S.sumSource === 'server') { serverListPrompt(); return; }
    var items = listSessions().filter(function(it){ return it.session; });
    if (!items.length) { toast('保存データがありません'); return; }
-   var counts = identityCounts(items), sel = {}, has = S.sumIds.length > 0;
+   var counts = identityCounts(items), sel = {}, has = S.sumIds.length > 0 && S.sumSource !== 'server';
    S.sumIds.forEach(function(id){ sel[id] = 1; });
    var rows = items.map(function(it){
      var s = it.session, t = C.sessionTotals(s), checked = has ? !!sel[it.id] : true, dup = counts[C.identityKey(s.meta)] > 1;
@@ -904,17 +1298,17 @@ html[data-day="2"]{--artifact-control-active:var(--artifact-control-orange)}
  function sumOpen(){
    var ids = Array.prototype.slice.call(document.querySelectorAll('.sum-check:checked')).map(function(x){ return x.value; });
    if (!ids.length) { toast('合算するデータを選んでください'); return; }
-   S.sumIds = ids; saveSumSelection(); closeModal(true);
+   S.sumSource = 'local'; S.sumIds = ids; saveSumSelection(); closeModal(true);
    if (S.route === 'sum') { leaveCurrent(); openCombined(); } else go('#/sum', true);
  }
  function combinedFrom(ids){
-   var items = listSessions().filter(function(it){ return it.session; });
+   var items = sumPool();
    var chosen = ids.length ? items.filter(function(it){ return ids.indexOf(it.id) >= 0; }) : items;
    return {items:items, chosen:chosen};
  }
  function openCombined(){
    var ids = S.sumIds.length ? S.sumIds : readSumSelection(), r = combinedFrom(ids);
-   if (!r.chosen.length) { goHomeWithMessage(r.items.length ? '合算するデータが見つかりません。選び直してください。' : '保存データがありません。'); return; }
+   if (!r.chosen.length) { goHomeWithMessage(S.sumSource === 'server' ? '共有サーバーの読み込み内容がありません。「全員分を見る」から開き直してください。' : r.items.length ? '合算するデータが見つかりません。選び直してください。' : '保存データがありません。'); return; }
    var combined; try { combined = C.sumSessions(r.chosen.map(function(it){ return it.session; })); } catch (e) { goHomeWithMessage(e.message); return; }
    S.route = 'sum'; S.id = null; data = combined; S.readOnly = true; S.lost = false; S.blocked = false; S.unsaved = false; S.hasSaved = false; S.saveError = ''; S.rawRecovery = null;
    S.sumIds = r.chosen.map(function(it){ return it.id; }); S.sumNames = r.chosen.map(function(it){ return who(it.session.meta); }); saveSumSelection();
@@ -923,7 +1317,7 @@ html[data-day="2"]{--artifact-control-active:var(--artifact-control-orange)}
    showView('session'); renderedType = ''; render();
  }
  function refreshCombined(){
-   if (S.route !== 'sum') return;
+   if (S.route !== 'sum' || S.sumSource === 'server') return;
    var r = combinedFrom(S.sumIds), chosen = r.chosen.filter(function(it){ return S.sumIds.indexOf(it.id) >= 0; });
    if (!chosen.length) { goHomeWithMessage('合算の対象データがなくなりました'); return; }
    try { data = C.sumSessions(chosen.map(function(it){ return it.session; })); } catch (e) { toast(e.message); return; }
@@ -1042,7 +1436,7 @@ html[data-day="2"]{--artifact-control-active:var(--artifact-control-orange)}
    var saved = store.save(data);
    if (saved.ok) { S.hasSaved = true; S.unsaved = false; delete unsavedCache[data.id]; }
    else { S.unsaved = true; S.saveError = saved.error; unsavedCache[data.id] = data; }
-   updateSaveStatus();
+   updateSaveStatus(); scheduleSync();
    return saved.ok;
  }
 
@@ -1062,13 +1456,13 @@ html[data-day="2"]{--artifact-control-active:var(--artifact-control-orange)}
  }
  function renderSessionBar(){
    var html;
-   if (S.route === 'sum') { var names = S.sumNames.slice(0, 4).join('、') + (S.sumNames.length > 4 ? ' ほか' + (S.sumNames.length - 4) + '件' : ''); html = '<span class="sum-tag">合算（' + S.sumIds.length + '件）</span><span>' + esc(names) + '</span>'; }
+   if (S.route === 'sum') { var names = S.sumNames.slice(0, 4).join('、') + (S.sumNames.length > 4 ? ' ほか' + (S.sumNames.length - 4) + '件' : ''); html = '<span class="sum-tag">合算（' + S.sumIds.length + '件・' + (S.sumSource === 'server' ? '共有サーバー' : 'この端末') + '）</span><span>' + esc(names) + '</span>'; }
    else { var m = data.meta; html = '<span>入力者 <strong>' + esc(m.name) + '</strong></span><span>' + esc(m.company) + '</span><span>日付 ' + esc(fmtDate(m.date)) + '</span><span>ID <span class="session-id">' + esc(data.id) + '</span></span>'; }
    $('session-bar').innerHTML = html;
  }
  function renderStateBanner(){
    var b = $('state-banner'), html = '', info = false;
-   if (S.route === 'sum') { info = true; html = '<div>合算表示です（' + S.sumIds.length + '件・読み取り専用）。票の入力はできません。</div><div class="button-row"><button type="button" class="btn" data-banner="sum-select">対象を選び直す</button><button type="button" class="btn" data-banner="home">保存一覧へ</button></div>'; }
+   if (S.route === 'sum') { info = true; html = '<div>' + (S.sumSource === 'server' ? '共有サーバーの全員分から ' + S.sumIds.length + '件の合算です（' + esc(sync.cache ? fmtDateTime(sync.cache.at) : '') + ' 読み込み・読み取り専用）。' : '合算表示です（' + S.sumIds.length + '件・読み取り専用）。') + '票の入力はできません。</div><div class="button-row"><button type="button" class="btn" data-banner="sum-select">' + (S.sumSource === 'server' ? '最新を読み込む' : '対象を選び直す') + '</button><button type="button" class="btn" data-banner="home">保存一覧へ</button></div>'; }
    else if (S.lost) html = '<div>このデータは別のタブ・画面で開かれたため、この画面での入力を停止しました。</div><div class="button-row"><button type="button" class="btn danger" data-banner="takeover">この画面で入力を再開</button><button type="button" class="btn" data-banner="home">保存一覧へ</button></div>';
    b.className = 'state-banner' + (info ? ' info' : ''); b.innerHTML = html; b.hidden = !html;
  }
@@ -1208,13 +1602,14 @@ html[data-day="2"]{--artifact-control-active:var(--artifact-control-orange)}
      '<li>上部で「1日目／2日目」と「学生／一般・社会人」を選び、①と②で各1マスをタップします。「1つ戻す」は直近100操作まで、「1票取り消す」は修正モードです。</li>' +
      '<li>同じマスへの0.12秒未満の連続タップは、誤タップ防止のため1回として扱います。</li>' +
      '<li>横幅が足りない場合は、表の中を横にスワイプしてください。業界名は左端に固定されます。</li>' +
-     '<li>保存はこの端末・ブラウザーの中だけで、別の端末とは自動同期しません。複数の端末のデータは、各端末の「バックアップ」を集める端末の「データを取り込む」で読み込み、「合算を見る」で合計できます。同じIDのデータは重複せず、新しい方に置き換わります。</li>' +
+     '<li>共有サーバー（代表者のGoogleスプレッドシート）に接続すると、入力は自動で送られ、全員分が1か所に集まります。代表者は「全員分を見る」から合算・CSV・バックアップを一括で取り出せます。電波がないときは端末に保存し、つながったときに自動で再送します。</li>' +
+     '<li>共有サーバーを使わない場合、保存はこの端末・ブラウザーの中だけです。別の端末のデータは「バックアップ」と「データを取り込む」で集められます。どちらの方法でも、同じIDのデータは重複せず、新しい方に置き換わります。</li>' +
      '<li>終了時・休憩時にはバックアップを保存してください。サイトデータの削除、プライベートブラウズ、端末変更のほか、iPhone・iPadでしばらく（7日程度）開かない場合にも、端末内のデータが消えることがあります。</li>' +
      '<li>Safariで開いた場合と、ホーム画面に追加したアイコンから開いた場合とでは、保存一覧が別々になることがあります。いつも同じ開き方で使ってください。</li>' +
      '<li>①の合計を原様式どおり回答者数としています。①と②の回答の組合せ、同一人物の重複回答は判定しません。会期中お一人1回の運用はスタッフで確認してください。</li></ol>' +
      '<p>元様式の項目・表の構成を維持しています。学生①の右端「業界不明」は業界別・展示別の行列計には含めず、①全体の合計に加算します。社会人②の右端表記も元様式を維持しています。</p></section>';
  }
- function footerNoteHtml(){ return '<p class="footer-note">元様式：学生C案・一般社会人A案。配色は社内「デザイン要則」の白地・ブルー・黒を参考にした画面用の近似色です。正式なRGB指定やロゴデータの再現ではありません。2日目のオレンジは日別識別用です。入力者名・会社名は、この端末内と、保存したバックアップ・CSVにだけ記録され、外部へは送信しません。<br>※重要な判断には必ず原文を確認してください。</p>'; }
+ function footerNoteHtml(){ return '<p class="footer-note">元様式：学生C案・一般社会人A案。配色は社内「デザイン要則」の白地・ブルー・黒を参考にした画面用の近似色です。正式なRGB指定やロゴデータの再現ではありません。2日目のオレンジは日別識別用です。入力者名・会社名・票数は、この端末内と保存したバックアップ・CSVに記録されます。共有サーバーに接続した場合だけ、代表者のGoogleスプレッドシートへ送信します（それ以外の外部送信はありません）。<br>※重要な判断には必ず原文を確認してください。</p>'; }
  function manager(){
    if (S.route === 'sum') { sumManager(); return; }
    if (S.route !== 'session' || !data) return;
@@ -1346,8 +1741,25 @@ html[data-day="2"]{--artifact-control-active:var(--artifact-control-orange)}
    'bulk-csv-export':bulkCsvExport,
    'sum-all':function(){ document.querySelectorAll('.sum-check').forEach(function(x){ x.checked = true; }); },
    'sum-none':function(){ document.querySelectorAll('.sum-check').forEach(function(x){ x.checked = false; }); },
-   'sum-open':sumOpen, 'sum-reselect':sumPrompt
+   'sum-open':sumOpen, 'sum-reselect':sumPrompt,
+   'sync-setup':syncSetupPrompt, 'sync-connect':syncConnect, 'sync-share':function(){ shareLinkPrompt(false); }, 'sync-accept':syncAccept,
+   'sync-now':function(){ syncAll().then(function(r){ toast(r.ok ? (r.sent ? '共有サーバーに送信しました' : '送信待ちのデータはありません') : '送信できませんでした：' + (r.error || '')); if (!$('app-modal').hidden && document.getElementById('sync-url')) syncSetupPrompt(); }); },
+   'sync-disconnect':function(){ modal('共有サーバーとの接続を解除', '<p>この端末から共有サーバーへの送信を止めます。端末内のデータと、共有サーバー（スプレッドシート）にあるデータはそのまま残ります。</p><div class="button-row"><button type="button" class="btn danger" data-action="sync-disconnect-ok">接続を解除</button><button type="button" class="btn" data-action="sync-setup">キャンセル</button></div>'); },
+   'sync-disconnect-ok':function(){ setSyncUrl(''); sync.memUrl = ''; closeModal(); if (S.route === 'home') renderHome(); renderSyncState(); toast('共有サーバーとの接続を解除しました'); },
+   'gas-copy':function(){ copyText(gasCode()).then(function(ok){ toast(ok ? 'スクリプトをコピーしました。Apps Scriptのエディタに貼り付けてください' : 'コピーできませんでした。「スクリプトを表示」から選択してコピーしてください'); }); },
+   'gas-show':gasShow,
+   'share-link-copy':function(){ copyText(shareLink()).then(function(ok){ toast(ok ? '共有リンクをコピーしました' : 'コピーできませんでした。表示中のリンクを選択してコピーしてください'); }); },
+   'share-link-send':function(){ if (!navigator.share) return; navigator.share({title:'展示アンケート集約', text:'展示アンケートの入力用リンクです（開くと共有サーバーにつながります）', url:shareLink()}).catch(function(e){ if (e && e.name !== 'AbortError') toast('共有できませんでした。リンクをコピーしてください'); }); },
+   'server-list':serverListPrompt,
+   'server-show-cache':function(){ renderServerList(); },
+   'server-all':function(){ document.querySelectorAll('.server-check').forEach(function(x){ x.checked = true; }); },
+   'server-none':function(){ document.querySelectorAll('.server-check').forEach(function(x){ x.checked = false; }); },
+   'server-sum':function(){ var list = serverSelected(); if (!list.length) { toast('合算するデータを選んでください'); return; } S.sumSource = 'server'; S.sumIds = list.map(function(x){ return x.id; }); saveSumSelection(); closeModal(true); if (S.route === 'sum') { leaveCurrent(); openCombined(); } else go('#/sum', true); },
+   'server-csv':function(){ var list = serverSelected(); if (!list.length) { toast('出力するデータを選んでください'); return; } sync.selected = list; serverCsvPrompt(); },
+   'server-csv-export':function(){ var list = (sync.selected || []).slice().sort(bySessionOrder), keys = readExportSettings(); if (!list.length) { toast('出力するデータがありません'); return; } exportFile({text:C.toCsv(C.csvRows(list.map(function(x){ return {cols:[x.id, x.meta.name, x.meta.company, x.meta.date], data:x}; }), keys, exportKind)), filename:'九州電力送配電_アンケート_全員分' + list.length + '件_' + scopeLabel(keys) + '_' + (exportKind === 'summary' ? 'サマリー' : '項目別集計') + '_' + fileStamp() + '.csv', mime:'text/csv;charset=utf-8', description:'共有サーバーの全員分から' + list.length + '件を、入力者ごとの行でまとめたCSVです（' + scopeLabel(keys) + '）。', back:renderServerList, backLabel:'全員分へ戻る'}); },
+   'server-json':function(){ var list = serverSelected(); if (!list.length) { toast('出力するデータを選んでください'); return; } exportFile({text:JSON.stringify(C.makeBundle(list, now()), null, 1), filename:'九州電力送配電_アンケート_全員分バックアップ_' + list.length + '件_' + fileStamp() + '.json', mime:'application/json;charset=utf-8', description:'共有サーバーの全員分から' + list.length + '件をまとめたバックアップです。', back:renderServerList, backLabel:'全員分へ戻る'}); }
  };
+ function serverCsvPrompt(){ modal('全員分CSV', '<p>共有サーバーの全員分から選んだ ' + (sync.selected || []).length + '件を、1つのCSVにまとめます。各行の先頭に ID・入力者・会社名・入力日 が付きます。</p>' + exportFieldsHtml() + '<div class="button-row"><button type="button" class="btn primary" data-action="server-csv-export">CSV出力</button><button type="button" class="btn" data-action="server-show-cache">全員分へ戻る</button></div>'); }
  function guard(fn){ return function(){ try { return fn.apply(this, arguments); } catch (e) { toast('操作を完了できませんでした：' + (e && e.message || e)); if (window.console) console.error(e); } }; }
  $('modal-body').addEventListener('click', function(event){
    var button = event.target.closest('[data-action]'); if (!button || button.disabled) return;
@@ -1401,6 +1813,9 @@ html[data-day="2"]{--artifact-control-active:var(--artifact-control-orange)}
  $('import-button').addEventListener('click', guard(pickImport));
  $('back-button').addEventListener('click', guard(backToList));
  $('state-banner').addEventListener('click', guard(function(e){ var b = e.target.closest('[data-banner]'); if (!b) return; var a = b.dataset.banner; if (a === 'home') navigateHome(); else if (a === 'takeover') takeover(); else if (a === 'sum-select') sumPrompt(); }));
+ $('sync-panel').addEventListener('click', guard(function(e){ var b = e.target.closest('[data-sync]'); if (!b) return; var a = b.dataset.sync; if (a === 'setup') syncSetupPrompt(); else if (a === 'list') serverListPrompt(); else if (a === 'share') shareLinkPrompt(false); }));
+ window.addEventListener('online', function(){ if (sync.url) syncNow(); });
+ setInterval(function(){ if (sync.url && !sync.busy && !sync.timer && !sync.retryTimer && document.visibilityState !== 'hidden' && pendingSessions().length) syncNow(); }, 60000);
  document.querySelectorAll('[data-select-day]').forEach(function(button){ button.addEventListener('click', function(){ if (!data) return; ui.day = button.dataset.selectDay; ui.remove = false; rememberUI(); render(); }); });
  document.querySelectorAll('[data-select-type]').forEach(function(button){ button.addEventListener('click', function(){ if (!data) return; ui.type = button.dataset.selectType; ui.remove = false; rememberUI(); render(); }); });
  document.querySelectorAll('[data-select-view]').forEach(function(button){ button.addEventListener('click', function(){ if (!data) return; ui.view = button.dataset.selectView; ui.remove = false; render(); }); });
@@ -1425,6 +1840,8 @@ html[data-day="2"]{--artifact-control-active:var(--artifact-control-orange)}
    try {
      if (!e.key) { if (S.route === 'home') scheduleHomeRender(); else if (S.route === 'session') { syncBeforeEdit(); render(); } else if (S.route === 'sum') { clearTimeout(sumTimer); sumTimer = setTimeout(refreshCombined, 200); } return; }
      if (e.key.indexOf(C.PREFIX) !== 0) return;
+     if (e.key === SYNC_KEY) { loadSyncConfig(); renderSyncState(); }
+     if (e.key.indexOf(SYNC_STATE) === 0) { renderSyncState(); if (S.route === 'home') scheduleHomeRender(); return; }
      if (S.route === 'home') { scheduleHomeRender(); return; }
      if (S.route === 'sum') { var m = /^kyudentd\.seal-survey\.v2\.s\.(\d{8}-[0-9A-Z]{6})$/.exec(e.key); if (m && S.sumIds.indexOf(m[1]) >= 0) { clearTimeout(sumTimer); sumTimer = setTimeout(refreshCombined, 200); } return; }
      if (S.route !== 'session' || !S.id) return;
@@ -1448,11 +1865,11 @@ html[data-day="2"]{--artifact-control-active:var(--artifact-control-orange)}
  }
  document.addEventListener('visibilitychange', function(){
    try {
-     if (document.visibilityState === 'hidden') { if (S.route === 'session' && S.id && !S.lost) store.release(S.id, TAB_ID); }
-     else onReturn();
+     if (document.visibilityState === 'hidden') { if (S.route === 'session' && S.id && !S.lost) store.release(S.id, TAB_ID); flushOnHide(); }
+     else { onReturn(); if (sync.url && !unloading) syncNow(); }
    } catch (err) { if (window.console) console.error(err); }
  });
- window.addEventListener('pagehide', function(){ unloading = true; stopHeartbeat(); if (S.route === 'session' && S.id && !S.lost) store.release(S.id, TAB_ID); });
+ window.addEventListener('pagehide', function(){ unloading = true; stopHeartbeat(); if (S.route === 'session' && S.id && !S.lost) store.release(S.id, TAB_ID); flushOnHide(); });
  window.addEventListener('pageshow', function(e){ unloading = false; if (e.persisted) { try { onReturn(); } catch (err) {} } });
  window.addEventListener('beforeunload', function(e){ if (Object.keys(unsavedCache).length || (S.route === 'session' && S.unsaved)) { e.preventDefault(); e.returnValue = ''; } });
  window.addEventListener('error', function(e){
@@ -1467,11 +1884,16 @@ html[data-day="2"]{--artifact-control-active:var(--artifact-control-orange)}
  window.SurveyApp = {
    getData:function(){ return data ? C.clone(data) : null; }, getUI:function(){ return C.clone(ui); },
    getState:function(){ return {route:S.route, id:S.id, readOnly:S.readOnly, lost:S.lost, blocked:S.blocked, unsaved:S.unsaved, hasSaved:S.hasSaved, sumIds:S.sumIds.slice(), storage:!!storage, writable:writable}; },
-   tabId:TAB_ID, lockStale:LOCK_STALE, tapGap:TAP_GAP, beat:function(){ beat(); }
+   tabId:TAB_ID, lockStale:LOCK_STALE, tapGap:TAP_GAP, beat:function(){ beat(); },
+   syncNow:function(){ return syncNow(); }, flush:function(){ flushOnHide(); },
+   syncInfo:function(){ return {url:sync.url, busy:sync.busy, lastOkAt:sync.lastOkAt, lastError:sync.lastError, failures:sync.failures, pending:pendingSessions().length, timer:!!sync.timer, retry:!!sync.retryTimer, conflicts:C.clone(sync.conflicts)}; }
  };
 
  $('start-date').value = C.localDate();
+ loadSyncConfig();
  route();
+ handleSyncParam();
+ if (sync.url) setTimeout(function(){ syncNow(); }, 1500);
  if ('serviceWorker' in navigator && location.protocol === 'https:') { try { navigator.serviceWorker.register('sw.js').catch(function(){}); } catch (ignore) {} }
 })();
 </script>
