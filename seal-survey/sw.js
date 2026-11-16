@@ -1,5 +1,7 @@
-/* Offline fallback for the survey page only (network first). Touches no other app's caches. */
-var CACHE = 'seal-survey-v2-1';
+/* Offline fallback for this survey page only (network first). Touches no other page's caches. */
+var FAMILY = 'seal-survey-sheet-';
+var CACHE = FAMILY + 'v3';
+var LEGACY = ["seal-survey-v2-1"];
 var PAGE = './index.html';
 
 self.addEventListener('install', function (event) {
@@ -15,8 +17,10 @@ self.addEventListener('activate', function (event) {
   event.waitUntil(
     caches.keys()
       .then(function (keys) {
-        return Promise.all(keys.filter(function (k) { return k.indexOf('seal-survey-') === 0 && k !== CACHE; })
-          .map(function (k) { return caches.delete(k); }));
+        return Promise.all(keys.filter(function (k) {
+          if (k === CACHE) return false;
+          return k.indexOf(FAMILY) === 0 || LEGACY.indexOf(k) >= 0;
+        }).map(function (k) { return caches.delete(k); }));
       })
       .then(function () { return self.clients.claim(); })
   );
@@ -35,8 +39,7 @@ self.addEventListener('fetch', function (event) {
   var url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
   var scopePath = new URL('./', self.location.href).pathname;
-  var isPage = req.mode === 'navigate' || url.pathname === scopePath || url.pathname === scopePath + 'index.html';
-  if (!isPage) return;
+  if (url.pathname !== scopePath && url.pathname !== scopePath + 'index.html') return;
   event.respondWith(
     fetch(new Request(url.origin + url.pathname + url.search, { cache: 'no-cache', credentials: 'same-origin' }))
       .then(function (res) {

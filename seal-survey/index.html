@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="ja" data-day="1">
+<html lang="ja" data-day="1" data-variant="sheet">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
-<meta name="description" content="九州電力送配電カラーイメージの電子シール式アンケート集約。入力者ごとにIDで端末内に保存し、保存一覧から再開。日別・対象別の自動集計、CSV出力、共有サーバー（Googleスプレッドシート）での全員分の集約・合算に対応。共有サーバーに接続した場合だけ送信します。">
+<meta name="description" content="電子シール式アンケートの集約（スプレッドシート登録版）。入力者ごとにIDで保存し、共有サーバー（Googleスプレッドシート）へ自動送信。全員分の合算・CSVを一括で取り出せます。">
 <meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#0060ae">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230060ae'/%3E%3Ccircle cx='22' cy='24' r='8' fill='%23fff'/%3E%3Ccircle cx='42' cy='24' r='8' fill='%23fff'/%3E%3Ccircle cx='22' cy='44' r='8' fill='%23fff'/%3E%3Ccircle cx='42' cy='44' r='8' fill='%23ffc293'/%3E%3C/svg%3E">
-<title>展示アンケート集約｜九州電力送配電</title>
+<title>展示アンケート集約（スプレッドシート登録版）｜九州電力送配電</title>
 <style>
 :root{
  --artifact-bg:var(--theme-background,#ffffff);--artifact-fg:var(--theme-text-primary,#132636);--artifact-muted:var(--theme-text-secondary,#536879);--artifact-line:var(--theme-border-light,#cbd9e3);
@@ -132,6 +132,10 @@ html[data-day="2"]{--artifact-control-active:var(--artifact-control-orange)}
 .vote-hit{-webkit-touch-callout:none}
 .vote-hit.readonly .empty-mark{border-color:var(--artifact-transparent);font-size:15px}
 .vote-hit:disabled.readonly{opacity:1}
+.variant-tag{display:inline-block;margin-left:10px;font-size:13px;font-weight:700;letter-spacing:0;vertical-align:4px;padding:2px 10px;border-radius:999px;border:1px solid var(--artifact-blue-ink);color:var(--artifact-blue-ink);background:var(--artifact-blue-wash)}
+html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);color:var(--artifact-orange);background:var(--artifact-orange-wash)}
+.sync-panel.sync-off{border-color:var(--artifact-warn);background:var(--artifact-warn-wash);color:var(--artifact-warn)}
+.sync-panel.sync-off .sync-text{color:var(--artifact-warn)}
 .sync-panel{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px}
 .sync-panel .sync-text{font-size:13px;line-height:1.6;flex:1 1 280px;min-width:0}
 .sync-panel .sync-text strong{font-size:15px}
@@ -158,7 +162,7 @@ html[data-day="2"]{--artifact-control-active:var(--artifact-control-orange)}
   <div class="home-tools"><button type="button" id="home-help" class="btn">使い方</button></div>
  </header>
  <div id="home-warning" class="warning" role="alert" hidden></div>
- <div class="home-hero"><h1>展示アンケート集約</h1><p>入力者ごとにIDを付けて保存します。続きは下の「保存一覧」から再開できます。</p></div>
+ <div class="home-hero"><h1>展示アンケート集約<span class="variant-tag">スプレッドシート登録版</span></h1><p>入力者ごとにIDを付けて保存し、共有サーバー（Googleスプレッドシート）へ自動で送ります。続きは下の「保存一覧」から再開できます。</p></div>
  <section id="sync-panel" class="panel sync-panel" aria-label="共有サーバー"></section>
  <section class="panel" aria-labelledby="start-heading">
   <h2 id="start-heading">新しく集約を始める</h2>
@@ -177,12 +181,12 @@ html[data-day="2"]{--artifact-control-active:var(--artifact-control-orange)}
  </section>
  <section class="panel" aria-labelledby="bulk-heading">
   <h2 id="bulk-heading">まとめて扱う（複数人・複数端末）</h2>
-  <p class="panel-lead">この端末に保存されたデータをまとめて扱います。共有サーバーを使わずに集めるときは、各端末で「バックアップ」を保存し、集める端末で「データを取り込む」を使います。同じIDのデータは重複せず、新しい方に置き換わります。</p>
+  <p class="panel-lead">この端末に保存されたデータをまとめて扱います。全員分は上の「全員分を見る」から取り出せます。共有サーバーに送れなかった端末のデータは、その端末の「バックアップ」をここで「データを取り込む」と集められます。</p>
   <div class="bulk-actions"><button type="button" class="btn primary" id="sum-button">合算を見る</button><button type="button" class="btn" id="bulk-csv-button">全件CSV</button><button type="button" class="btn" id="bulk-json-button">全件バックアップ</button><button type="button" class="btn" id="import-button">データを取り込む</button></div>
  </section>
  <ul class="home-notes">
-  <li>入力はこの端末・このブラウザーの中に保存されます。共有サーバーに接続している場合は、代表者のGoogleスプレッドシートにも自動で送られます（それ以外の外部送信はありません）。</li>
-  <li>iPhone・iPadでは、しばらく開かないとサイトのデータが消えることがあります。共有サーバーを使わない場合は、終了時・休憩時に「バックアップ」を保存してください。</li>
+  <li>入力はこの端末にも保存され、共有サーバー（代表者のGoogleスプレッドシート）へ自動で送られます。電波がないときは、つながったときに再送します。</li>
+  <li>共有サーバーのほかに外部へ送信することはありません。共有リンクは関係者以外に送らないでください。</li>
  </ul>
 </div>
 
@@ -228,7 +232,7 @@ html[data-day="2"]{--artifact-control-active:var(--artifact-control-orange)}
    <div class="button-row interactive-only"><button type="button" class="btn primary" id="summary-export-button">CSV・バックアップを保存</button></div>
   </section>
  </main>
- <p class="small-note">入力のたびにこの端末内へ自動保存します。共有サーバーに接続中なら、数秒ごとにまとめて自動送信します。接続していない場合は、終了時に「保存・CSV」からバックアップを保存してください。</p>
+ <p class="small-note">入力のたびにこの端末内へ自動保存し、共有サーバーに接続中なら数秒ごとにまとめて自動送信します。</p>
 </div>
 
 <div id="app-modal" class="modal-backdrop" hidden><section id="modal-content" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="modal-header"><h2 id="modal-title">保存・CSV・使い方</h2><button type="button" class="close-btn" id="modal-close" aria-label="閉じる">×</button></div><div id="modal-body"></div></section></div>
@@ -408,13 +412,15 @@ function exclude_(ids, flag) {
   });
 }
 </script>
+<script>window.SEAL_VARIANT = {"id": "sheet", "prefix": "kyudentd.seal-survey.v2.", "sync": true, "label": "スプレッドシート登録版"};</script>
 <script>
 /* KYUDEN T&D electronic-seal survey core (Ver.2) — pure logic, no DOM, no network. */
 (function (global) {
   'use strict';
   var FORMAT = 'kyudentd-seal-survey', VERSION = 1, VERSION2 = 2, BUNDLE_FORMAT = 'kyudentd-seal-survey-bundle';
   var MAX_COUNT = 1000000, IMPORT_LIMIT = 8 * 1024 * 1024;
-  var PREFIX = 'kyudentd.seal-survey.v2.';
+  var VARIANT = global.SEAL_VARIANT || {};
+  var PREFIX = typeof VARIANT.prefix === 'string' && /^kyudentd\.seal-survey\.[a-z0-9.]+\.$/.test(VARIANT.prefix) ? VARIANT.prefix : 'kyudentd.seal-survey.v2.';
   var ID_CHARS = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
   var ID_RE = /^\d{8}-[0-9A-HJKMNP-TV-Z]{6}$/;
   var NAME_MAX = 40, COMPANY_MAX = 60;
@@ -772,6 +778,7 @@ function exclude_(ids, flag) {
 (function(){
  'use strict';
  var C = window.SurveyCore, $ = function(id){ return document.getElementById(id); };
+ var VARIANT = window.SEAL_VARIANT || {}, SYNC_ENABLED = VARIANT.sync !== false, APP_LABEL = '展示アンケート集約' + (VARIANT.label ? '（' + VARIANT.label + '）' : '');
  var LOCK_BEAT = 5000, LOCK_STALE = 20000, TAP_GAP = 120, UNDO_LIMIT = 100, PREVIEW_LIMIT = 300000;
  var TAB_ID = 'T' + C.randomCode(12) + Date.now().toString(36);
  var storage = null, writable = false;
@@ -815,7 +822,7 @@ function exclude_(ids, flag) {
  /* ---------- shared server (Google Apps Script + Sheets) ---------- */
  function fmtTime(iso){ var d = new Date(iso); return isNaN(d.getTime()) ? '' : pad(d.getHours()) + ':' + pad(d.getMinutes()); }
  function shortUrl(u){ var m = /\/s\/([A-Za-z0-9_\-]+)\/exec$/.exec(u || ''); return m ? 'script.google.com/…/s/' + m[1].slice(0, 6) + '…' + m[1].slice(-4) + '/exec' : String(u || ''); }
- function loadSyncConfig(){ sync.url = ''; try { var v = JSON.parse(storage && storage.getItem(SYNC_KEY) || 'null'); if (v && typeof v.url === 'string' && SYNC_URL_RE.test(v.url)) sync.url = v.url; } catch (ignore) {} if (!sync.url && sync.memUrl) sync.url = sync.memUrl; }
+ function loadSyncConfig(){ sync.url = ''; if (!SYNC_ENABLED) return; try { var v = JSON.parse(storage && storage.getItem(SYNC_KEY) || 'null'); if (v && typeof v.url === 'string' && SYNC_URL_RE.test(v.url)) sync.url = v.url; } catch (ignore) {} if (!sync.url && sync.memUrl) sync.url = sync.memUrl; }
  function setSyncUrl(url){
    sync.url = url || ''; sync.memUrl = sync.url; sync.lastError = ''; sync.failures = 0; sync.cache = null; sync.conflicts = {}; sync.mem = {};
    clearTimeout(sync.timer); sync.timer = null; clearTimeout(sync.retryTimer); sync.retryTimer = null;
@@ -902,13 +909,15 @@ function exclude_(ids, flag) {
  }
  function renderSyncState(){
    var chip = $('sync-chip');
-   if (chip) { var s = S.route === 'session' ? syncSummary() : {text:''}; chip.textContent = s.text; chip.className = 'sync-chip ' + (s.cls || ''); chip.hidden = !s.text; }
+   if (chip) { var s = S.route === 'session' ? (SYNC_ENABLED && !sync.url ? {text:'共有サーバー未接続：この端末だけに保存しています（共有リンクを開くと全員分に送られます）', cls:'problem'} : syncSummary()) : {text:''}; chip.textContent = s.text; chip.className = 'sync-chip ' + (s.cls || ''); chip.hidden = !s.text; }
    if (S.route === 'home') renderSyncPanel();
  }
  function renderSyncPanel(){
    var host = $('sync-panel'); if (!host) return;
+   host.hidden = !SYNC_ENABLED; if (!SYNC_ENABLED) return;
+   host.classList.toggle('sync-off', !sync.url);
    var html;
-   if (!sync.url) html = '<div class="sync-text"><strong><span class="sync-dot"></span>共有サーバー：未接続</strong><br>全員の入力を1か所（代表者のGoogleスプレッドシート）に自動で集められます。代表者が1回だけ設定し、入力する人には「共有リンク」を送ります。</div><div class="button-row"><button type="button" class="btn primary" data-sync="setup">共有サーバーを設定</button></div>';
+   if (!sync.url) html = '<div class="sync-text"><strong><span class="sync-dot problem"></span>共有サーバーに未接続です</strong><br>このままでは入力がこの端末にしか保存されず、全員分に集まりません。代表者から届いた<strong>共有リンク</strong>を開いてください（1回開けば以後は自動で接続します）。</div><div class="button-row"><button type="button" class="btn" data-sync="setup">共有サーバーを設定（代表者向け）</button></div>';
    else { var s = syncSummary(); html = '<div class="sync-text"><strong><span class="sync-dot ' + (s.cls === 'problem' ? 'problem' : 'on') + '"></span>共有サーバー：接続中</strong><br><span class="' + (s.cls === 'problem' ? 'danger-text' : 'secondary-text') + '">' + esc(s.text) + '</span></div><div class="button-row"><button type="button" class="btn primary" data-sync="list">全員分を見る</button><button type="button" class="btn" data-sync="share">共有リンクを送る</button><button type="button" class="btn" data-sync="setup">設定</button></div>'; }
    host.innerHTML = html;
  }
@@ -961,6 +970,7 @@ function exclude_(ids, flag) {
    var url = q.get('sync'); if (url === null) return;
    q.delete('sync'); var rest = q.toString();
    try { history.replaceState(history.state, '', location.pathname + (rest ? '?' + rest : '') + location.hash); } catch (ignore) {}
+   if (!SYNC_ENABLED) { toast('このページはスマホ完結版です（共有サーバーには接続しません）'); return; }
    url = url.trim();
    if (!SYNC_URL_RE.test(url)) { toast('共有リンクの接続先が正しくありません'); return; }
    if (url === sync.url) { toast('共有サーバーに接続済みです'); return; }
@@ -1313,7 +1323,7 @@ function exclude_(ids, flag) {
    S.route = 'sum'; S.id = null; data = combined; S.readOnly = true; S.lost = false; S.blocked = false; S.unsaved = false; S.hasSaved = false; S.saveError = ''; S.rawRecovery = null;
    S.sumIds = r.chosen.map(function(it){ return it.id; }); S.sumNames = r.chosen.map(function(it){ return who(it.session.meta); }); saveSumSelection();
    ui.view = 'summary'; ui.remove = false; ui.day = '1'; ui.type = 'student';
-   document.title = '合算｜展示アンケート集約';
+   document.title = '合算｜' + APP_LABEL;
    showView('session'); renderedType = ''; render();
  }
  function refreshCombined(){
@@ -1357,7 +1367,7 @@ function exclude_(ids, flag) {
  }
  function showView(name){ $('home-view').hidden = name !== 'home'; $('session-view').hidden = name !== 'session'; try { window.scrollTo(0, 0); } catch (ignore) {} }
  function showHome(){
-   S.route = 'home'; data = null; document.documentElement.dataset.day = '1'; document.title = '展示アンケート集約｜九州電力送配電';
+   S.route = 'home'; data = null; document.documentElement.dataset.day = '1'; document.title = APP_LABEL + '｜九州電力送配電';
    if (!$('start-date').value) $('start-date').value = C.localDate();
    showView('home'); renderHome();
  }
@@ -1383,7 +1393,7 @@ function exclude_(ids, flag) {
    S.blocked = status === 'recovered'; S.rawRecovery = status === 'recovered' ? (loaded.raw === undefined ? null : loaded.raw) : null;
    S.saveError = status === 'recovered' ? '保存データに異常があるため、直前の保存を表示しています。最新分が欠けている可能性があります。入力は停止中です。「保存・CSV」で確認してください。' : '';
    restoreUi(id); ui.view = 'vote'; ui.remove = false; clearUndo();
-   document.title = session.meta.name + '｜展示アンケート集約';
+   document.title = session.meta.name + '｜' + APP_LABEL;
    showView('session'); renderedType = ''; render(); startHeartbeat();
    if (S.unsaved) { var r = store.save(data); if (r.ok) { S.unsaved = false; S.hasSaved = true; delete unsavedCache[id]; } else S.saveError = r.error; updateSaveStatus(); }
  }
@@ -1559,7 +1569,7 @@ function exclude_(ids, flag) {
    $('board-actions').hidden = ui.view !== 'vote' || S.route === 'sum';
    $('summary-export-button').textContent = S.route === 'sum' ? 'CSVを保存' : 'CSV・バックアップを保存';
    renderSessionBar(); renderStateBanner();
-   updateBoard(); if (ui.view === 'summary') updateSummary(); updateSaveStatus();
+   updateBoard(); if (ui.view === 'summary') updateSummary(); updateSaveStatus(); renderSyncState();
  }
  function vote(button){
    if (ui.view !== 'vote' || !$('app-modal').hidden || S.route !== 'session') return;
@@ -1602,14 +1612,16 @@ function exclude_(ids, flag) {
      '<li>上部で「1日目／2日目」と「学生／一般・社会人」を選び、①と②で各1マスをタップします。「1つ戻す」は直近100操作まで、「1票取り消す」は修正モードです。</li>' +
      '<li>同じマスへの0.12秒未満の連続タップは、誤タップ防止のため1回として扱います。</li>' +
      '<li>横幅が足りない場合は、表の中を横にスワイプしてください。業界名は左端に固定されます。</li>' +
-     '<li>共有サーバー（代表者のGoogleスプレッドシート）に接続すると、入力は自動で送られ、全員分が1か所に集まります。代表者は「全員分を見る」から合算・CSV・バックアップを一括で取り出せます。電波がないときは端末に保存し、つながったときに自動で再送します。</li>' +
-     '<li>共有サーバーを使わない場合、保存はこの端末・ブラウザーの中だけです。別の端末のデータは「バックアップ」と「データを取り込む」で集められます。どちらの方法でも、同じIDのデータは重複せず、新しい方に置き換わります。</li>' +
+     (SYNC_ENABLED ? '<li>共有サーバー（代表者のGoogleスプレッドシート）に接続すると、入力は自動で送られ、全員分が1か所に集まります。代表者は「全員分を見る」から合算・CSV・バックアップを一括で取り出せます。電波がないときは端末に保存し、つながったときに自動で再送します。</li>' +
+     '<li>共有サーバーに接続していない端末の入力は、その端末にしか保存されません。代表者から届いた共有リンクを各端末で1回開いてください。同じIDのデータは重複せず、新しい方に置き換わります。</li>'
+     : '<li>保存はこの端末・ブラウザーの中だけで、外部へは送信しません。全員分を集めるときは、各自が保存一覧の「バックアップ」（または「全件バックアップ」）でJSONファイルを保存してAirDrop・LINE・メールで送り、集める人が「データを取り込む」でまとめて読み込み、「合算を見る」「全件CSV」で集計します。同じIDのデータは重複せず、新しい方に置き換わります。</li>' +
+     '<li>取り込んだデータを集める人の端末で書き換えると、元の端末と食い違います。入力は元の端末で続け、最後にもう一度バックアップを取り込み直してください。</li>') +
      '<li>終了時・休憩時にはバックアップを保存してください。サイトデータの削除、プライベートブラウズ、端末変更のほか、iPhone・iPadでしばらく（7日程度）開かない場合にも、端末内のデータが消えることがあります。</li>' +
      '<li>Safariで開いた場合と、ホーム画面に追加したアイコンから開いた場合とでは、保存一覧が別々になることがあります。いつも同じ開き方で使ってください。</li>' +
      '<li>①の合計を原様式どおり回答者数としています。①と②の回答の組合せ、同一人物の重複回答は判定しません。会期中お一人1回の運用はスタッフで確認してください。</li></ol>' +
      '<p>元様式の項目・表の構成を維持しています。学生①の右端「業界不明」は業界別・展示別の行列計には含めず、①全体の合計に加算します。社会人②の右端表記も元様式を維持しています。</p></section>';
  }
- function footerNoteHtml(){ return '<p class="footer-note">元様式：学生C案・一般社会人A案。配色は社内「デザイン要則」の白地・ブルー・黒を参考にした画面用の近似色です。正式なRGB指定やロゴデータの再現ではありません。2日目のオレンジは日別識別用です。入力者名・会社名・票数は、この端末内と保存したバックアップ・CSVに記録されます。共有サーバーに接続した場合だけ、代表者のGoogleスプレッドシートへ送信します（それ以外の外部送信はありません）。<br>※重要な判断には必ず原文を確認してください。</p>'; }
+ function footerNoteHtml(){ return '<p class="footer-note">元様式：学生C案・一般社会人A案。配色は社内「デザイン要則」の白地・ブルー・黒を参考にした画面用の近似色です。正式なRGB指定やロゴデータの再現ではありません。2日目のオレンジは日別識別用です。' + (SYNC_ENABLED ? '入力者名・会社名・票数は、この端末内と保存したバックアップ・CSVに記録されます。共有サーバーに接続した場合だけ、代表者のGoogleスプレッドシートへ送信します（それ以外の外部送信はありません）。' : '入力者名・会社名・票数は、この端末内と保存したバックアップ・CSVにだけ記録され、外部へは送信しません。') + '<br>※重要な判断には必ず原文を確認してください。</p>'; }
  function manager(){
    if (S.route === 'sum') { sumManager(); return; }
    if (S.route !== 'session' || !data) return;
@@ -1705,7 +1717,7 @@ function exclude_(ids, flag) {
    if (!ensureEditable()) { closeModal(); render(); return; }
    var m; try { m = C.normalizeMeta({name:$('meta-name').value, company:$('meta-company').value, date:$('meta-date').value, createdAt:data.meta.createdAt}); } catch (e) { toast(e.message); return; }
    var dup = listSessions().some(function(it){ return it.session && it.id !== data.id && C.identityKey(it.session.meta) === C.identityKey(m); });
-   data.meta = m; var ok = persist([]); document.title = m.name + '｜展示アンケート集約'; render(); manager();
+   data.meta = m; var ok = persist([]); document.title = m.name + '｜' + APP_LABEL; render(); manager();
    toast(!ok ? '端末内に未保存です。バックアップを保存してください' : dup ? '保存しました。同じ入力者・日付のデータが他にもあります' : '入力者情報を保存しました');
  }
  async function shareFile(){ if (!activeExport || !activeExport.file || !navigator.share) return; try { await navigator.share({files:[activeExport.file], title:activeExport.filename}); } catch (e) { if (e && e.name !== 'AbortError') toast('共有できませんでした。ダウンロードをご利用ください'); } }
@@ -1843,7 +1855,7 @@ function exclude_(ids, flag) {
      if (e.key === SYNC_KEY) { loadSyncConfig(); renderSyncState(); }
      if (e.key.indexOf(SYNC_STATE) === 0) { renderSyncState(); if (S.route === 'home') scheduleHomeRender(); return; }
      if (S.route === 'home') { scheduleHomeRender(); return; }
-     if (S.route === 'sum') { var m = /^kyudentd\.seal-survey\.v2\.s\.(\d{8}-[0-9A-Z]{6})$/.exec(e.key); if (m && S.sumIds.indexOf(m[1]) >= 0) { clearTimeout(sumTimer); sumTimer = setTimeout(refreshCombined, 200); } return; }
+     if (S.route === 'sum') { var sk = e.key.indexOf(C.PREFIX + 's.') === 0 ? e.key.slice((C.PREFIX + 's.').length) : ''; if (C.ID_RE.test(sk) && S.sumIds.indexOf(sk) >= 0) { clearTimeout(sumTimer); sumTimer = setTimeout(refreshCombined, 200); } return; }
      if (S.route !== 'session' || !S.id) return;
      if (e.key === store.lockKey(S.id)) { if (!S.lost && e.newValue) { var l = null; try { l = JSON.parse(e.newValue); } catch (ignore) {} if (l && l.tab !== TAB_ID) markLost(); } return; }
      if (e.key === store.key(S.id)) {

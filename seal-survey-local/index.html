@@ -1,0 +1,1740 @@
+<!DOCTYPE html>
+<html lang="ja" data-day="1" data-variant="local">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
+<meta name="description" content="電子シール式アンケートの集約（スマホ完結版）。入力者ごとにIDで端末内に保存し、各自のバックアップ（JSON）を取り込んで全員分を合算。外部へは送信しません。">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#0060ae">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230060ae'/%3E%3Ccircle cx='22' cy='24' r='8' fill='%23fff'/%3E%3Ccircle cx='42' cy='24' r='8' fill='%23fff'/%3E%3Ccircle cx='22' cy='44' r='8' fill='%23fff'/%3E%3Ccircle cx='42' cy='44' r='8' fill='%23ffc293'/%3E%3C/svg%3E">
+<title>展示アンケート集約（スマホ完結版）｜九州電力送配電</title>
+<style>
+:root{
+ --artifact-bg:var(--theme-background,#ffffff);--artifact-fg:var(--theme-text-primary,#132636);--artifact-muted:var(--theme-text-secondary,#536879);--artifact-line:var(--theme-border-light,#cbd9e3);
+ --artifact-blue:#0072ce;--artifact-blue-ink:#0060ae;--artifact-blue-wash:#edf6fd;--artifact-orange:#b84c00;--artifact-orange-wash:#fff1e7;--artifact-white:#ffffff;--artifact-warn:#9b3a00;--artifact-warn-wash:#fff0e5;--artifact-danger:#a52626;--artifact-danger-wash:#ffeded;--artifact-backdrop:rgba(6,24,38,.48);--artifact-shadow:0 12px 48px rgba(7,40,68,.14);--artifact-active:var(--artifact-blue-ink);--artifact-active-wash:var(--artifact-blue-wash);--artifact-transparent:transparent;
+ --artifact-font:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,system-ui,sans-serif;
+}
+html[data-day="2"]{--artifact-active:var(--artifact-orange);--artifact-active-wash:var(--artifact-orange-wash)}
+html[data-theme="dark"]{--artifact-bg:#111c27;--artifact-fg:#f1f6fb;--artifact-muted:#b2c5d5;--artifact-line:#3b5062;--artifact-blue-ink:#78baff;--artifact-blue-wash:#172f45;--artifact-orange:#ffc293;--artifact-orange-wash:#3c291d;--artifact-warn:#ffd2b0;--artifact-warn-wash:#3c291d;--artifact-danger:#ffbaba;--artifact-danger-wash:#3b1e25}
+@supports (color:color-mix(in srgb,blue 10%,white)){:root{--artifact-blue-wash:color-mix(in srgb,var(--artifact-blue) 7%,var(--artifact-bg));--artifact-orange-wash:color-mix(in srgb,var(--artifact-orange) 8%,var(--artifact-bg));--artifact-warn-wash:color-mix(in srgb,var(--artifact-warn) 9%,var(--artifact-bg));--artifact-danger-wash:color-mix(in srgb,var(--artifact-danger) 7%,var(--artifact-bg))}}
+*{box-sizing:border-box}html{font-family:var(--artifact-font);font-size:16px;-webkit-text-size-adjust:100%;color:var(--artifact-fg);background:var(--artifact-bg)}body{margin:0;color:var(--artifact-fg);background:var(--artifact-bg);line-height:1.5}button,input,select,textarea{font:inherit}button,a,input,select{touch-action:manipulation}button,a{-webkit-tap-highlight-color:var(--artifact-transparent)}button{cursor:pointer}button:disabled{cursor:default;opacity:.43}button,input,select,textarea,a{outline-offset:3px}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--artifact-active)}[hidden]{display:none!important}a{color:var(--artifact-blue-ink)}button{color:var(--artifact-fg);background:var(--artifact-bg)}
+.app-shell{max-width:1380px;margin:0 auto;padding:0 max(20px,env(safe-area-inset-right)) 20px max(20px,env(safe-area-inset-left))}.app-header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 0 14px;border-bottom:2px solid var(--artifact-blue)}.brand{display:flex;gap:18px;align-items:center}.brand-company{font-size:18px;font-weight:750;letter-spacing:.025em;white-space:nowrap}.brand-product{font-size:13px;color:var(--artifact-muted);border-left:1px solid var(--artifact-line);padding-left:18px}.header-tools{display:flex;align-items:center;gap:12px}.save-state{font-size:12px;color:var(--artifact-muted);text-align:right;line-height:1.4}.save-state.problem{color:var(--artifact-warn)}.btn{display:inline-flex;justify-content:center;align-items:center;gap:7px;border:1px solid var(--artifact-line);border-radius:6px;min-height:44px;padding:9px 14px;background:var(--artifact-bg);color:var(--artifact-fg);font-size:14px;font-weight:650;text-decoration:none;line-height:1.35}.btn.primary{border-color:var(--artifact-blue-ink);background:var(--artifact-blue-ink);color:var(--artifact-white)}.btn.danger{border-color:var(--artifact-danger);color:var(--artifact-danger);background:var(--artifact-bg)}.btn:active:not(:disabled){transform:translateY(1px)}.btn.subtle{border-color:var(--artifact-transparent);color:var(--artifact-muted);background:var(--artifact-bg)}.controls{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:12px 0}.control-group{display:flex;align-items:center;gap:8px}.control-label{font-size:12px;color:var(--artifact-muted);white-space:nowrap}.segmented{display:inline-flex;gap:0;border:1px solid var(--artifact-line);border-radius:7px;overflow:hidden;background:var(--artifact-bg);color:var(--artifact-fg)}.segmented button{min-height:44px;min-width:86px;padding:8px 16px;font-size:14px;font-weight:650;border:0;border-right:1px solid var(--artifact-line);color:var(--artifact-muted);background:var(--artifact-bg);white-space:nowrap}.segmented button:last-child{border-right:0}.segmented button[aria-pressed="true"]{background:var(--artifact-active-wash);color:var(--artifact-active);box-shadow:inset 0 -3px 0 var(--artifact-active)}.day-dot,.legend-dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--artifact-blue);color:var(--artifact-white);margin-right:7px}.day-dot.orange{background:var(--artifact-orange);color:var(--artifact-white)}.view-group{margin-left:auto}.warning{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;font-size:13px;line-height:1.6;padding:11px 14px;margin:0 0 12px;border:1px solid var(--artifact-warn);border-radius:5px;background:var(--artifact-warn-wash);color:var(--artifact-warn)}.warning .btn{min-height:38px;flex-shrink:0;font-size:12px}.board-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin:8px 0 14px}.eyebrow{color:var(--artifact-active);font-size:13px;font-weight:700;margin:0 0 3px}.board-heading h1{font-size:clamp(22px,2.5vw,30px);letter-spacing:.01em;line-height:1.4;margin:0;font-weight:750}.board-instruction{font-size:14px;color:var(--artifact-muted);margin:6px 0 0}.board-actions{display:flex;gap:8px;padding-top:7px;flex-shrink:0}.board-actions .btn{font-size:13px;padding:8px 12px}.btn[aria-pressed="true"].correction{background:var(--artifact-danger-wash);color:var(--artifact-danger);border-color:var(--artifact-danger)}.correction-banner{font-size:14px;margin:0 0 12px;padding:9px 12px;background:var(--artifact-danger-wash);color:var(--artifact-danger);border:1px solid var(--artifact-danger)}.section-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 4px}.section-heading h2{margin:0;font-size:17px;font-weight:750;line-height:1.5}.question-total{white-space:nowrap;font-size:13px;color:var(--artifact-muted)}.question-total strong{color:var(--artifact-active);font-size:20px;font-weight:750;margin:0 3px;font-variant-numeric:tabular-nums}.question-hint{font-size:12px;line-height:1.5;margin:0 0 8px;color:var(--artifact-muted)}.scroll-guide{display:none;color:var(--artifact-active);font-size:12px;margin:0 0 5px}.board-section{margin-bottom:20px}.table-scroll{overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;border:1px solid var(--artifact-line);background:var(--artifact-bg);color:var(--artifact-fg)}.vote-table{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;min-width:700px;font-size:13px}.vote-table.student{min-width:950px}.vote-table th,.vote-table td{border-right:1px solid var(--artifact-line);border-bottom:1px solid var(--artifact-line);padding:0;vertical-align:middle}.vote-table tr>*:last-child{border-right:0}.vote-table tbody tr:last-child>*{border-bottom:0}.vote-table thead th{background:var(--artifact-blue-wash);color:var(--artifact-fg);text-align:center;font-size:12px;line-height:1.4;font-weight:600;padding:9px 5px;height:67px}.vote-table.adult thead th{height:52px;font-size:13px}.vote-table .row-name{position:sticky;left:0;z-index:2;background:var(--artifact-bg);color:var(--artifact-fg);font-weight:600;font-size:13px;text-align:left;padding:8px 10px;line-height:1.45}.vote-table thead th:first-child{position:sticky;left:0;z-index:3;background:var(--artifact-blue-wash);color:var(--artifact-fg)}.vote-table .sum-cell{text-align:right;padding:6px 9px;font-size:16px;font-weight:650;font-variant-numeric:tabular-nums;background:var(--artifact-blue-wash);color:var(--artifact-fg)}.sum-cell small{font-size:11px;font-weight:400;margin-left:3px;color:var(--artifact-muted)}.vote-table .total-row .row-name{background:var(--artifact-blue-wash);color:var(--artifact-fg)}.vote-table .total-row .sum-cell{height:38px}.vote-hit{display:flex;width:100%;min-height:53px;align-items:center;justify-content:center;gap:6px;border:0;border-radius:0;padding:8px 4px;background:var(--artifact-bg);color:var(--artifact-active);position:relative;user-select:none;-webkit-user-select:none;font-variant-numeric:tabular-nums;transition:background-color .12s ease}.vote-hit:hover:not(:disabled){background:var(--artifact-active-wash);color:var(--artifact-active)}.vote-hit:focus-visible{outline:3px solid var(--artifact-active);outline-offset:-3px;z-index:1}.vote-hit.has-votes{background:var(--artifact-active-wash);color:var(--artifact-active)}.vote-hit.readonly{cursor:default;opacity:1}.vote-hit.empty .empty-mark{display:flex;align-items:center;justify-content:center;width:25px;height:25px;border:1px dashed var(--artifact-line);border-radius:50%;font-size:19px;line-height:1;color:var(--artifact-muted);font-weight:400}.vote-hit .vote-number{font-size:20px;font-weight:750;line-height:1.1;min-width:12px}.vote-hit .seal-stack{display:flex;gap:3px;flex-wrap:wrap;align-content:center;justify-content:center;max-width:32px}.seal{width:11px;height:11px;border-radius:50%;background:var(--artifact-active);color:var(--artifact-white);flex-shrink:0}.vote-hit.just-tapped{animation:seal-hit .18s ease-out}.vote-hit.remove-mode:not(.readonly){color:var(--artifact-danger)}.vote-hit.remove-mode:not(.readonly) .seal{background:var(--artifact-danger);color:var(--artifact-white)}.vote-hit.remove-mode:not(.readonly).has-votes{background:var(--artifact-danger-wash);color:var(--artifact-danger)}.unknown-td{vertical-align:top!important;background:var(--artifact-bg);color:var(--artifact-fg)}.unknown-hit{min-height:350px;flex-direction:column;gap:8px}.unknown-hit .vote-number{font-size:28px}.unknown-caption{font-size:11px;color:var(--artifact-muted);font-weight:400}.choice-scroll{overflow:auto;-webkit-overflow-scrolling:touch}.choice-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--artifact-line);border-left:1px solid var(--artifact-line);min-width:640px}.choice-card{border-right:1px solid var(--artifact-line);border-bottom:1px solid var(--artifact-line);background:var(--artifact-bg);color:var(--artifact-fg);display:flex;flex-direction:column;min-width:0}.choice-label{display:flex;align-items:center;justify-content:center;text-align:center;padding:8px 8px;min-height:42px;background:var(--artifact-blue-wash);color:var(--artifact-fg);font-size:14px;line-height:1.4;font-weight:600}.choice-card .vote-hit{flex:1;min-height:57px}.choice-card .vote-hit .vote-number{font-size:23px}.choice-card .seal-stack{max-width:72px}.choice-card .seal{width:15px;height:15px}.choice-grid.adult{grid-template-columns:repeat(4,minmax(0,1fr)) 112px;grid-template-rows:repeat(2,1fr);min-width:740px}.choice-grid.adult .choice-label{font-size:12px;min-height:38px}.choice-grid.adult .vote-hit{min-height:49px}.choice-card.unknown-choice{grid-column:5;grid-row:1 / span 2}.choice-card.unknown-choice .vote-hit{flex-direction:column;gap:9px}.board-footer{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--artifact-line);padding:12px 0 0;margin-top:2px;font-size:12px;color:var(--artifact-muted)}.board-footer strong{color:var(--artifact-fg);font-size:17px;margin:0 4px;font-variant-numeric:tabular-nums}.footer-day{color:var(--artifact-active);font-weight:650;white-space:nowrap}.footer-day .legend-dot{background:var(--artifact-active);color:var(--artifact-white)}.small-note{font-size:11px;color:var(--artifact-muted);margin:10px 0 0}.info{display:inline-flex;position:relative;align-items:center;justify-content:center;font-size:12px;color:var(--artifact-muted);border:0;background:var(--artifact-transparent);min-height:24px;min-width:24px;padding:2px;vertical-align:middle}.info .tooltip{display:none;position:absolute;bottom:calc(100% + 6px);right:0;width:240px;font-size:12px;font-weight:400;line-height:1.6;text-align:left;z-index:6;padding:10px 12px;border:1px solid var(--artifact-line);background:var(--artifact-bg);color:var(--artifact-fg);box-shadow:var(--artifact-shadow);border-radius:5px}.info:hover .tooltip,.info:focus .tooltip{display:block}.summary-kpis{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--artifact-line);border-bottom:1px solid var(--artifact-line);margin:12px 0 18px}.kpi{padding:16px 18px 16px 0}.kpi+.kpi{padding-left:18px;border-left:1px solid var(--artifact-line)}.kpi-label{font-size:13px;color:var(--artifact-muted)}.kpi-value{display:flex;align-items:baseline;gap:6px;margin-top:4px;font-size:34px;font-weight:750;font-variant-numeric:tabular-nums;line-height:1.3}.kpi-value small{font-size:13px;font-weight:400;color:var(--artifact-muted)}.summary-charts{display:grid;grid-template-columns:1fr 1fr;gap:36px;margin-bottom:22px}.summary-charts h3{font-size:15px;margin:0 0 14px}.bar-record{display:grid;grid-template-columns:minmax(115px,46%) 1fr 38px;gap:9px;align-items:center;font-size:12px;margin-bottom:10px}.bar-track{height:12px;background:var(--artifact-blue-wash);color:var(--artifact-fg);border-radius:2px;overflow:hidden}.bar-fill{height:100%;width:0;background:var(--artifact-active);color:var(--artifact-white);min-width:0}.bar-number{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}.plain-table{width:100%;border-collapse:collapse;font-size:13px;min-width:570px}.plain-table th,.plain-table td{padding:10px 11px;text-align:left;border-bottom:1px solid var(--artifact-line)}.plain-table th{background:var(--artifact-blue-wash);color:var(--artifact-fg);font-weight:600}.plain-table td.num,.plain-table th.num{text-align:right;font-variant-numeric:tabular-nums}.plain-table tr.is-current td{background:var(--artifact-active-wash);color:var(--artifact-fg)}.section-subtitle{font-size:16px;margin:24px 0 10px}.summary-note{font-size:12px;color:var(--artifact-muted);margin:8px 0}.empty-chart{font-size:12px;color:var(--artifact-muted);margin:0 0 12px}.modal-backdrop{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;padding:max(20px,env(safe-area-inset-top)) max(20px,env(safe-area-inset-right)) max(20px,env(safe-area-inset-bottom)) max(20px,env(safe-area-inset-left));background:var(--artifact-backdrop);color:var(--artifact-fg)}.modal{width:min(760px,100%);max-height:90vh;max-height:90dvh;overflow:auto;border-radius:9px;border:1px solid var(--artifact-line);padding:22px 24px;background:var(--artifact-bg);color:var(--artifact-fg);box-shadow:var(--artifact-shadow);overscroll-behavior:contain}.modal-header{display:flex;justify-content:space-between;gap:16px;align-items:center;border-bottom:1px solid var(--artifact-line);padding-bottom:13px;margin-bottom:16px}.modal-header h2{font-size:21px;margin:0}.close-btn{min-width:44px;min-height:44px;border:1px solid var(--artifact-line);border-radius:5px;background:var(--artifact-bg);color:var(--artifact-fg);font-size:22px;line-height:1}.modal h3{font-size:16px;margin:19px 0 8px}.modal p,.modal li{font-size:13px;line-height:1.7}.modal p{margin:8px 0}.modal ul,.modal ol{padding-left:20px;margin:8px 0}.manage-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}.manage-section{border-bottom:1px solid var(--artifact-line);padding-bottom:16px}.field{display:block;margin:10px 0;font-size:13px;color:var(--artifact-muted)}.field>span{display:block;margin-bottom:5px}.field input,.field select,.select-control{appearance:none;-webkit-appearance:none;width:100%;min-height:44px;padding:9px 12px;border:1px solid var(--artifact-line);border-radius:5px;color:var(--artifact-fg);background:var(--artifact-bg);font-size:16px;line-height:1.4}.select-wrap{position:relative}.select-wrap:after{content:'⌄';position:absolute;pointer-events:none;right:12px;top:10px;color:var(--artifact-muted)}select.select-control,.field select{padding-right:32px}.field input[type="date"]{min-width:0;max-width:100%;font-variant-numeric:tabular-nums}.button-row{display:flex;gap:9px;flex-wrap:wrap;margin:10px 0}.manage-section .button-row .btn{font-size:13px}.local-status-box{font-size:12px;line-height:1.7;border:1px solid var(--artifact-line);padding:10px 12px}.export-box{border:1px solid var(--artifact-line);padding:14px;border-radius:6px}.export-name{font-size:13px;word-break:break-all;font-weight:650}.preview-text{width:100%;min-height:150px;max-height:260px;resize:vertical;border:1px solid var(--artifact-line);border-radius:5px;background:var(--artifact-bg);color:var(--artifact-fg);padding:10px;font:12px/1.7 ui-monospace,monospace}.secondary-text{color:var(--artifact-muted)}.danger-text{color:var(--artifact-danger)}.footer-note{border-top:1px solid var(--artifact-line);padding-top:12px;font-size:11px!important;color:var(--artifact-muted)}.scope-label{font-size:13px;font-weight:650;color:var(--artifact-active);margin:0 0 8px}.toast{position:fixed;bottom:max(18px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:55;max-width:min(600px,calc(100vw - 32px));width:max-content;padding:11px 18px;border-radius:6px;box-shadow:var(--artifact-shadow);border:1px solid var(--artifact-active);background:var(--artifact-active-wash);color:var(--artifact-active);font-size:13px;font-weight:650;pointer-events:none;text-align:center}.print-only{display:none}.no-script{margin:20px;padding:20px;border:1px solid var(--artifact-danger);background:var(--artifact-bg);color:var(--artifact-danger)}
+/* Button contrast update: presentation only; keep layout and aria-pressed behavior. */
+:root{
+ --artifact-control-blue:#0060ae;
+ --artifact-control-orange:#b84c00;
+ --artifact-control-danger:#a52626;
+ --artifact-control-on-solid:#ffffff;
+ --artifact-control-active:var(--artifact-control-blue);
+}
+html[data-day="2"]{--artifact-control-active:var(--artifact-control-orange)}
+.btn{border-color:var(--artifact-blue-ink);background:var(--artifact-blue-wash);color:var(--artifact-blue-ink);font-weight:700}
+.btn.primary,.header-tools .btn{border-color:var(--artifact-blue-ink);background:var(--artifact-control-blue);color:var(--artifact-control-on-solid)}
+.btn.danger,.btn.correction[aria-pressed="false"]{border-color:var(--artifact-danger);background:var(--artifact-danger-wash);color:var(--artifact-danger)}
+.btn.correction[aria-pressed="true"]{border-color:var(--artifact-danger);background:var(--artifact-control-danger);color:var(--artifact-control-on-solid);box-shadow:inset 0 -4px 0 var(--artifact-control-on-solid);font-weight:800}
+.segmented{border-color:var(--artifact-active)}
+.segmented button{
+ --artifact-button-accent:var(--artifact-control-active);
+ --artifact-button-ink:var(--artifact-active);
+ --artifact-button-wash:var(--artifact-active-wash);
+ border-right-color:var(--artifact-active);
+ font-weight:700;
+}
+.segmented button[data-select-day="1"]{--artifact-button-accent:var(--artifact-control-blue);--artifact-button-ink:var(--artifact-blue-ink);--artifact-button-wash:var(--artifact-blue-wash)}
+.segmented button[data-select-day="2"]{--artifact-button-accent:var(--artifact-control-orange);--artifact-button-ink:var(--artifact-orange);--artifact-button-wash:var(--artifact-orange-wash)}
+.segmented button[aria-pressed="false"]{background:var(--artifact-button-wash);color:var(--artifact-button-ink);box-shadow:inset 0 -2px 0 var(--artifact-button-accent)}
+.segmented button[aria-pressed="true"]{background:var(--artifact-button-accent);color:var(--artifact-control-on-solid);box-shadow:inset 0 -4px 0 var(--artifact-control-on-solid);font-weight:800}
+.segmented button[aria-pressed="true"] .day-dot{background:var(--artifact-control-on-solid);color:var(--artifact-button-accent)}
+.segmented button:focus-visible{outline:3px solid var(--artifact-button-ink);outline-offset:-3px}
+.segmented button[aria-pressed="true"]:focus-visible{outline-color:var(--artifact-control-on-solid);outline-offset:-5px}
+@media (hover:hover){
+ .segmented button[aria-pressed="false"]:hover{background:var(--artifact-button-wash);color:var(--artifact-button-ink);box-shadow:inset 0 0 0 2px var(--artifact-button-accent)}
+}
+@keyframes seal-hit{0%{transform:scale(.96)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media screen and (max-width:1050px){.app-shell{padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))}.brand-product{display:none}.controls{gap:12px}.segmented button{min-width:78px;padding:8px 12px}.board-heading h1{font-size:25px}.board-instruction{font-size:13px}.board-actions{gap:6px}.board-actions .btn{padding:8px 9px;font-size:12px}.section-heading h2{font-size:16px}.board-section{margin-bottom:16px}}
+@media screen and (max-width:980px){.scroll-guide.student-guide{display:block}.controls .control-label{display:none}.summary-charts{gap:24px}}
+@media screen and (max-width:720px){.app-shell{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right))}.app-header{padding:11px 0 9px}.brand-company{font-size:16px}.header-tools{gap:8px}.save-state{font-size:11px}.header-tools .btn{padding:8px 10px;font-size:12px}.controls{gap:9px;padding:10px 0}.control-group{gap:0}.segmented button{font-size:13px;min-width:68px;padding:8px 11px}.view-group{margin-left:0}.board-heading{flex-wrap:wrap;gap:4px;margin-top:5px}.board-heading h1{font-size:23px}.board-actions{width:100%;padding-top:4px;justify-content:flex-end}.board-actions .btn{min-height:40px}.section-heading{align-items:flex-start}.section-heading h2{font-size:15px}.question-hint{font-size:11px}.question-total{font-size:11px}.question-total strong{font-size:18px}.scroll-guide{display:block}.board-footer{gap:8px}.board-footer .foot-policy{width:100%;order:3}.summary-kpis .kpi{padding:12px 7px}.kpi-label{font-size:11px}.kpi-value{font-size:28px}.summary-charts{grid-template-columns:1fr;gap:16px}.modal-backdrop{padding:10px max(10px,env(safe-area-inset-right)) 10px max(10px,env(safe-area-inset-left))}.modal{max-height:94vh;max-height:94dvh;padding:16px}.modal-header h2{font-size:19px}.manage-grid{grid-template-columns:1fr;gap:0}.warning{flex-wrap:wrap}.bar-record{grid-template-columns:minmax(120px,46%) 1fr 38px}.unknown-hit{min-height:350px}}
+@media screen and (orientation:landscape) and (max-height:500px){.app-header{padding:8px 0 7px}.controls{padding:8px 0}.board-heading{margin:3px 0 10px}.board-heading h1{font-size:23px}.board-instruction{margin-top:3px;font-size:12px}.eyebrow{font-size:12px}.modal{max-height:92vh;max-height:92dvh}.board-actions{padding-top:3px}.btn{min-height:44px}.board-heading{flex-wrap:nowrap}.board-actions{width:auto}.board-section{margin-bottom:14px}}
+@media print{
+ :root,html[data-theme="dark"]{--artifact-bg:#ffffff;--artifact-fg:#132636;--artifact-muted:#43576a;--artifact-line:#b8c8d5;--artifact-blue-wash:#edf6fd;--artifact-blue-ink:#0060ae;--artifact-orange:#b84c00;--artifact-orange-wash:#fff1e7}
+ body{margin:0;padding:.3in .35in;background:#fff;color:#132636;print-color-adjust:exact;-webkit-print-color-adjust:exact}.app-shell{max-width:100%!important;width:100%!important;padding:0}.app-header{padding:0 0 9px}.brand-product{display:block}.controls,.header-tools,.board-actions,.warning,.correction-banner,.scroll-guide,.modal-backdrop,.toast,.interactive-only,.info{display:none!important}.board-heading{margin:12px 0}.board-heading h1{font-size:22px}.board-instruction{font-size:11px}.section-heading h2{font-size:14px}.board-section{break-inside:avoid;margin-bottom:15px}.table-scroll,.choice-scroll{max-height:none!important;overflow:visible!important}.vote-table,.vote-table.student,.vote-table.adult{min-width:0!important;font-size:9px}.vote-table thead th,.vote-table.adult thead th{font-size:9px;height:46px;padding:4px 2px}.vote-table .row-name{font-size:9px;position:static;padding:4px}.vote-table .sum-cell{font-size:11px;padding:4px}.vote-table .vote-hit{min-height:31px;padding:3px}.vote-hit .vote-number{font-size:13px!important}.vote-hit .empty-mark{display:none}.vote-hit .seal-stack{max-width:18px;gap:2px}.vote-hit .seal{width:6px;height:6px}.unknown-hit{min-height:208px!important}.unknown-caption{font-size:8px}.choice-grid,.choice-grid.adult{min-width:0!important}.choice-grid.adult{grid-template-columns:repeat(4,minmax(0,1fr)) 12%}.choice-label,.choice-grid.adult .choice-label{font-size:9px;min-height:30px;padding:4px}.choice-card .vote-hit,.choice-grid.adult .vote-hit{min-height:35px}.board-footer{font-size:9px;padding-top:8px}.board-footer strong{font-size:13px}.small-note{font-size:8px}.print-only{display:block;font-size:11px;color:#43576a}.summary-kpis{margin-bottom:14px}.kpi{padding:10px}.kpi-value{font-size:25px}.summary-charts{grid-template-columns:1fr 1fr;gap:18px;break-inside:avoid}.summary-charts h3{font-size:12px}.bar-record{font-size:9px;gap:5px;margin-bottom:7px}.plain-table{min-width:0;font-size:10px}.plain-table th,.plain-table td{padding:6px}.section-subtitle{font-size:13px}.summary-note{font-size:9px}button.vote-hit{display:flex!important}button,a,input,select{box-shadow:none}*{animation:none!important;transition:none!important}.vote-hit:disabled{opacity:1}
+ @page{size:auto!important;}
+}
+
+.vote-table.student td.sum-cell{border-right:1px solid var(--artifact-line)}.vote-table.student .unknown-td{border-bottom:0}
+/* ===== Ver.2: multi-person home screen, session bar, locks, imports ===== */
+.sr-file{position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0}
+.app-header .brand{min-width:0}
+.home-tools{display:flex;gap:8px;align-items:center}
+.home-hero{margin:18px 0 6px}
+.home-hero h1{font-size:clamp(22px,2.6vw,30px);font-weight:750;line-height:1.4;margin:0;letter-spacing:.01em}
+.home-hero p{font-size:14px;color:var(--artifact-muted);margin:6px 0 0}
+.panel{border:1px solid var(--artifact-line);border-radius:10px;padding:16px 18px;margin:14px 0;background:var(--artifact-bg);color:var(--artifact-fg)}
+.panel h2{font-size:17px;font-weight:750;margin:0 0 4px;line-height:1.5}
+.panel-lead{font-size:13px;color:var(--artifact-muted);margin:0 0 12px;line-height:1.6}
+.start-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1.15fr) minmax(0,.95fr) auto;gap:12px;align-items:end}
+.start-grid .field{margin:0}
+.start-grid .start-submit{min-height:48px;padding:10px 26px;font-size:16px}
+.req{color:var(--artifact-danger);font-weight:700;font-size:11px;margin-left:6px}
+.form-error{color:var(--artifact-danger);font-size:13px;font-weight:650;margin:10px 0 0}
+.field input[type="date"]{display:block}
+.field input[type="date"]::-webkit-date-and-time-value{text-align:left}
+.field input:disabled{opacity:.55}
+.list-head{display:flex;align-items:flex-end;justify-content:space-between;gap:10px 16px;flex-wrap:wrap;margin:24px 0 10px}
+.list-head h2{font-size:18px;margin:0;font-weight:750}
+.list-count{font-size:13px;color:var(--artifact-muted);font-weight:400;margin-left:8px}
+.list-tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;width:min(340px,100%)}
+.filter-input{appearance:none;-webkit-appearance:none;min-height:44px;width:100%;padding:9px 12px;border:1px solid var(--artifact-line);border-radius:6px;font-size:16px;color:var(--artifact-fg);background:var(--artifact-bg)}
+.session-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:12px}
+.session-card{display:flex;flex-direction:column;gap:7px;border:1px solid var(--artifact-line);border-left:5px solid var(--artifact-blue-ink);border-radius:9px;padding:13px 15px;background:var(--artifact-bg);color:var(--artifact-fg);min-width:0}
+.session-card.in-use{border-left-color:var(--artifact-warn)}
+.session-card.broken{border-left-color:var(--artifact-danger)}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.card-top>div{min-width:0}
+.session-name{font-size:17px;font-weight:750;line-height:1.4;overflow-wrap:anywhere}
+.session-company{font-size:13px;color:var(--artifact-muted);overflow-wrap:anywhere}
+.session-date{font-size:14px;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
+.session-meta{display:flex;flex-wrap:wrap;gap:2px 14px;font-size:12px;color:var(--artifact-muted)}
+.session-id{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--artifact-fg);letter-spacing:.02em;white-space:nowrap}
+.session-totals{font-size:13px;color:var(--artifact-muted)}
+.session-totals strong{font-size:19px;color:var(--artifact-fg);font-variant-numeric:tabular-nums;margin:0 3px}
+.badges{display:flex;flex-wrap:wrap;gap:6px}
+.badge{display:inline-flex;align-items:center;font-size:11px;font-weight:700;line-height:1.4;padding:2px 9px;border-radius:999px;border:1px solid var(--artifact-line);color:var(--artifact-muted);background:var(--artifact-bg)}
+.badge.warn{color:var(--artifact-warn);border-color:var(--artifact-warn);background:var(--artifact-warn-wash)}
+.badge.danger{color:var(--artifact-danger);border-color:var(--artifact-danger);background:var(--artifact-danger-wash)}
+.badge.info{color:var(--artifact-blue-ink);border-color:var(--artifact-blue-ink);background:var(--artifact-blue-wash)}
+.card-actions{display:flex;gap:8px;margin-top:3px}
+.card-actions .btn{flex:1 1 auto;min-width:0;padding-left:10px;padding-right:10px;white-space:nowrap}
+.card-actions .btn.primary{flex:1.6 1 auto}
+.empty-list{border:1px dashed var(--artifact-line);border-radius:10px;padding:26px 16px;text-align:center;color:var(--artifact-muted);font-size:14px;line-height:1.7}
+.bulk-actions{display:flex;flex-wrap:wrap;gap:9px}
+.home-notes{font-size:12px;color:var(--artifact-muted);line-height:1.7;margin:16px 0 0;padding-left:18px}
+.back-btn{white-space:nowrap;flex-shrink:0}
+.session-bar{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 16px;padding:10px 0 0;font-size:13px;color:var(--artifact-muted)}
+.session-bar strong{color:var(--artifact-fg);font-size:16px;font-weight:750;overflow-wrap:anywhere}
+.session-bar .sum-tag{color:var(--artifact-blue-ink);font-weight:750;font-size:15px}
+.state-banner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:14px;line-height:1.6;margin:0 0 12px;padding:10px 14px;border:1px solid var(--artifact-warn);border-radius:6px;background:var(--artifact-warn-wash);color:var(--artifact-warn);font-weight:650}
+.state-banner.info{border-color:var(--artifact-blue-ink);background:var(--artifact-blue-wash);color:var(--artifact-blue-ink)}
+.state-banner .button-row{margin:0}
+.check-list{border-top:1px solid var(--artifact-line);margin:10px 0}
+.check-row{display:flex;align-items:center;gap:12px;min-height:54px;padding:8px 4px;border-bottom:1px solid var(--artifact-line);font-size:13px;line-height:1.5;cursor:pointer}
+.check-row input,.check-inline input{flex:0 0 auto;width:22px;height:22px;margin:0;accent-color:var(--artifact-blue-ink)}
+.check-row .who{font-weight:700;font-size:14px}
+.check-inline{display:inline-flex;align-items:center;gap:8px;min-height:44px;white-space:nowrap;font-weight:650}
+.dup-list{list-style:none;padding:0;margin:10px 0}
+.dup-list li{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid var(--artifact-line);border-radius:7px;padding:9px 12px;margin:8px 0}
+.plan-table td{vertical-align:top}
+.plan-table .st-new{color:var(--artifact-blue-ink);font-weight:700}
+.plan-table .st-skip{color:var(--artifact-muted)}
+.plan-table .st-warn{color:var(--artifact-warn);font-weight:700}
+.vote-hit{-webkit-touch-callout:none}
+.vote-hit.readonly .empty-mark{border-color:var(--artifact-transparent);font-size:15px}
+.vote-hit:disabled.readonly{opacity:1}
+.variant-tag{display:inline-block;margin-left:10px;font-size:13px;font-weight:700;letter-spacing:0;vertical-align:4px;padding:2px 10px;border-radius:999px;border:1px solid var(--artifact-blue-ink);color:var(--artifact-blue-ink);background:var(--artifact-blue-wash)}
+html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);color:var(--artifact-orange);background:var(--artifact-orange-wash)}
+.sync-panel.sync-off{border-color:var(--artifact-warn);background:var(--artifact-warn-wash);color:var(--artifact-warn)}
+.sync-panel.sync-off .sync-text{color:var(--artifact-warn)}
+.sync-panel{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px}
+.sync-panel .sync-text{font-size:13px;line-height:1.6;flex:1 1 280px;min-width:0}
+.sync-panel .sync-text strong{font-size:15px}
+.sync-panel .button-row{margin:0}
+.sync-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:7px;background:var(--artifact-muted);vertical-align:1px}
+.sync-dot.on{background:#1a7a43}.sync-dot.problem{background:var(--artifact-warn)}
+.sync-chip{font-size:12px;line-height:1.5;color:var(--artifact-muted);padding:3px 0 0}
+.sync-chip.ok{color:#1a7a43}.sync-chip.problem{color:var(--artifact-warn);font-weight:700}
+.sync-ok{color:#1a7a43;font-weight:650}.sync-wait{color:var(--artifact-warn);font-weight:650}
+.preview-text.link-text{min-height:76px;font-size:13px;word-break:break-all}
+@media screen and (max-width:900px){.start-grid{grid-template-columns:1fr 1fr}.start-grid .start-submit{grid-column:1 / -1}}
+@media screen and (max-width:720px){.session-brand{display:none}.panel{padding:14px}.home-hero{margin-top:12px}.list-head{margin-top:18px}.bulk-actions .btn{flex:1 1 calc(50% - 9px)}.session-bar{padding-top:8px}.session-bar strong{font-size:15px}}
+@media screen and (max-width:560px){.start-grid{grid-template-columns:1fr}.app-header .brand-company{font-size:15px}.home-tools .btn{padding:8px 10px;font-size:12px}}
+@media screen and (max-width:380px){.header-tools .btn,.back-btn{padding:8px 8px;font-size:12px}.save-state{max-width:88px}}
+@media print{#home-view,.back-btn,#state-banner,.home-tools,#sync-chip{display:none!important}.session-bar{font-size:10px;padding:4px 0 0}.session-bar strong{font-size:12px}}
+</style>
+</head>
+<body>
+<noscript><div class="no-script">このアンケートはJavaScriptを使用します。iPhone・iPadの「ファイル」プレビューやアプリ内プレビューではなく、JavaScriptが有効なSafari等の通常ブラウザーで開いてください。</div></noscript>
+
+<div id="home-view" class="app-shell" hidden>
+ <header class="app-header">
+  <div class="brand"><div class="brand-company">九州電力送配電</div><div class="brand-product">電子シール アンケート集約</div></div>
+  <div class="home-tools"><button type="button" id="home-help" class="btn">使い方</button></div>
+ </header>
+ <div id="home-warning" class="warning" role="alert" hidden></div>
+ <div class="home-hero"><h1>展示アンケート集約<span class="variant-tag">スマホ完結版</span></h1><p>入力者ごとにIDを付けて、この端末の中に保存します（外部へは送信しません）。全員分は、各自のバックアップ（JSON）を集めて取り込みます。</p></div>
+ <section id="sync-panel" class="panel sync-panel" aria-label="共有サーバー"></section>
+ <section class="panel" aria-labelledby="start-heading">
+  <h2 id="start-heading">新しく集約を始める</h2>
+  <p class="panel-lead">入力者名・会社名・日付を入れて「開始」を押すと、IDが発行されます。</p>
+  <div class="start-grid">
+   <label class="field"><span>入力者名<span class="req">必須</span></span><input id="start-name" type="text" autocomplete="name" enterkeyhint="next" maxlength="80" placeholder="例：九電 太郎"></label>
+   <label class="field"><span>会社名<span class="req">必須</span></span><input id="start-company" type="text" autocomplete="organization" enterkeyhint="next" maxlength="120" placeholder="例：九州電力送配電"></label>
+   <label class="field"><span>日付<span class="req">必須</span></span><input id="start-date" type="date" min="1900-01-01" max="2199-12-31"></label>
+   <button type="button" id="start-button" class="btn primary start-submit">開始</button>
+  </div>
+  <p id="start-error" class="form-error" role="alert" hidden></p>
+ </section>
+ <section aria-labelledby="list-heading">
+  <div class="list-head"><h2 id="list-heading">保存一覧<span id="list-count" class="list-count"></span></h2><div id="filter-wrap" class="list-tools" hidden><input id="home-filter" class="filter-input" type="search" placeholder="名前・会社名・ID・日付で絞り込み" aria-label="保存一覧の絞り込み" autocomplete="off" enterkeyhint="search"></div></div>
+  <div id="session-list-host"></div>
+ </section>
+ <section class="panel" aria-labelledby="bulk-heading">
+  <h2 id="bulk-heading">まとめて扱う（複数人・複数端末）</h2>
+  <p class="panel-lead">全員分を集めるときは、各自が「全件バックアップ」でJSONファイルを保存してAirDrop・LINE・メールで送り、集める人が「データを取り込む」でまとめて読み込みます（複数ファイルを一度に選べます）。同じIDのデータは重複せず、新しい方に置き換わります。</p>
+  <div class="bulk-actions"><button type="button" class="btn primary" id="sum-button">合算を見る</button><button type="button" class="btn" id="bulk-csv-button">全件CSV</button><button type="button" class="btn" id="bulk-json-button">全件バックアップ</button><button type="button" class="btn" id="import-button">データを取り込む</button></div>
+ </section>
+ <ul class="home-notes">
+  <li>保存先はこの端末・このブラウザーの中です。別の端末とは自動で同期せず、外部へも送信しません。</li>
+  <li>iPhone・iPadでは、しばらく開かないとサイトのデータが消えることがあります。毎日の終わりに「全件バックアップ」を保存して、集める人に送ってください。</li>
+ </ul>
+</div>
+
+<div id="session-view" class="app-shell" hidden>
+ <header class="app-header">
+  <div class="brand"><button type="button" id="back-button" class="btn back-btn">‹ 保存一覧</button><div class="brand-company session-brand">九州電力送配電</div></div>
+  <div class="header-tools"><div id="save-state" class="save-state" role="status" aria-live="polite">起動中…</div><button type="button" id="manage-button" class="btn">保存・CSV</button></div>
+ </header>
+ <div id="session-bar" class="session-bar"></div>
+ <div id="sync-chip" class="sync-chip" role="status" aria-live="polite" hidden></div>
+ <nav class="controls" aria-label="日別・対象・画面の切り替え">
+  <div class="control-group"><span class="control-label">日別</span><div class="segmented" role="group" aria-label="日別"><button type="button" data-select-day="1" aria-pressed="true"><span class="day-dot" aria-hidden="true"></span>1日目</button><button type="button" data-select-day="2" aria-pressed="false"><span class="day-dot orange" aria-hidden="true"></span>2日目</button></div></div>
+  <div class="control-group"><span class="control-label">対象</span><div class="segmented" role="group" aria-label="回答対象"><button type="button" data-select-type="student" aria-pressed="true">学生</button><button type="button" data-select-type="adult" aria-pressed="false">一般・社会人</button></div></div>
+  <div class="control-group view-group"><div class="segmented" role="group" aria-label="画面"><button type="button" data-select-view="vote" aria-pressed="true">アンケート</button><button type="button" data-select-view="summary" aria-pressed="false">集計</button></div></div>
+ </nav>
+ <div id="state-banner" class="state-banner" role="status" hidden></div>
+ <div id="storage-warning" class="warning" role="alert" hidden><div id="storage-warning-text"></div><button type="button" id="warning-manager" class="btn">保存・確認</button></div>
+ <main>
+  <div id="print-context" class="print-only"></div>
+  <div class="board-heading"><div><p id="audience-label" class="eyebrow">1日目 ／ 学生の方へ</p><h1 id="board-title">どの業界・展示に興味がわいた？</h1><p id="board-instruction" class="board-instruction">①と②にシールを1枚ずつ（計2枚）。マスをタップすると1票追加されます。</p></div><div class="board-actions interactive-only" id="board-actions"><button type="button" class="btn" id="undo-button" disabled>1つ戻す</button><button type="button" class="btn correction" id="remove-toggle" aria-pressed="false">1票取り消す</button></div></div>
+  <div id="vote-view">
+   <div id="correction-banner" class="correction-banner" role="status" hidden>修正モード：タップしたマスから1票取り消します。終わったら「修正モードを終了」を押してください。</div>
+   <section class="board-section" aria-labelledby="q1-heading">
+    <div class="section-heading"><h2 id="q1-heading">① 気になる業界 × 一番興味がわいた展示</h2><div class="question-total">合計 <strong id="q1-total">0</strong>票</div></div>
+    <p id="q1-hint" class="question-hint">一番気になる業界の行と、一番興味がわいた展示の列が交わるマスを1回タップ</p>
+    <p id="student-guide" class="scroll-guide student-guide">表の中を横にスワイプできます →　業界名は左端に固定</p><p id="adult-guide" class="scroll-guide" hidden>横幅が足りない場合は、表の中を横にスワイプできます →</p>
+    <div id="matrix-host" class="table-scroll" tabindex="0" aria-label="①投票表。横スクロール可能"></div>
+   </section>
+   <section class="board-section" aria-labelledby="q2-heading">
+    <div class="section-heading"><h2 id="q2-heading">② 送電の仕事を、就職先として考えたい？</h2><div class="question-total">合計 <strong id="q2-total">0</strong>票</div></div>
+    <p id="q2-hint" class="question-hint">1つだけ選んで、シールを1枚（該当するマスを1回タップ）</p>
+    <div id="choices-host" class="choice-scroll" tabindex="0" aria-label="②選択肢。横スクロール可能"></div>
+   </section>
+   <footer class="board-footer"><div class="footer-day"><span class="legend-dot" aria-hidden="true"></span><span id="footer-day">1日目：青のシール</span></div><div class="foot-policy">各設問で1つだけ・会期中お一人1回・回答任意</div><div>回答者数（①の合計）<strong id="respondents">0</strong>人<button type="button" class="info" aria-label="回答者数の集計方法">ⓘ<span class="tooltip" role="tooltip">表示中の日・対象の①の票数の合計です。学生は右端の業界不明も加算します。個人の識別や重複回答の判定はしません。</span></button></div></footer>
+   <p id="unknown-note" class="small-note">学生①の「業界不明」は行計・列計の対象外です。右端の票数として別管理し、①の合計に含めます。</p>
+  </div>
+  <section id="summary-view" hidden aria-label="集計結果">
+   <div class="summary-kpis"><div class="kpi"><div class="kpi-label">回答者数（①合計）<button type="button" class="info" aria-label="①集計方法">ⓘ<span class="tooltip" role="tooltip">選択した日・対象の①全マスの合計です。学生①は業界不明を加算。個人の識別や重複排除は行いません。</span></button></div><div class="kpi-value"><span id="summary-q1">0</span><small>人</small></div></div><div class="kpi"><div class="kpi-label">②の回答票数<button type="button" class="info" aria-label="②集計方法">ⓘ<span class="tooltip" role="tooltip">選択した日・対象の②の全選択肢の票数の合計です。社会人②は集計不可の欄も加算します。</span></button></div><div class="kpi-value"><span id="summary-q2">0</span><small>票</small></div></div><div class="kpi"><div class="kpi-label">①と②の差<button type="button" class="info" aria-label="差の計算方法">ⓘ<span class="tooltip" role="tooltip">①合計 − ②合計。0なら票数は一致しますが、同一人物が両方に回答したことや重複がないことは保証しません。</span></button></div><div class="kpi-value"><span id="summary-gap">0</span><small>票</small></div></div></div>
+   <p id="summary-gap-note" class="summary-note"></p>
+   <div class="summary-charts"><section><h3 id="summary-industry-heading">① 気になる業界</h3><div id="summary-industry"></div></section><section><h3 id="summary-choices-heading">② 送電の仕事を、就職先として考えたい？</h3><div id="summary-choices"></div></section></div>
+   <h2 class="section-subtitle">1日目・2日目の一覧</h2><div id="summary-day-table" class="table-scroll" tabindex="0" aria-label="日別集計一覧"></div>
+   <p class="summary-note">①合計は原様式の回答者数。②は回答票数です。両問の個人単位の対応・重複回答は判定していません。各棒は0から始まり、項目名・正確な票数を表示します。</p>
+   <div class="button-row interactive-only"><button type="button" class="btn primary" id="summary-export-button">CSV・バックアップを保存</button></div>
+  </section>
+ </main>
+ <p class="small-note">入力のたびにこの端末内へ自動保存します。別の端末とは自動同期しません。終了時は「保存・CSV」からバックアップを保存してください。</p>
+</div>
+
+<div id="app-modal" class="modal-backdrop" hidden><section id="modal-content" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="modal-header"><h2 id="modal-title">保存・CSV・使い方</h2><button type="button" class="close-btn" id="modal-close" aria-label="閉じる">×</button></div><div id="modal-body"></div></section></div>
+<div id="toast" class="toast" hidden role="status" aria-live="polite" aria-atomic="true"></div>
+<input type="file" id="restore-file" class="sr-file" accept=".json,application/json" tabindex="-1" aria-hidden="true">
+<input type="file" id="import-file" class="sr-file" accept=".json,application/json" multiple tabindex="-1" aria-hidden="true">
+<script>window.SEAL_VARIANT = {"id": "local", "prefix": "kyudentd.seal-survey.local.v2.", "sync": false, "label": "スマホ完結版"};</script>
+<script>
+/* KYUDEN T&D electronic-seal survey core (Ver.2) — pure logic, no DOM, no network. */
+(function (global) {
+  'use strict';
+  var FORMAT = 'kyudentd-seal-survey', VERSION = 1, VERSION2 = 2, BUNDLE_FORMAT = 'kyudentd-seal-survey-bundle';
+  var MAX_COUNT = 1000000, IMPORT_LIMIT = 8 * 1024 * 1024;
+  var VARIANT = global.SEAL_VARIANT || {};
+  var PREFIX = typeof VARIANT.prefix === 'string' && /^kyudentd\.seal-survey\.[a-z0-9.]+\.$/.test(VARIANT.prefix) ? VARIANT.prefix : 'kyudentd.seal-survey.v2.';
+  var ID_CHARS = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+  var ID_RE = /^\d{8}-[0-9A-HJKMNP-TV-Z]{6}$/;
+  var NAME_MAX = 40, COMPANY_MAX = 60;
+  var EXHIBITS = ['超軽量型クレーン','重機用遠隔操作システム','バランスリフト','四足歩行ロボット','ノボレール','ローニン','送配電事業PR','ラインマンPR'];
+  var UNKNOWN = 'シール集計不可／業界不明';
+  var CONFIG = {
+    student: {
+      name:'学生', audience:'学生の方へ', title:'どの業界・展示に興味がわいた？',
+      q1:'気になる業界 × 一番興味がわいた展示', first:'気になる業界',
+      hint:'一番気になる業界の行と、一番興味がわいた展示の列が交わるマスを1回タップ',
+      rows:['電力・エネルギー','建設・土木','機械・ものづくり','IT・ロボット','その他の業界','まだ決まっていない'],
+      cols:EXHIBITS.slice(),
+      heads:['超軽量型<br>クレーン','重機用<br>遠隔操作<br>システム','バランス<br>リフト','四足歩行<br>ロボット','ノボレール','ローニン','送配電事業<br>PR','ラインマン<br>PR'],
+      q2:'送電の仕事を、就職先として考えたい？',
+      choices:['考えたい','少し気になる','まだわからない','今は考えていない'], hasUnknown:true
+    },
+    adult: {
+      name:'一般・社会人', audience:'一般・社会人の方へ', title:'ご所属と、ご来場の目的は？',
+      q1:'ご所属の業界 × 主な来場目的', first:'ご所属',
+      hint:'ご所属の行と、主な来場目的の列が交わるマスを1回タップ',
+      rows:['送電関係','電力・インフラ','建設・土木・設計','製造・機械・商社','IT・通信','官公庁・教育・団体','その他・一般'],
+      cols:['技術の情報収集','導入・活用の検討','交流・連携','一般見学・体験'],
+      heads:['技術の情報収集','導入・活用の検討','交流・連携','一般見学・体験'],
+      q2:'一番興味がわいた展示は？', choices:EXHIBITS.concat([UNKNOWN]), hasUnknown:false
+    }
+  };
+
+  /* ---------- basic helpers ---------- */
+  function clone(x) { return JSON.parse(JSON.stringify(x)); }
+  function plain(x) { return x !== null && typeof x === 'object' && !Array.isArray(x); }
+  function integer(x) { return Number.isSafeInteger(x) && x >= 0 && x <= MAX_COUNT; }
+  function pad2(v) { return String(v).padStart(2, '0'); }
+  function localDate(d) { d = d || new Date(); return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+  function validDate(value) {
+    if (value === '') return true;
+    if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+    var d = new Date(value + 'T00:00:00.000Z');
+    return !isNaN(d.getTime()) && d.toISOString().slice(0, 10) === value && value >= '1900-01-01' && value <= '2199-12-31';
+  }
+  function isoOrNull(x) {
+    if (x === null || x === undefined) return null;
+    if (typeof x !== 'string' || x.length > 40 || isNaN(Date.parse(x))) throw new Error('保存日時が不正です。');
+    return new Date(x).toISOString();
+  }
+
+  /* ---------- survey forms (same structure as Ver.1) ---------- */
+  function freshForm(type) {
+    var c = CONFIG[type]; if (!c) throw new Error('様式が不正です。');
+    return {matrix:c.rows.map(function(){ return c.cols.map(function(){ return 0; }); }), unknown:0, q2:c.choices.map(function(){ return 0; })};
+  }
+  function freshDay() { return {date:'', updatedAt:null, student:freshForm('student'), adult:freshForm('adult')}; }
+  function freshData() { return {format:FORMAT, version:VERSION, revision:0, updatedAt:null, days:{'1':freshDay(), '2':freshDay()}}; }
+  function normalizeForm(input, type) {
+    var c = CONFIG[type];
+    if (!plain(input) || !Array.isArray(input.matrix) || input.matrix.length !== c.rows.length || !Array.isArray(input.q2) || input.q2.length !== c.choices.length || !integer(input.unknown)) throw new Error(c.name + 'のデータ形式が異なります。');
+    var matrix = input.matrix.map(function(row) {
+      if (!Array.isArray(row) || row.length !== c.cols.length || !row.every(integer)) throw new Error(c.name + 'の行列または票数が不正です。');
+      return row.slice();
+    });
+    if (!input.q2.every(integer) || (!c.hasUnknown && input.unknown !== 0)) throw new Error(c.name + 'の票数が不正です。');
+    return {matrix:matrix, unknown:input.unknown, q2:input.q2.slice()};
+  }
+  function normalizeDay(input) {
+    if (!plain(input) || !validDate(input.date)) throw new Error('日付が不正です。');
+    return {date:input.date, updatedAt:isoOrNull(input.updatedAt), student:normalizeForm(input.student, 'student'), adult:normalizeForm(input.adult, 'adult')};
+  }
+  /* Ver.1 whole-file data (still accepted for restore / import). */
+  function normalizeData(input, allowPartial) {
+    if (!plain(input) || input.format !== FORMAT || input.version !== VERSION || !plain(input.days)) throw new Error('このアンケートのバックアップ（旧版）ではありません。');
+    var keys = Object.keys(input.days);
+    if (!keys.length || keys.some(function(k){ return k !== '1' && k !== '2'; }) || (!allowPartial && keys.length !== 2)) throw new Error('日別データの構成が不正です。');
+    var revision = input.revision === undefined ? 0 : input.revision;
+    if (!Number.isSafeInteger(revision) || revision < 0 || revision > Number.MAX_SAFE_INTEGER - 1) throw new Error('保存番号が不正です。');
+    var result = {format:FORMAT, version:VERSION, revision:revision, updatedAt:isoOrNull(input.updatedAt), days:{}};
+    keys.sort().forEach(function(k){ result.days[k] = normalizeDay(input.days[k]); });
+    return result;
+  }
+
+  /* ---------- people / IDs ---------- */
+  var CONTROL_RE = /[\u0000-\u001F\u007F-\u009F­؜᠎​‌‎‏‪-‮⁠-⁯﻿￹-￻]/g;
+  function cleanText(value) {
+    if (value === undefined || value === null) return '';
+    return String(value).replace(CONTROL_RE, ' ').replace(/[\s　]+/g, ' ').trim();
+  }
+  function codeLength(s) { return Array.from(s).length; }
+  function searchKey(value) {
+    var s = cleanText(value);
+    try { s = s.normalize('NFKC'); } catch (ignore) {}
+    return s.toLowerCase().replace(/\s+/g, '');
+  }
+  function identityKey(meta) { return searchKey(meta.name) + '\u0001' + searchKey(meta.company) + '\u0001' + meta.date; }
+  function normalizeMeta(input) {
+    if (!plain(input)) throw new Error('入力者情報が不正です。');
+    var name = cleanText(input.name), company = cleanText(input.company), date = input.date;
+    if (!name) throw new Error('入力者名を入力してください。');
+    if (codeLength(name) > NAME_MAX) throw new Error('入力者名は' + NAME_MAX + '文字以内で入力してください。');
+    if (!company) throw new Error('会社名を入力してください。');
+    if (codeLength(company) > COMPANY_MAX) throw new Error('会社名は' + COMPANY_MAX + '文字以内で入力してください。');
+    if (typeof date !== 'string' || date === '' || !validDate(date)) throw new Error('日付を正しく入力してください。');
+    return {name:name, company:company, date:date, createdAt:isoOrNull(input.createdAt)};
+  }
+  function randomValues(n) {
+    var values = new Uint32Array(n);
+    try { (global.crypto || global.msCrypto).getRandomValues(values); }
+    catch (e) { for (var i = 0; i < n; i++) values[i] = Math.floor(Math.random() * 4294967296); }
+    return values;
+  }
+  function randomCode(n, rng) {
+    var values = rng ? rng(n) : randomValues(n), out = '';
+    for (var i = 0; i < n; i++) out += ID_CHARS.charAt(values[i] % 32);
+    return out;
+  }
+  function makeId(date, rng) {
+    if (typeof date !== 'string' || date === '' || !validDate(date)) throw new Error('日付が不正です。');
+    return date.replace(/-/g, '') + '-' + randomCode(6, rng);
+  }
+
+  /* ---------- sessions (one per person / company / date) ---------- */
+  function newSession(meta, id, nowIso) {
+    if (!ID_RE.test(id)) throw new Error('IDが不正です。');
+    var m = normalizeMeta(meta); m.createdAt = isoOrNull(nowIso);
+    return {format:FORMAT, version:VERSION2, id:id, meta:m, revision:0, updatedAt:m.createdAt, importedAt:null, days:{'1':freshDay(), '2':freshDay()}};
+  }
+  function normalizeSession(input) {
+    if (!plain(input) || input.format !== FORMAT || input.version !== VERSION2) throw new Error('このアンケート（Ver.2）のデータではありません。');
+    if (typeof input.id !== 'string' || !ID_RE.test(input.id)) throw new Error('IDの形式が不正です。');
+    var meta = normalizeMeta(input.meta);
+    if (!meta.createdAt) throw new Error('作成日時がありません。');
+    var revision = input.revision === undefined ? 0 : input.revision;
+    if (!Number.isSafeInteger(revision) || revision < 0 || revision > Number.MAX_SAFE_INTEGER - 1) throw new Error('保存番号が不正です。');
+    if (!plain(input.days)) throw new Error('日別データがありません。');
+    var keys = Object.keys(input.days);
+    if (keys.length !== 2 || !plain(input.days['1']) || !plain(input.days['2'])) throw new Error('日別データの構成が不正です。');
+    return {format:FORMAT, version:VERSION2, id:input.id, meta:meta, revision:revision, updatedAt:isoOrNull(input.updatedAt), importedAt:isoOrNull(input.importedAt),
+      days:{'1':normalizeDay(input.days['1']), '2':normalizeDay(input.days['2'])}};
+  }
+  function parseJsonText(text, limit) {
+    if (typeof text !== 'string') throw new Error('ファイルを読み取れません。');
+    if (text.length > limit) throw new Error('ファイルが大きすぎます。');
+    try { return JSON.parse(text.replace(/^﻿/, '')); } catch (e) { throw new Error('JSONファイルを読み取れません。'); }
+  }
+  function parseSession(text) { return normalizeSession(parseJsonText(text, IMPORT_LIMIT)); }
+  /* Accepts: Ver.2 bundle, Ver.2 single session, Ver.1 backup. */
+  function parseImport(text) {
+    var x = parseJsonText(text, IMPORT_LIMIT);
+    if (plain(x) && x.format === BUNDLE_FORMAT) {
+      if (x.version !== VERSION2 || !Array.isArray(x.sessions)) throw new Error('まとめバックアップの形式が不正です。');
+      if (x.sessions.length > 5000) throw new Error('データの件数が多すぎます。');
+      var sessions = [], errors = [];
+      x.sessions.forEach(function(s, i) { try { sessions.push(normalizeSession(s)); } catch (e) { errors.push((i + 1) + '件目：' + e.message); } });
+      if (!sessions.length && !errors.length) throw new Error('データが含まれていません。');
+      return {kind:'sessions', sessions:sessions, errors:errors};
+    }
+    if (plain(x) && x.format === FORMAT && x.version === VERSION2) return {kind:'sessions', sessions:[normalizeSession(x)], errors:[]};
+    if (plain(x) && x.format === FORMAT && x.version === VERSION) return {kind:'v1', data:normalizeData(x, true)};
+    throw new Error('このアンケートのバックアップ（JSON）ではありません。');
+  }
+  function makeBundle(sessions, nowIso) {
+    return {format:BUNDLE_FORMAT, version:VERSION2, exportedAt:isoOrNull(nowIso), sessions:sessions.map(normalizeSession)};
+  }
+  function sameContent(a, b) { return JSON.stringify(a.meta) === JSON.stringify(b.meta) && JSON.stringify(a.days) === JSON.stringify(b.days); }
+  function isNewer(a, b) {
+    var x = a.updatedAt || '', y = b.updatedAt || '';
+    return x > y || (x === y && a.revision > b.revision);
+  }
+
+  /* ---------- statistics / totals ---------- */
+  function sum(xs) { return xs.reduce(function(a, b){ return a + b; }, 0); }
+  function stats(form) {
+    var rows = form.matrix.map(sum), cols = form.matrix[0].map(function(_, i){ return sum(form.matrix.map(function(r){ return r[i]; })); });
+    return {rows:rows, cols:cols, known:sum(rows), unknown:form.unknown, q1:sum(rows) + form.unknown, q2:sum(form.q2), difference:sum(rows) + form.unknown - sum(form.q2)};
+  }
+  function sessionTotals(data) {
+    var q1 = 0, q2 = 0;
+    ['1','2'].forEach(function(k){ if (!data.days[k]) return; ['student','adult'].forEach(function(t){ var s = stats(data.days[k][t]); q1 += s.q1; q2 += s.q2; }); });
+    return {q1:q1, q2:q2};
+  }
+  function addForm(target, source) {
+    source.matrix.forEach(function(row, r){ row.forEach(function(v, c){ target.matrix[r][c] += v; }); });
+    target.unknown += source.unknown;
+    source.q2.forEach(function(v, i){ target.q2[i] += v; });
+  }
+  function sumSessions(list) {
+    var out = freshData();
+    ['1','2'].forEach(function(k) {
+      var dates = {};
+      list.forEach(function(s) { var d = s.days[k]; addForm(out.days[k].student, d.student); addForm(out.days[k].adult, d.adult); if (d.date) dates[d.date] = 1; });
+      var ds = Object.keys(dates); out.days[k].date = ds.length === 1 ? ds[0] : '';
+    });
+    try { return normalizeData(out, false); } catch (e) { throw new Error('合算の票数が上限（' + MAX_COUNT + '）を超えました。'); }
+  }
+
+  /* ---------- votes ---------- */
+  function targetKey(type, target) { return type + ':' + target.q + ':' + (target.r === undefined ? '' : target.r) + ':' + (target.c === undefined ? '' : target.c); }
+  function valueAt(form, type, target) {
+    var c = CONFIG[type];
+    if (!c || !plain(target)) throw new Error('投票先が不正です。');
+    if (target.q === 'matrix' && Number.isInteger(target.r) && Number.isInteger(target.c) && target.r >= 0 && target.r < c.rows.length && target.c >= 0 && target.c < c.cols.length) return form.matrix[target.r][target.c];
+    if (target.q === 'q2' && Number.isInteger(target.c) && target.c >= 0 && target.c < c.choices.length) return form.q2[target.c];
+    if (target.q === 'unknown' && c.hasUnknown) return form.unknown;
+    throw new Error('投票先が不正です。');
+  }
+  function change(form, type, target, delta) {
+    if (delta !== 1 && delta !== -1) throw new Error('票数の変更が不正です。');
+    var value = valueAt(form, type, target), next = value + delta;
+    if (!integer(next)) return false;
+    if (target.q === 'matrix') form.matrix[target.r][target.c] = next;
+    else if (target.q === 'q2') form.q2[target.c] = next;
+    else form.unknown = next;
+    return true;
+  }
+  function targetLabel(type, t) {
+    var c = CONFIG[type];
+    if (t.q === 'matrix') return c.rows[t.r] + ' ／ ' + c.cols[t.c];
+    if (t.q === 'q2') return '② ' + c.choices[t.c];
+    return '① ' + UNKNOWN;
+  }
+  function dayKeys(scope, activeDay) {
+    if (scope === 'all') return ['1','2'];
+    if (scope === 'day') return [String(activeDay)];
+    if (scope === '1' || scope === '2') return [scope];
+    throw new Error('出力対象が不正です。');
+  }
+
+  /* ---------- CSV ---------- */
+  var META_HEAD = ['ID','入力者','会社名','入力日'];
+  function detailRows(data, keys) {
+    var rows = [['日別','日付','対象','設問番号','設問','行項目','列項目・選択肢','票数']];
+    keys.forEach(function(k){ ['student','adult'].forEach(function(type){
+      var c = CONFIG[type], d = data.days[k], f = d[type];
+      c.rows.forEach(function(label, r){ c.cols.forEach(function(col, v){ rows.push([k + '日目', d.date, c.name, 1, c.q1, label, col, f.matrix[r][v]]); }); });
+      if (c.hasUnknown) rows.push([k + '日目', d.date, c.name, 1, c.q1, '業界不明', 'シール集計不可', f.unknown]);
+      c.choices.forEach(function(label, i){ rows.push([k + '日目', d.date, c.name, 2, c.q2, '', label, f.q2[i]]); });
+    }); });
+    return rows;
+  }
+  function summaryRows(data, keys) {
+    var rows = [['日別','日付','対象','回答者数（①合計）','②回答票数','①と②の差','①うち業界不明','②うち集計不可']];
+    keys.forEach(function(k){ ['student','adult'].forEach(function(type){ var d = data.days[k], f = d[type], s = stats(f); rows.push([k + '日目', d.date, CONFIG[type].name, s.q1, s.q2, s.difference, s.unknown, type === 'adult' ? f.q2[8] : 0]); }); });
+    return rows;
+  }
+  /* entries: [{cols:[id,name,company,date], data:{days:...}}] */
+  function csvRows(entries, keys, kind) {
+    var base = kind === 'summary' ? summaryRows : detailRows;
+    var rows = [META_HEAD.concat(base(freshData(), [])[0])];
+    entries.forEach(function(e){ base(e.data, keys).slice(1).forEach(function(r){ rows.push(e.cols.concat(r)); }); });
+    return rows;
+  }
+  function csvCell(value) {
+    var s = String(value === undefined || value === null ? '' : value);
+    if (typeof value === 'string' && /^[\s]*[=+\-@]/.test(s)) s = "'" + s;
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+  function toCsv(rows) { return '﻿' + rows.map(function(r){ return r.map(csvCell).join(','); }).join('\r\n') + '\r\n'; }
+
+  /* ---------- storage: one key per session + lock per session ---------- */
+  function quotaMessage(e) {
+    var name = e && e.name || '', code = e && e.code;
+    if (name === 'QuotaExceededError' || name === 'NS_ERROR_DOM_QUOTA_REACHED' || code === 22 || code === 1014) return '端末の保存容量が不足しています。不要なデータを削除するか、バックアップを保存してください。';
+    return (e && e.message) || '保存に失敗しました。';
+  }
+  function SessionStore(storage, prefix) { this.storage = storage || null; this.prefix = prefix || PREFIX; }
+  SessionStore.prototype.key = function(id) { return this.prefix + 's.' + id; };
+  SessionStore.prototype.lockKey = function(id) { return this.prefix + 'lock.' + id; };
+  SessionStore.prototype.uiKey = function(id) { return this.prefix + 'ui.' + id; };
+  SessionStore.prototype.ids = function() {
+    var out = [], seen = {}, s = this.storage, p = this.prefix + 's.';
+    if (!s) return out;
+    try {
+      for (var i = 0; i < s.length; i++) {
+        var k = s.key(i);
+        if (!k || k.indexOf(p) !== 0) continue;
+        var id = k.slice(p.length).replace(/\.previous$/, '');
+        if (ID_RE.test(id) && !seen[id]) { seen[id] = 1; out.push(id); }
+      }
+    } catch (ignore) {}
+    return out;
+  };
+  SessionStore.prototype.load = function(id) {
+    if (!this.storage) return {status:'unavailable'};
+    var key = this.key(id), raw = null, previous = null;
+    try { raw = this.storage.getItem(key); previous = this.storage.getItem(key + '.previous'); }
+    catch (e) { return {status:'unavailable', error:e.message}; }
+    if (raw === null && previous === null) return {status:'missing'};
+    if (raw !== null) { try { var d = parseSession(raw); if (d.id === id) return {status:'ok', data:d}; } catch (ignore) {} }
+    if (previous !== null) { try { var p = parseSession(previous); if (p.id === id) return {status:'recovered', data:p, raw:raw}; } catch (ignore) {} }
+    return {status:'corrupt', raw:raw === null ? previous : raw};
+  };
+  SessionStore.prototype.save = function(session) {
+    var n = normalizeSession(session), text = JSON.stringify(n), key = this.key(n.id);
+    if (!this.storage) return {ok:false, error:'この環境ではブラウザー内の保存が使えません。'};
+    try {
+      var old = this.storage.getItem(key);
+      if (old !== null && old !== text) { try { parseSession(old); try { this.storage.setItem(key + '.previous', old); } catch (ignore) {} } catch (ignore) {} }
+      this.storage.setItem(key, text);
+      if (this.storage.getItem(key) !== text) throw new Error('保存内容の再確認に失敗しました。');
+      return {ok:true};
+    } catch (e) { return {ok:false, error:quotaMessage(e)}; }
+  };
+  SessionStore.prototype.raw = function(id) {
+    if (!this.storage) return null;
+    try { var a = this.storage.getItem(this.key(id)); return a !== null ? a : this.storage.getItem(this.key(id) + '.previous'); } catch (e) { return null; }
+  };
+  SessionStore.prototype.remove = function(id) {
+    if (!this.storage) return {ok:false, error:'保存領域を使えません。'};
+    var self = this;
+    try { [self.key(id), self.key(id) + '.previous', self.uiKey(id), self.lockKey(id)].forEach(function(k){ self.storage.removeItem(k); }); return {ok:true}; }
+    catch (e) { return {ok:false, error:e.message}; }
+  };
+  SessionStore.prototype.readLock = function(id) {
+    if (!this.storage) return null;
+    try {
+      var t = this.storage.getItem(this.lockKey(id)); if (!t) return null;
+      var l = JSON.parse(t);
+      return plain(l) && typeof l.tab === 'string' && Number.isFinite(l.at) ? l : null;
+    } catch (e) { return null; }
+  };
+  SessionStore.prototype.lockState = function(id, tab, now, staleMs) {
+    var l = this.readLock(id);
+    if (!l) return {state:'free'};
+    if (l.tab === tab) return {state:'mine', lock:l};
+    if (now - l.at > staleMs || l.at - now > staleMs) return {state:'stale', lock:l};
+    return {state:'held', lock:l};
+  };
+  SessionStore.prototype.acquire = function(id, tab, now, staleMs, force) {
+    if (!this.storage) return {ok:true, noStorage:true};
+    var st = this.lockState(id, tab, now, staleMs);
+    if (st.state === 'held' && !force) return {ok:false, lock:st.lock};
+    try { this.storage.setItem(this.lockKey(id), JSON.stringify({tab:tab, at:now})); }
+    catch (e) { return {ok:true, lockFailed:true}; }
+    var check = this.readLock(id);
+    if (!check || check.tab !== tab) return {ok:false, lock:check};
+    return {ok:true};
+  };
+  SessionStore.prototype.release = function(id, tab) {
+    if (!this.storage) return;
+    var l = this.readLock(id);
+    if (l && l.tab === tab) { try { this.storage.removeItem(this.lockKey(id)); } catch (ignore) {} }
+  };
+
+  global.SurveyCore = {
+    FORMAT:FORMAT, VERSION:VERSION, VERSION2:VERSION2, BUNDLE_FORMAT:BUNDLE_FORMAT, MAX_COUNT:MAX_COUNT, IMPORT_LIMIT:IMPORT_LIMIT,
+    PREFIX:PREFIX, ID_RE:ID_RE, ID_CHARS:ID_CHARS, NAME_MAX:NAME_MAX, COMPANY_MAX:COMPANY_MAX, CONFIG:CONFIG, UNKNOWN:UNKNOWN,
+    clone:clone, plain:plain, localDate:localDate, validDate:validDate, freshForm:freshForm, freshDay:freshDay, freshData:freshData,
+    normalizeData:normalizeData, normalizeDay:normalizeDay, cleanText:cleanText, searchKey:searchKey, identityKey:identityKey,
+    normalizeMeta:normalizeMeta, randomCode:randomCode, makeId:makeId, newSession:newSession, normalizeSession:normalizeSession,
+    parseSession:parseSession, parseImport:parseImport, makeBundle:makeBundle, sameContent:sameContent, isNewer:isNewer,
+    stats:stats, sessionTotals:sessionTotals, sumSessions:sumSessions, change:change, valueAt:valueAt, targetKey:targetKey,
+    targetLabel:targetLabel, dayKeys:dayKeys, detailRows:detailRows, summaryRows:summaryRows, csvRows:csvRows, toCsv:toCsv,
+    csvCell:csvCell, SessionStore:SessionStore
+  };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+</script>
+<script>
+(function(){
+ 'use strict';
+ var C = window.SurveyCore, $ = function(id){ return document.getElementById(id); };
+ var VARIANT = window.SEAL_VARIANT || {}, SYNC_ENABLED = VARIANT.sync !== false, APP_LABEL = '展示アンケート集約' + (VARIANT.label ? '（' + VARIANT.label + '）' : '');
+ var LOCK_BEAT = 5000, LOCK_STALE = 20000, TAP_GAP = 120, UNDO_LIMIT = 100, PREVIEW_LIMIT = 300000;
+ var TAB_ID = 'T' + C.randomCode(12) + Date.now().toString(36);
+ var storage = null, writable = false;
+ try { storage = window.localStorage; } catch (ignore) { storage = null; }
+ if (storage) { try { var probeKey = C.PREFIX + 'probe.' + TAB_ID; storage.setItem(probeKey, '1'); writable = storage.getItem(probeKey) === '1'; storage.removeItem(probeKey); } catch (ignore) { writable = false; } }
+ var store = new C.SessionStore(storage, C.PREFIX);
+
+ var ui = {day:'1', type:'student', view:'vote', remove:false};
+ var S = {route:'', id:null, readOnly:false, lost:false, blocked:false, saveError:'', rawRecovery:null, unsaved:false, hasSaved:false, sumIds:[], sumNames:[]};
+ var data = null;
+ var unsavedCache = {}, importedOk = {};
+ var undoStacks = {}, lastTaps = {}, renderedType = '', cellButtons = [], toastTimer = null, lastFocus = null, activeExport = null;
+ var pendingRestore = null, pendingImport = null, pendingMeta = null, pendingV1 = null, modalBack = null;
+ var exportScope = 'all', exportKind = 'detail', heartbeatTimer = null, homeTimer = null, sumTimer = null, persistAsked = false, navSeq = 0, unloading = false;
+ var SYNC_KEY = C.PREFIX + 'sync.config', SYNC_STATE = C.PREFIX + 'sync.state.', SERVER_CACHE = C.PREFIX + 'server.cache', SUM_SEL = C.PREFIX + 'sum';
+ var SYNC_URL_RE = /^https:\/\/script\.google\.com\/(?:a\/macros\/[A-Za-z0-9.\-]+\/|macros\/)s\/[A-Za-z0-9_\-]{20,200}\/exec$/;
+ var SYNC_DEBOUNCE = 8000, SYNC_MAXWAIT = 45000, SYNC_RETRY = [15000, 30000, 60000, 120000, 300000];
+ var sync = {url:'', timer:null, firstDirtyAt:0, busy:false, busyPromise:null, again:false, lastOkAt:null, lastError:'', failures:0, retryTimer:null, conflicts:{}, cache:null, loadToken:0, mem:{}};
+ var pendingSyncUrl = '';
+
+ /* ---------- small helpers ---------- */
+ function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+ function num(n){ return Number(n).toLocaleString('ja-JP'); }
+ function now(){ return new Date().toISOString(); }
+ function pad(v){ return String(v).padStart(2, '0'); }
+ function fmtDate(d){ return d ? String(d).replace(/-/g, '/') : '未設定'; }
+ function fmtDateTime(iso){ if (!iso) return '—'; var d = new Date(iso); if (isNaN(d.getTime())) return '—'; var y = d.getFullYear() !== new Date().getFullYear() ? d.getFullYear() + '/' : ''; return y + (d.getMonth() + 1) + '/' + d.getDate() + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()); }
+ function fileStamp(){ var d = new Date(); return d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + '_' + pad(d.getHours()) + pad(d.getMinutes()) + pad(d.getSeconds()); }
+ function safePart(s){ return String(s || '').replace(/[\\\/:*?"<>|#%&{}$!'@+`=~^\[\];,\u0000-\u001F]/g, '_').replace(/\s+/g, '').slice(0, 24) || '名前なし'; }
+ function who(m){ return m.name + '（' + m.company + '）'; }
+ function dateLabel(k){ return k + '日目' + (data && data.days[k].date ? ' ／ ' + data.days[k].date.replace(/-/g, '/') : ''); }
+ function scopeLabel(keys){ return keys.map(function(k){ return k + '日目'; }).join('・'); }
+ function activeForm(){ return data.days[ui.day][ui.type]; }
+ function stackKey(){ return (S.id || 'sum') + ':' + ui.day + ':' + ui.type; }
+ function undoStack(){ var k = stackKey(); return undoStacks[k] || (undoStacks[k] = []); }
+ function clearUndo(keys){ if (!keys) undoStacks = {}; else keys.forEach(function(k){ ['student','adult'].forEach(function(t){ delete undoStacks[(S.id || 'sum') + ':' + k + ':' + t]; }); }); lastTaps = {}; }
+ function toast(text){ clearTimeout(toastTimer); var t = $('toast'); t.textContent = text; t.hidden = false; toastTimer = setTimeout(function(){ t.hidden = true; }, 1800); }
+ function canEdit(){ return S.route === 'session' && !!data && !S.readOnly && !S.lost && !S.blocked; }
+ function restorable(){ return S.route === 'session' && !!data && !S.readOnly && !S.lost; }
+ function selectOptions(values, current){ return values.map(function(v){ return '<option value="' + esc(v[0]) + '"' + (current === v[0] ? ' selected' : '') + '>' + esc(v[1]) + '</option>'; }).join(''); }
+ /* ---------- shared server (Google Apps Script + Sheets) ---------- */
+ function fmtTime(iso){ var d = new Date(iso); return isNaN(d.getTime()) ? '' : pad(d.getHours()) + ':' + pad(d.getMinutes()); }
+ function shortUrl(u){ var m = /\/s\/([A-Za-z0-9_\-]+)\/exec$/.exec(u || ''); return m ? 'script.google.com/…/s/' + m[1].slice(0, 6) + '…' + m[1].slice(-4) + '/exec' : String(u || ''); }
+ function loadSyncConfig(){ sync.url = ''; if (!SYNC_ENABLED) return; try { var v = JSON.parse(storage && storage.getItem(SYNC_KEY) || 'null'); if (v && typeof v.url === 'string' && SYNC_URL_RE.test(v.url)) sync.url = v.url; } catch (ignore) {} if (!sync.url && sync.memUrl) sync.url = sync.memUrl; }
+ function setSyncUrl(url){
+   sync.url = url || ''; sync.memUrl = sync.url; sync.lastError = ''; sync.failures = 0; sync.cache = null; sync.conflicts = {}; sync.mem = {};
+   clearTimeout(sync.timer); sync.timer = null; clearTimeout(sync.retryTimer); sync.retryTimer = null;
+   try { if (storage) { if (url) storage.setItem(SYNC_KEY, JSON.stringify({url:url, at:now()})); else storage.removeItem(SYNC_KEY); } } catch (ignore) {}
+   try { sessionStorage.removeItem(SERVER_CACHE); } catch (ignore) {}
+ }
+ function syncedRev(id){ try { var v = JSON.parse(storage && storage.getItem(SYNC_STATE + id) || 'null'); if (v && Number.isSafeInteger(v.rev)) return v.rev; } catch (ignore) {} return sync.mem[id] === undefined ? -1 : sync.mem[id]; }
+ function setSyncedRev(id, rev){ sync.mem[id] = rev; try { if (storage) storage.setItem(SYNC_STATE + id, JSON.stringify({rev:rev, at:now()})); } catch (ignore) {} }
+ function clearSyncedRev(id){ delete sync.mem[id]; delete sync.conflicts[id]; try { if (storage) storage.removeItem(SYNC_STATE + id); } catch (ignore) {} }
+ function clearAllSyncedRev(){ sync.mem = {}; sync.conflicts = {}; if (!storage) return; try { var keys = []; for (var i = 0; i < storage.length; i++) { var k = storage.key(i); if (k && k.indexOf(SYNC_STATE) === 0) keys.push(k); } keys.forEach(function(k){ storage.removeItem(k); }); } catch (ignore) {} }
+ function pendingSessions(){ if (!sync.url) return []; return validSessions().filter(function(s){ return syncedRev(s.id) < s.revision; }); }
+ function fetchJson(url, opts){
+   var ctrl = typeof AbortController === 'function' ? new AbortController() : null, timer = null;
+   if (ctrl) { opts.signal = ctrl.signal; timer = setTimeout(function(){ ctrl.abort(); }, 30000); }
+   return fetch(url, opts).then(function(r){
+     if (timer) clearTimeout(timer);
+     if (!r.ok) throw new Error('共有サーバーのエラー（' + r.status + '）');
+     return r.text();
+   }, function(e){ if (timer) clearTimeout(timer); throw new Error(e && e.name === 'AbortError' ? '共有サーバーの応答がありません（時間切れ）' : '共有サーバーに接続できません'); })
+   .then(function(t){
+     var j; try { j = JSON.parse(t); } catch (e) { throw new Error('共有サーバーの応答を読めません（URLと「アクセスできるユーザー：全員」の設定を確認してください）'); }
+     if (!j || typeof j !== 'object') throw new Error('共有サーバーの応答が不正です');
+     return j;
+   });
+ }
+ function serverPost(payload, url){ return fetchJson(url || sync.url, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(payload), redirect:'follow', credentials:'omit', cache:'no-store'}); }
+ function serverGet(action, url){ var u = url || sync.url; return fetchJson(u + '?action=' + encodeURIComponent(action) + '&t=' + Date.now(), {method:'GET', redirect:'follow', credentials:'omit', cache:'no-store'}); }
+ function scheduleSync(){
+   if (!sync.url) return;
+   var t = Date.now();
+   if (!sync.firstDirtyAt) sync.firstDirtyAt = t;
+   var wait = Math.max(0, Math.min(SYNC_DEBOUNCE, sync.firstDirtyAt + SYNC_MAXWAIT - t));
+   clearTimeout(sync.timer); sync.timer = setTimeout(function(){ sync.timer = null; syncNow(); }, wait);
+   renderSyncState();
+ }
+ function scheduleRetry(){ clearTimeout(sync.retryTimer); var d = SYNC_RETRY[Math.min(Math.max(sync.failures, 1), SYNC_RETRY.length) - 1]; sync.retryTimer = setTimeout(function(){ sync.retryTimer = null; syncNow(); }, d); }
+ function syncNow(){
+   if (!sync.url) return Promise.resolve({ok:false, off:true});
+   if (sync.busy) { sync.again = true; return sync.busyPromise; }
+   clearTimeout(sync.timer); sync.timer = null;
+   var list = pendingSessions();
+   if (!list.length) { sync.firstDirtyAt = 0; renderSyncState(); return Promise.resolve({ok:true, sent:0}); }
+   clearTimeout(sync.retryTimer); sync.retryTimer = null;
+   if (navigator.onLine === false) { sync.failures++; sync.lastError = 'オフライン'; scheduleRetry(); renderSyncState(); return Promise.resolve({ok:false, error:'オフライン'}); }
+   var batch = list.slice(0, 40).map(function(x){ return C.normalizeSession(x); }), url = sync.url;
+   sync.busy = true; renderSyncState();
+   sync.busyPromise = serverPost({action:'put', sessions:batch}, url).then(function(res){
+     if (!res.ok) throw new Error(res.error || '共有サーバーに保存できませんでした');
+     if (url !== sync.url) return {ok:false, error:'接続先が変わりました'};
+     var byId = {}, problems = 0; batch.forEach(function(x){ byId[x.id] = x; });
+     (res.results || []).forEach(function(r){
+       var x = byId[r.id]; if (!x) return;
+       if (r.status !== 'saved') { problems++; sync.conflicts[x.id] = r.status; } else delete sync.conflicts[x.id];
+       setSyncedRev(x.id, x.revision);
+     });
+     sync.lastOkAt = now(); sync.lastError = ''; sync.failures = 0; sync.firstDirtyAt = 0;
+     return {ok:true, sent:batch.length, problems:problems};
+   }).catch(function(e){ sync.failures++; sync.lastError = e.message || '送信できませんでした'; scheduleRetry(); return {ok:false, error:sync.lastError}; })
+   .then(function(r){
+     sync.busy = false; sync.busyPromise = null;
+     var again = sync.again; sync.again = false;
+     if (r.ok && (again || pendingSessions().length)) { clearTimeout(sync.timer); sync.timer = setTimeout(function(){ sync.timer = null; syncNow(); }, again ? SYNC_DEBOUNCE : 800); }
+     renderSyncState(); if (S.route === 'home') scheduleHomeRender();
+     return r;
+   });
+   return sync.busyPromise;
+ }
+ function syncAll(){ return syncNow().then(function(r){ return r.ok && pendingSessions().length ? syncNow() : r; }); }
+ function flushOnHide(){
+   if (!sync.url) return;
+   var list = pendingSessions(); if (!list.length) return;
+   var body = JSON.stringify({action:'put', sessions:list.slice(0, 20).map(function(x){ return C.normalizeSession(x); })});
+   if (body.length > 60000) return;
+   try { if (navigator.sendBeacon && navigator.sendBeacon(sync.url, new Blob([body], {type:'text/plain;charset=UTF-8'}))) return; } catch (ignore) {}
+   try { fetch(sync.url, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:body, keepalive:true, credentials:'omit', mode:'no-cors'}).catch(function(){}); } catch (ignore) {}
+ }
+ function syncSummary(){
+   if (!sync.url) return {text:'', cls:''};
+   var pend = pendingSessions().length;
+   if (sync.busy) return {text:'共有サーバーへ送信中…', cls:''};
+   if (pend && sync.lastError) return {text:'共有サーバーに未送信 ' + pend + '件（' + sync.lastError + '。自動で再送します）', cls:'problem'};
+   if (pend) return {text:'共有サーバーへ送信待ち ' + pend + '件', cls:''};
+   return {text:'共有サーバーに送信済み' + (sync.lastOkAt ? ' ' + fmtTime(sync.lastOkAt) : ''), cls:'ok'};
+ }
+ function renderSyncState(){
+   var chip = $('sync-chip');
+   if (chip) { var s = S.route === 'session' ? (SYNC_ENABLED && !sync.url ? {text:'共有サーバー未接続：この端末だけに保存しています（共有リンクを開くと全員分に送られます）', cls:'problem'} : syncSummary()) : {text:''}; chip.textContent = s.text; chip.className = 'sync-chip ' + (s.cls || ''); chip.hidden = !s.text; }
+   if (S.route === 'home') renderSyncPanel();
+ }
+ function renderSyncPanel(){
+   var host = $('sync-panel'); if (!host) return;
+   host.hidden = !SYNC_ENABLED; if (!SYNC_ENABLED) return;
+   host.classList.toggle('sync-off', !sync.url);
+   var html;
+   if (!sync.url) html = '<div class="sync-text"><strong><span class="sync-dot problem"></span>共有サーバーに未接続です</strong><br>このままでは入力がこの端末にしか保存されず、全員分に集まりません。代表者から届いた<strong>共有リンク</strong>を開いてください（1回開けば以後は自動で接続します）。</div><div class="button-row"><button type="button" class="btn" data-sync="setup">共有サーバーを設定（代表者向け）</button></div>';
+   else { var s = syncSummary(); html = '<div class="sync-text"><strong><span class="sync-dot ' + (s.cls === 'problem' ? 'problem' : 'on') + '"></span>共有サーバー：接続中</strong><br><span class="' + (s.cls === 'problem' ? 'danger-text' : 'secondary-text') + '">' + esc(s.text) + '</span></div><div class="button-row"><button type="button" class="btn primary" data-sync="list">全員分を見る</button><button type="button" class="btn" data-sync="share">共有リンクを送る</button><button type="button" class="btn" data-sync="setup">設定</button></div>'; }
+   host.innerHTML = html;
+ }
+ function gasCode(){ var el = $('gas-code'); return el ? el.textContent.replace(/^\s+/, '') : ''; }
+ function copyText(text){
+   var p = navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(text).then(function(){ return true; }, function(){ return false; }) : Promise.resolve(false);
+   return p.then(function(ok){ if (ok) return true; try { var ta = document.createElement('textarea'); ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.left = '-9999px'; document.body.appendChild(ta); ta.select(); var r = document.execCommand('copy'); document.body.removeChild(ta); return !!r; } catch (e) { return false; } });
+ }
+ function shareLink(){ return location.origin + location.pathname + '?sync=' + encodeURIComponent(sync.url); }
+ function syncSetupPrompt(){
+   var connected = !!sync.url;
+   modal('共有サーバーの設定',
+     (connected ? '<div class="local-status-box">接続中：<span class="session-id">' + esc(shortUrl(sync.url)) + '</span><br>' + esc(syncSummary().text) + '</div><div class="button-row"><button type="button" class="btn primary" data-action="sync-share">共有リンクを送る</button><button type="button" class="btn" data-action="sync-now">今すぐ送信</button><button type="button" class="btn danger" data-action="sync-disconnect">接続を解除</button></div>' : '') +
+     '<p>全員の入力を、代表者のGoogleスプレッドシートに自動で集めます（無料）。設定は代表者が1回だけ行います（PCがおすすめ）。入力する人は、代表者から届く「共有リンク」を開くだけです。</p>' +
+     '<h3>設定の手順（約5分）</h3><ol>' +
+     '<li><a href="https://script.google.com/home" target="_blank" rel="noopener noreferrer">script.google.com</a> を開き、「新しいプロジェクト」を押します（Googleにログイン）。</li>' +
+     '<li>下の「スクリプトをコピー」を押し、エディタの中身を全部消して貼り付け、保存します。</li>' +
+     '<li>右上「デプロイ」→「新しいデプロイ」→ 種類の選択（歯車）で「ウェブアプリ」。次のユーザーとして実行：<strong>自分</strong>、アクセスできるユーザー：<strong>全員</strong> →「デプロイ」→ アクセスを承認します（「詳細」→「…に移動」→「許可」）。</li>' +
+     '<li>表示された「ウェブアプリ」のURL（…/exec で終わる）をコピーし、下に貼り付けて「接続」を押します。</li>' +
+     '<li>「共有リンクを送る」で、入力する人にリンクを送ります。</li></ol>' +
+     '<div class="button-row"><button type="button" class="btn" data-action="gas-copy">スクリプトをコピー</button><button type="button" class="btn" data-action="gas-show">スクリプトを表示</button></div>' +
+     '<label class="field"><span>ウェブアプリのURL</span><input id="sync-url" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://script.google.com/macros/s/…/exec" value="' + esc(sync.url) + '"></label>' +
+     '<div class="button-row"><button type="button" class="btn primary" data-action="sync-connect">接続</button><button type="button" class="btn" data-action="close">閉じる</button></div>' +
+     '<p class="secondary-text">データは代表者のGoogleドライブの「展示アンケート集約データ」に、入力者ごと（ID単位）に1行で保存されます。同じIDは上書きされ、重複しません。共有リンクを知っている人は全員分を読み書きできるため、関係者以外に送らないでください。各端末にも今までどおり保存されます。</p>');
+ }
+ function gasShow(){
+   modal('共有サーバー用スクリプト', '<p>Apps Scriptのエディタに、この内容をそのまま貼り付けます。</p><textarea id="gas-text" class="preview-text" readonly spellcheck="false" aria-label="スクリプト"></textarea><div class="button-row"><button type="button" class="btn primary" data-action="gas-copy">スクリプトをコピー</button><button type="button" class="btn" data-action="sync-setup">設定に戻る</button></div>');
+   $('gas-text').value = gasCode();
+ }
+ function syncConnect(){
+   var input = $('sync-url'), url = (input && input.value || '').trim();
+   if (!SYNC_URL_RE.test(url)) { toast('「https://script.google.com/…/exec」の形のURLを貼り付けてください'); return; }
+   var btn = document.querySelector('[data-action="sync-connect"]'); if (btn) { btn.disabled = true; btn.textContent = '接続を確認中…'; }
+   serverGet('ping', url).then(function(res){
+     if (!res.ok || res.app !== 'kyudentd-seal-survey') throw new Error('このアンケート用の共有サーバーではありません');
+     setSyncUrl(url); clearAllSyncedRev(); renderHome(); toast('共有サーバーに接続しました'); shareLinkPrompt(true); syncNow();
+   }).catch(function(e){ if (btn && btn.isConnected) { btn.disabled = false; btn.textContent = '接続'; } toast('接続できません：' + e.message); });
+ }
+ function shareLinkPrompt(justConnected){
+   if (!sync.url) return;
+   modal('共有リンク', (justConnected ? '<p><strong>接続できました。</strong>この端末の入力は、自動で共有サーバーに送られます。</p>' : '') +
+     '<p>このリンクを、入力する人全員に送ってください。開くと共有サーバーにつながり、以後は自動で集まります（各端末で1回開けばOK）。</p>' +
+     '<textarea id="share-link" class="preview-text link-text" readonly spellcheck="false" aria-label="共有リンク"></textarea>' +
+     '<div class="button-row"><button type="button" class="btn primary" data-action="share-link-copy">リンクをコピー</button>' + (navigator.share ? '<button type="button" class="btn" data-action="share-link-send">LINE・メールで送る</button>' : '') + '</div>' +
+     '<p class="secondary-text">リンクを知っている人は全員分を読み書きできます。関係者以外に送らないでください。</p><div class="button-row"><button type="button" class="btn" data-action="close">閉じる</button></div>');
+   $('share-link').value = shareLink();
+ }
+ function handleSyncParam(){
+   var q; try { q = new URLSearchParams(location.search); } catch (e) { return; }
+   var url = q.get('sync'); if (url === null) return;
+   q.delete('sync'); var rest = q.toString();
+   try { history.replaceState(history.state, '', location.pathname + (rest ? '?' + rest : '') + location.hash); } catch (ignore) {}
+   if (!SYNC_ENABLED) { toast('このページはスマホ完結版です（共有サーバーには接続しません）'); return; }
+   url = url.trim();
+   if (!SYNC_URL_RE.test(url)) { toast('共有リンクの接続先が正しくありません'); return; }
+   if (url === sync.url) { toast('共有サーバーに接続済みです'); return; }
+   pendingSyncUrl = url;
+   modal('共有サーバーに接続しますか？', '<p>このリンクは、展示アンケートの入力を代表者の共有サーバー（Googleスプレッドシート）に集めるためのものです。接続すると、この端末の入力（入力者名・会社名・票数）が自動で送られます。</p><p class="secondary-text">接続先：' + esc(shortUrl(url)) + '</p>' + (sync.url ? '<p class="danger-text">いまは別の共有サーバーに接続しています。切り替えると、以後の送信先が変わります。</p>' : '') + '<div class="button-row"><button type="button" class="btn primary" data-action="sync-accept">接続する</button><button type="button" class="btn" data-action="close">接続しない</button></div>');
+ }
+ function syncAccept(){
+   var url = pendingSyncUrl; pendingSyncUrl = ''; closeModal(true);
+   if (!url) return;
+   toast('接続先を確認しています…');
+   serverGet('ping', url).then(function(res){
+     if (!res.ok || res.app !== 'kyudentd-seal-survey') throw Object.assign(new Error('このアンケート用の共有サーバーではありません'), {fatal:true});
+     return true;
+   }).catch(function(e){ if (e && e.fatal) throw e; return false; }).then(function(verified){
+     setSyncUrl(url); clearAllSyncedRev(); if (S.route === 'home') renderHome(); renderSyncState();
+     toast(verified ? '共有サーバーに接続しました' : '接続先を確認できませんでした。電波のある所で自動的に送信します');
+     syncNow();
+   }, function(e){ toast('接続しませんでした：' + e.message); });
+ }
+ function saveServerCache(){ try { if (sync.cache) sessionStorage.setItem(SERVER_CACHE, JSON.stringify(sync.cache)); } catch (ignore) {} }
+ function loadServerCache(){ try { var v = JSON.parse(sessionStorage.getItem(SERVER_CACHE) || 'null'); if (v && Array.isArray(v.sessions)) { var list = []; v.sessions.forEach(function(x){ try { list.push(C.normalizeSession(x)); } catch (ignore) {} }); sync.cache = {at:v.at, sessions:list, excluded:v.excluded || 0}; } } catch (ignore) {} }
+ function serverListPrompt(){
+   if (!sync.url) { syncSetupPrompt(); return; }
+   var token = ++sync.loadToken;
+   modal('全員分（共有サーバー）', '<p>共有サーバーから全員分を読み込んでいます…</p><p class="secondary-text">この端末の未送信分を先に送ってから読み込みます。</p>');
+   syncAll().then(function(){ return serverGet('list'); }).then(function(res){
+     if (token !== sync.loadToken || $('app-modal').hidden) return;
+     if (!res.ok || !Array.isArray(res.sessions)) throw new Error(res.error || '共有サーバーの応答が不正です');
+     var list = [], bad = 0;
+     res.sessions.forEach(function(x){ try { list.push(C.normalizeSession(x)); } catch (e) { bad++; } });
+     sync.cache = {at:now(), sessions:list, excluded:res.excluded || 0, bad:bad}; saveServerCache();
+     renderServerList();
+   }).catch(function(e){
+     if (token !== sync.loadToken || $('app-modal').hidden) return;
+     modal('全員分（共有サーバー）', '<p class="danger-text">読み込めませんでした：' + esc(e.message) + '</p>' + (sync.cache ? '<p>前回（' + esc(fmtDateTime(sync.cache.at)) + '）に読み込んだ内容なら表示できます。</p><div class="button-row"><button type="button" class="btn" data-action="server-show-cache">前回の内容を表示</button></div>' : '') + '<div class="button-row"><button type="button" class="btn primary" data-action="server-list">再読み込み</button><button type="button" class="btn" data-action="close">閉じる</button></div>');
+   });
+ }
+ function renderServerList(){
+   var c = sync.cache; if (!c) return;
+   var items = c.sessions.slice().sort(bySessionOrder), counts = {}, q1 = 0, q2 = 0;
+   items.forEach(function(x){ var k = C.identityKey(x.meta), t = C.sessionTotals(x); counts[k] = (counts[k] || 0) + 1; q1 += t.q1; q2 += t.q2; });
+   var rows = items.map(function(x){ var t = C.sessionTotals(x), dup = counts[C.identityKey(x.meta)] > 1; return '<label class="check-row"><input type="checkbox" class="server-check" value="' + esc(x.id) + '" checked><span><span class="who">' + esc(x.meta.name) + '</span>（' + esc(x.meta.company) + '）' + (dup ? ' <span class="badge warn">同じ入力者・日付が複数</span>' : '') + '<br><span class="secondary-text">' + esc(fmtDate(x.meta.date)) + '・ID ' + esc(x.id) + '・①' + num(t.q1) + '人・②' + num(t.q2) + '票・更新 ' + esc(fmtDateTime(x.updatedAt)) + '</span></span></label>'; }).join('');
+   modal('全員分（共有サーバー）', '<p><strong>' + items.length + '件</strong>（①合計 ' + num(q1) + '人・②合計 ' + num(q2) + '票）／ 読み込み ' + esc(fmtDateTime(c.at)) + (c.excluded ? '／ 除外 ' + c.excluded + '件' : '') + '</p>' +
+     (items.length ? '<div class="button-row"><button type="button" class="btn primary" data-action="server-sum">合算を表示</button><button type="button" class="btn" data-action="server-csv">全員分CSV</button><button type="button" class="btn" data-action="server-json">全員分バックアップ</button><button type="button" class="btn" data-action="server-list">再読み込み</button></div><p class="secondary-text">チェックしたデータだけを合算・出力します。同じ票を2つのデータに入力していないか確認してください。</p><div class="button-row"><button type="button" class="btn" data-action="server-all">すべて選択</button><button type="button" class="btn" data-action="server-none">すべて解除</button></div><div class="check-list">' + rows + '</div>'
+       : '<p>共有サーバーにはまだデータがありません。</p><div class="button-row"><button type="button" class="btn" data-action="server-list">再読み込み</button></div>') +
+     '<div class="button-row"><button type="button" class="btn" data-action="close">閉じる</button></div>');
+ }
+ function serverSelected(){ var set = {}; Array.prototype.slice.call(document.querySelectorAll('.server-check:checked')).forEach(function(x){ set[x.value] = 1; }); return (sync.cache ? sync.cache.sessions : []).filter(function(x){ return set[x.id]; }); }
+ function askPersist(){ if (persistAsked) return; persistAsked = true; try { if (navigator.storage && navigator.storage.persisted && navigator.storage.persist) navigator.storage.persisted().then(function(p){ if (!p) return navigator.storage.persist(); }).catch(function(){}); } catch (ignore) {} }
+
+ /* ---------- saved sessions on this device ---------- */
+ function listSessions(){
+   var items = [], byId = {};
+   store.ids().forEach(function(id){
+     var r = store.load(id), it = {id:id, status:r.status, session:(r.status === 'ok' || r.status === 'recovered') ? r.data : null, raw:r.raw === undefined ? null : r.raw, unsaved:false};
+     items.push(it); byId[id] = it;
+   });
+   Object.keys(unsavedCache).forEach(function(id){
+     var c = unsavedCache[id], it = byId[id];
+     if (!it) { it = {id:id, status:'ok', session:c, raw:null, unsaved:true}; items.push(it); byId[id] = it; }
+     else if (!it.session || c.revision >= it.session.revision) { it.session = c; it.unsaved = true; it.status = 'ok'; }
+   });
+   items.sort(function(a, b){
+     if (!a.session !== !b.session) return a.session ? -1 : 1;
+     var x = a.session ? (a.session.updatedAt || a.session.meta.createdAt || '') : '', y = b.session ? (b.session.updatedAt || b.session.meta.createdAt || '') : '';
+     return x < y ? 1 : x > y ? -1 : (a.id < b.id ? -1 : 1);
+   });
+   return items;
+ }
+ function findItem(id){ var items = listSessions(); for (var i = 0; i < items.length; i++) if (items[i].id === id) return items[i]; return null; }
+ function validSessions(){ return listSessions().filter(function(it){ return it.session; }).map(function(it){ return it.session; }); }
+ function identityCounts(items){ var m = {}; items.forEach(function(it){ if (it.session) { var k = C.identityKey(it.session.meta); m[k] = (m[k] || 0) + 1; } }); return m; }
+ function bySessionOrder(a, b){ var x = a.meta.date + '\u0001' + C.searchKey(a.meta.company) + '\u0001' + C.searchKey(a.meta.name) + '\u0001' + a.id, y = b.meta.date + '\u0001' + C.searchKey(b.meta.company) + '\u0001' + C.searchKey(b.meta.name) + '\u0001' + b.id; return x < y ? -1 : x > y ? 1 : 0; }
+
+ /* ---------- home screen ---------- */
+ function updateHomeWarning(){
+   var w = $('home-warning'), text = '';
+   if (!storage) text = 'この環境ではブラウザー内の保存が使えません（プライベートブラウズやサイトデータの設定が原因の可能性があります）。入力はできますが、画面を閉じると消えるため、必ずバックアップを保存してください。';
+   else if (!writable) text = 'このブラウザー内に保存できない状態です（保存容量の不足や設定による制限）。入力後は必ずバックアップを保存してください。';
+   else if (Object.keys(unsavedCache).length) text = '端末内に保存できていないデータがあります（「端末内に未保存」の表示）。開いて「保存・CSV」からバックアップを保存してください。';
+   w.textContent = text; w.hidden = !text;
+ }
+ function cardHtml(it, counts){
+   var inUse = store.lockState(it.id, TAB_ID, Date.now(), LOCK_STALE).state === 'held', id = esc(it.id);
+   if (!it.session) {
+     return '<article class="session-card broken" data-id="' + id + '"><div class="card-top"><div><div class="session-name">読み取れないデータ</div><div class="session-company">保存内容が壊れています。退避してから削除してください。</div></div></div><div class="session-meta"><span>ID <span class="session-id">' + id + '</span></span></div><div class="card-actions"><button type="button" class="btn" data-act="raw" data-id="' + id + '">内容を退避</button><button type="button" class="btn danger" data-act="delete" data-id="' + id + '"' + (inUse ? ' disabled' : '') + '>削除</button></div></article>';
+   }
+   var s = it.session, m = s.meta, t = C.sessionTotals(s), badges = [];
+   if (inUse) badges.push('<span class="badge warn">別の画面で入力中</span>');
+   if (it.unsaved) badges.push('<span class="badge danger">端末内に未保存</span>');
+   if (it.status === 'recovered') badges.push('<span class="badge danger">保存データの確認が必要</span>');
+   if (s.importedAt) badges.push('<span class="badge info">他の端末から取り込み</span>');
+   if (counts[C.identityKey(m)] > 1) badges.push('<span class="badge warn">同じ入力者・日付のデータが複数</span>');
+   if (sync.url && sync.conflicts[s.id] === 'stale') badges.push('<span class="badge warn">共有サーバーの方が新しい内容</span>');
+   if (sync.url && sync.conflicts[s.id] === 'conflict') badges.push('<span class="badge danger">共有サーバーに同じIDの別データ</span>');
+   if (sync.url && sync.conflicts[s.id] === 'invalid') badges.push('<span class="badge danger">共有サーバーが受け付けません</span>');
+   return '<article class="session-card' + (inUse ? ' in-use' : '') + (it.status === 'recovered' ? ' broken' : '') + '" data-id="' + id + '">' +
+     '<div class="card-top"><div><div class="session-name">' + esc(m.name) + '</div><div class="session-company">' + esc(m.company) + '</div></div><div class="session-date">' + esc(fmtDate(m.date)) + '</div></div>' +
+     '<div class="session-meta"><span>ID <span class="session-id">' + id + '</span></span><span>最終更新 ' + esc(fmtDateTime(s.updatedAt)) + '</span>' + (sync.url ? '<span class="' + (syncedRev(s.id) >= s.revision ? 'sync-ok' : 'sync-wait') + '">' + (syncedRev(s.id) >= s.revision ? '共有済み' : '共有へ送信待ち') + '</span>' : '') + '</div>' +
+     '<div class="session-totals">①合計<strong>' + num(t.q1) + '</strong>人　②合計<strong>' + num(t.q2) + '</strong>票</div>' +
+     (badges.length ? '<div class="badges">' + badges.join('') + '</div>' : '') +
+     '<div class="card-actions"><button type="button" class="btn primary" data-act="resume" data-id="' + id + '">' + (inUse ? '状況を確認' : '再開') + '</button><button type="button" class="btn" data-act="backup" data-id="' + id + '">バックアップ</button><button type="button" class="btn danger" data-act="delete" data-id="' + id + '"' + (inUse ? ' disabled' : '') + '>削除</button></div></article>';
+ }
+ function renderHome(){
+   if (S.route !== 'home') return;
+   var items = listSessions(), counts = identityCounts(items), qRaw = $('home-filter').value || '', q = C.searchKey(qRaw), valid = items.filter(function(it){ return it.session; });
+   var shown = !q ? items : items.filter(function(it){
+     if (!it.session) return C.searchKey(it.id).indexOf(q) >= 0;
+     var m = it.session.meta;
+     return [m.name, m.company, it.id, m.date, fmtDate(m.date)].some(function(v){ return C.searchKey(v).indexOf(q) >= 0; });
+   });
+   $('list-count').textContent = items.length ? items.length + '件' : '';
+   $('filter-wrap').hidden = items.length < 4 && !q;
+   ['sum-button','bulk-csv-button','bulk-json-button'].forEach(function(id){ $(id).disabled = !valid.length; });
+   var html;
+   if (!items.length) html = '<div class="empty-list">まだ保存データはありません。<br>上の欄に入力者名・会社名・日付を入れて「開始」を押してください。</div>';
+   else if (!shown.length) html = '<div class="empty-list">「' + esc(qRaw.trim()) + '」に一致するデータはありません。</div>';
+   else html = '<div class="session-list">' + shown.map(function(it){ return cardHtml(it, counts); }).join('') + '</div>';
+   $('session-list-host').innerHTML = html;
+   updateHomeWarning(); renderSyncPanel();
+ }
+ function scheduleHomeRender(){ clearTimeout(homeTimer); homeTimer = setTimeout(renderHome, 120); }
+ function showStartError(msg){ var e = $('start-error'); e.textContent = msg || ''; e.hidden = !msg; }
+ function startNew(){
+   showStartError('');
+   var meta;
+   try { meta = C.normalizeMeta({name:$('start-name').value, company:$('start-company').value, date:$('start-date').value}); }
+   catch (e) { showStartError(e.message); (/入力者名/.test(e.message) ? $('start-name') : /会社名/.test(e.message) ? $('start-company') : $('start-date')).focus(); return; }
+   var key = C.identityKey(meta), dupes = listSessions().filter(function(it){ return it.session && C.identityKey(it.session.meta) === key; });
+   if (dupes.length) { dupPrompt(meta, dupes); return; }
+   openNew(meta);
+ }
+ function createSession(meta, days){
+   var taken = {}; store.ids().forEach(function(x){ taken[x] = 1; }); Object.keys(unsavedCache).forEach(function(x){ taken[x] = 1; });
+   var id, tries = 0;
+   do { id = C.makeId(meta.date); tries++; } while (taken[id] && tries < 50);
+   if (taken[id]) throw new Error('IDを発行できませんでした。もう一度お試しください。');
+   var session = C.newSession(meta, id, now());
+   if (days) Object.keys(days).forEach(function(k){ session.days[k] = C.clone(days[k]); });
+   var saved = store.save(session);
+   if (!saved.ok) unsavedCache[id] = session;
+   askPersist(); scheduleSync();
+   return {id:id, saved:saved};
+ }
+ function openNew(meta){
+   var r = createSession(meta);
+   $('start-name').value = ''; $('start-company').value = ''; showStartError('');
+   go('#/s/' + r.id, true);
+   if (!r.saved.ok) toast('端末内に保存できません。入力後は必ずバックアップを保存してください');
+ }
+ function dupPrompt(meta, dupes){
+   pendingMeta = meta;
+   modal('同じ入力者・日付のデータがあります', '<p><strong>' + esc(who(meta)) + ' ／ ' + esc(fmtDate(meta.date)) + '</strong> のデータが、この端末にすでにあります。</p><p>続きから入力する場合は「再開」を選んでください。新しく作ると同じ人・同じ日のデータが2つになり、合算したときに二重計上の原因になります。</p><ul class="dup-list">' +
+     dupes.map(function(it){ var t = C.sessionTotals(it.session); return '<li><span>ID <span class="session-id">' + esc(it.id) + '</span>　最終更新 ' + esc(fmtDateTime(it.session.updatedAt)) + '　①' + num(t.q1) + '人・②' + num(t.q2) + '票</span><button type="button" class="btn primary" data-action="dup-resume" data-id="' + esc(it.id) + '">再開</button></li>'; }).join('') +
+     '</ul><div class="button-row"><button type="button" class="btn" data-action="dup-create">別のデータとして新しく作る</button><button type="button" class="btn" data-action="close">キャンセル</button></div>');
+ }
+ function resume(id){
+   var it = findItem(id);
+   if (!it || !it.session) { toast('データを読み込めません'); renderHome(); return; }
+   var st = store.lockState(id, TAB_ID, Date.now(), LOCK_STALE);
+   if (st.state === 'held') { inUsePrompt(id, st.lock); return; }
+   if (it.session.importedAt && !importedOk[id]) { importedPrompt(id, it.session); return; }
+   go('#/s/' + id, true);
+ }
+ function inUsePrompt(id, lock){
+   var it = findItem(id), secs = lock ? Math.max(0, Math.round((Date.now() - lock.at) / 1000)) : null;
+   var label = it && it.session ? '<strong>' + esc(who(it.session.meta)) + '・' + esc(fmtDate(it.session.meta.date)) + '</strong>（ID ' + esc(id) + '）' : 'ID ' + esc(id);
+   modal('このデータは入力中です', '<p>' + label + ' は、この端末の別のタブまたは画面で開かれています' + (secs !== null ? '（' + secs + '秒前に確認）' : '') + '。</p><p>同じデータを2か所で同時に入力すると、数え漏れや二重入力の原因になります。通常は、開いている画面で続けてください。</p><div class="button-row"><button type="button" class="btn danger" data-action="inuse-takeover" data-id="' + esc(id) + '">この画面に引き継ぐ</button><button type="button" class="btn" data-action="close">閉じる</button></div><p class="secondary-text">引き継ぐと、元の画面は入力を停止します。</p>');
+ }
+ function importedPrompt(id, s){
+   modal('取り込んだデータを開きます', '<p><strong>' + esc(who(s.meta)) + '・' + esc(fmtDate(s.meta.date)) + '</strong>（ID ' + esc(id) + '）は、別の端末から取り込んだデータです（' + esc(fmtDateTime(s.importedAt)) + ' 取り込み）。</p><p>元の端末でも入力を続けている場合、ここで入力すると内容が食い違います。あとで取り込み直すと新しい方の内容に置き換わり、もう一方の入力は反映されません。</p><div class="button-row"><button type="button" class="btn primary" data-action="imported-open" data-id="' + esc(id) + '">このまま開く</button><button type="button" class="btn" data-action="close">キャンセル</button></div>');
+ }
+ function deletePrompt(id){
+   var it = findItem(id); if (!it) { renderHome(); return; }
+   if (store.lockState(id, TAB_ID, Date.now(), LOCK_STALE).state === 'held') { toast('別の画面で入力中のため削除できません'); return; }
+   var t = it.session ? C.sessionTotals(it.session) : null;
+   var label = it.session ? '<strong>' + esc(who(it.session.meta)) + '・' + esc(fmtDate(it.session.meta.date)) + '</strong>（ID ' + esc(id) + '）' : '読み取れないデータ（ID ' + esc(id) + '）';
+   modal('データの削除', '<p>' + label + ' をこの端末から削除します。' + (t ? '①合計 ' + num(t.q1) + '人・②合計 ' + num(t.q2) + '票。' : '') + '</p><p class="danger-text">元に戻せません。先にバックアップを保存してください。</p><div class="button-row">' +
+     (it.session ? '<button type="button" class="btn" data-action="delete-backup" data-id="' + esc(id) + '">バックアップを保存</button>' : '<button type="button" class="btn" data-action="raw-one" data-id="' + esc(id) + '">内容を退避</button>') +
+     '</div>' + (sync.url && it.session ? '<label class="check-inline"><input type="checkbox" id="delete-exclude">共有サーバーの集計からも外す</label><p class="secondary-text">チェックしない場合、共有サーバーのデータはそのまま残ります（この端末からだけ削除）。</p>' : '') + '<label class="field"><span>削除してよければ「削除」と入力</span><input id="delete-confirm-text" type="text" autocomplete="off" maxlength="4" placeholder="削除"></label><div class="button-row"><button type="button" class="btn danger" data-action="delete-confirm" data-id="' + esc(id) + '">削除する</button><button type="button" class="btn" data-action="close">キャンセル</button></div>');
+ }
+ function deleteConfirm(id){
+   if ($('delete-confirm-text').value.trim() !== '削除') { toast('確認欄に「削除」と入力してください'); return; }
+   if (store.lockState(id, TAB_ID, Date.now(), LOCK_STALE).state === 'held') { closeModal(); renderHome(); toast('別の画面で入力中のため削除できません'); return; }
+   var exclude = !!($('delete-exclude') && $('delete-exclude').checked && sync.url);
+   var r = store.remove(id); delete unsavedCache[id]; delete importedOk[id]; clearSyncedRev(id);
+   if (S.sumSource !== 'server') { S.sumIds = S.sumIds.filter(function(x){ return x !== id; }); saveSumSelection(); }
+   closeModal(); renderHome(); toast(r.ok || !storage ? 'データを削除しました' : '削除できませんでした：' + r.error);
+   if (exclude) serverPost({action:'exclude', ids:[id]}).then(function(res){ toast(res.ok && res.changed ? '共有サーバーの集計からも外しました' : res.ok ? '共有サーバーにこのデータはありませんでした' : '共有サーバーで外せませんでした：' + (res.error || '')); }, function(e){ toast('共有サーバーで外せませんでした：' + e.message); });
+ }
+ function backupOne(id, back){
+   var it = findItem(id); if (!it || !it.session) { toast('データを読み込めません'); return; }
+   var s = it.session;
+   exportFile({text:JSON.stringify(C.normalizeSession(s), null, 2), filename:'九州電力送配電_アンケート_' + s.id + '_' + safePart(s.meta.name) + '_' + fileStamp() + '.json', mime:'application/json;charset=utf-8',
+     description:who(s.meta) + '・' + fmtDate(s.meta.date) + '（ID ' + s.id + '）のバックアップです。別の端末の「データを取り込む」や、入力画面の「バックアップから復元」で使えます。', back:back || null, backLabel:back ? '戻る' : '閉じる'});
+ }
+ function rawOne(id, back){
+   var raw = store.raw(id);
+   if (raw === null) { toast('退避できる内容がありません'); return; }
+   exportFile({text:raw, filename:'九州電力送配電_アンケート_読み取れないデータ_' + id + '_' + fileStamp() + '.txt', mime:'text/plain;charset=utf-8', description:'保存領域に残っていた内容をそのまま退避します。復元できるとは限りません。', back:back || null, backLabel:back ? '戻る' : '閉じる'});
+ }
+ function exportFieldsHtml(){ return '<label class="field"><span>出力対象（日別に選べます）</span><span class="select-wrap"><select id="export-scope" class="select-control">' + selectOptions([['all','1日目・2日目をまとめて'],['1','1日目だけ'],['2','2日目だけ']], exportScope) + '</select></span></label><label class="field"><span>CSVの種類</span><span class="select-wrap"><select id="csv-kind" class="select-control">' + selectOptions([['detail','項目別集計（各マス・各選択肢の票数）'],['summary','日別サマリー（回答者数・票数・差）']], exportKind) + '</select></span></label>'; }
+ function readExportSettings(){ if ($('export-scope')) exportScope = $('export-scope').value; if ($('csv-kind')) exportKind = $('csv-kind').value; return C.dayKeys(exportScope, ui.day); }
+ function bulkCsvPrompt(){
+   var n = validSessions().length; if (!n) { toast('保存データがありません'); return; }
+   modal('全件CSV', '<p>保存一覧のデータ（' + n + '件）を1つのCSVにまとめて出力します。各行の先頭に ID・入力者・会社名・入力日 が付くので、Excelで入力者ごとの集計や合計ができます。</p>' + exportFieldsHtml() + '<div class="button-row"><button type="button" class="btn primary" data-action="bulk-csv-export">CSV出力</button><button type="button" class="btn" data-action="close">閉じる</button></div>');
+ }
+ function bulkCsvExport(){
+   var keys = readExportSettings(), list = validSessions().sort(bySessionOrder);
+   if (!list.length) { toast('保存データがありません'); return; }
+   var entries = list.map(function(s){ return {cols:[s.id, s.meta.name, s.meta.company, s.meta.date], data:s}; });
+   exportFile({text:C.toCsv(C.csvRows(entries, keys, exportKind)), filename:'九州電力送配電_アンケート_全件' + list.length + '件_' + scopeLabel(keys) + '_' + (exportKind === 'summary' ? 'サマリー' : '項目別集計') + '_' + fileStamp() + '.csv', mime:'text/csv;charset=utf-8',
+     description:list.length + '件のデータを、入力者ごとの行でまとめたCSVです（' + scopeLabel(keys) + '）。', back:bulkCsvPrompt, backLabel:'戻る'});
+ }
+ function bulkJson(){
+   var list = validSessions(); if (!list.length) { toast('保存データがありません'); return; }
+   exportFile({text:JSON.stringify(C.makeBundle(list, now()), null, 1), filename:'九州電力送配電_アンケート_全件バックアップ_' + list.length + '件_' + fileStamp() + '.json', mime:'application/json;charset=utf-8',
+     description:'保存一覧の' + list.length + '件をまとめたバックアップです。別の端末の「データを取り込む」で読み込めます。'});
+ }
+
+ /* ---------- import (other devices / old version) ---------- */
+ function readFileAsText(file){ if (file.text) return file.text(); return new Promise(function(resolve, reject){ var reader = new FileReader(); reader.onload = function(){ resolve(String(reader.result)); }; reader.onerror = function(){ reject(new Error('ファイルを読み取れません。')); }; reader.readAsText(file, 'UTF-8'); }); }
+ function pickImport(){ var f = $('import-file'); f.value = ''; f.click(); }
+ async function handleImportFiles(files){
+   if (files.length > 200) { toast('一度に選べるのは200ファイルまでです'); return; }
+   var results = [], v1 = [];
+   for (var i = 0; i < files.length; i++) {
+     var f = files[i];
+     if (f.size > C.IMPORT_LIMIT) { results.push({file:f.name, error:'ファイルが大きすぎます（上限8 MB）'}); continue; }
+     try { var p = C.parseImport(await readFileAsText(f)); if (p.kind === 'v1') v1.push({file:f.name, data:p.data}); else results.push({file:f.name, sessions:p.sessions, errors:p.errors}); }
+     catch (e) { results.push({file:f.name, error:e.message}); }
+   }
+   if (S.route !== 'home') return;
+   if (files.length === 1 && v1.length === 1) { v1Prompt(v1[0]); return; }
+   importPlan(results, v1);
+ }
+ var PLAN_LABEL = {
+   'new':['新規に追加','st-new'], 'new-id':['新規に追加（IDが重なったため新しいIDを付けます）','st-new'], 'replace':['更新（ファイルの方が新しい）','st-new'],
+   'same':['取り込み済み（変更なし）','st-skip'], 'older':['スキップ（端末側の方が新しい）','st-skip'], 'locked':['スキップ（この端末の別画面で入力中）','st-warn'],
+   'skip-broken':['スキップ（端末側のデータが読み取れません）','st-warn'], 'skip-unsaved':['スキップ（端末内に未保存のデータがあります）','st-warn']
+ };
+ function importPlan(results, v1){
+   var incoming = {}, order = [], errors = [];
+   results.forEach(function(r){
+     if (r.error) errors.push(r.file + '：' + r.error);
+     (r.errors || []).forEach(function(e){ errors.push(r.file + '：' + e); });
+     (r.sessions || []).forEach(function(s){ var cur = incoming[s.id]; if (!cur) { incoming[s.id] = {session:s, file:r.file}; order.push(s.id); } else if (C.isNewer(s, cur.session)) incoming[s.id] = {session:s, file:r.file}; });
+   });
+   var t = Date.now(), identityOf = {};
+   listSessions().forEach(function(it){ if (it.session) identityOf[it.id] = C.identityKey(it.session.meta); });
+   var plan = order.map(function(id){
+     var inc = incoming[id].session, local = store.load(id), status, loc = null;
+     if (local.status === 'missing') status = unsavedCache[id] ? 'skip-unsaved' : 'new';
+     else if (local.status === 'ok' || local.status === 'recovered') {
+       loc = local.data;
+       if (loc.meta.createdAt !== inc.meta.createdAt) status = 'new-id';
+       else if (store.lockState(id, TAB_ID, t, LOCK_STALE).state === 'held') status = 'locked';
+       else if (C.sameContent(loc, inc)) status = 'same';
+       else if (C.isNewer(inc, loc)) status = 'replace';
+       else status = 'older';
+     } else status = 'skip-broken';
+     if (status === 'new' || status === 'replace') identityOf[id] = C.identityKey(inc.meta);
+     else if (status === 'new-id') identityOf['new:' + id] = C.identityKey(inc.meta);
+     return {id:id, session:inc, local:loc, status:status, file:incoming[id].file};
+   });
+   var counts = {}; Object.keys(identityOf).forEach(function(k){ counts[identityOf[k]] = (counts[identityOf[k]] || 0) + 1; });
+   var actionable = plan.filter(function(p){ return p.status === 'new' || p.status === 'new-id' || p.status === 'replace'; }).length, dupWarn = false;
+   var rows = plan.map(function(p){
+     var s = p.session, t2 = C.sessionTotals(s), lab = PLAN_LABEL[p.status], dup = (p.status === 'new' || p.status === 'new-id' || p.status === 'replace') && counts[C.identityKey(s.meta)] > 1;
+     if (dup) dupWarn = true;
+     var change = p.status === 'replace' && p.local ? (function(){ var a = C.sessionTotals(p.local); return '<br><span class="secondary-text">端末側 ①' + num(a.q1) + '・②' + num(a.q2) + ' → ファイル ①' + num(t2.q1) + '・②' + num(t2.q2) + '</span>'; })() : '';
+     return '<tr><td>' + esc(who(s.meta)) + (dup ? '<br><span class="badge warn">同じ入力者・日付が複数</span>' : '') + '</td><td>' + esc(fmtDate(s.meta.date)) + '</td><td class="session-id">' + esc(s.id) + '</td><td class="num">' + num(t2.q1) + '／' + num(t2.q2) + '</td><td class="' + lab[1] + '">' + esc(lab[0]) + change + '</td></tr>';
+   }).join('');
+   pendingImport = plan;
+   modal('データの取り込み確認',
+     (plan.length ? '<p>ファイルに含まれるデータ ' + plan.length + '件のうち、<strong>' + actionable + '件</strong>を取り込みます。同じIDのデータは重複させず、新しい方を残します。</p><div class="table-scroll"><table class="plain-table plan-table"><thead><tr><th>入力者（会社）</th><th>日付</th><th>ID</th><th class="num">①／②</th><th>取り込み内容</th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '<p>取り込めるデータが見つかりませんでした。</p>') +
+     (dupWarn ? '<p class="danger-text">「同じ入力者・日付が複数」のデータは、合算すると二重計上になるおそれがあります。合算のときに対象を確認してください。</p>' : '') +
+     (errors.length ? '<h3>読み取れなかったもの</h3><ul>' + errors.map(function(e){ return '<li>' + esc(e) + '</li>'; }).join('') + '</ul>' : '') +
+     (v1.length ? '<p class="secondary-text">旧版（Ver.1）のバックアップ ' + v1.length + '件は、まとめては取り込めません。1件ずつ選ぶと、入力者名・会社名を付けて取り込めます。</p>' : '') +
+     '<div class="button-row"><button type="button" class="btn primary" data-action="import-confirm"' + (actionable ? '' : ' disabled') + '>取り込む（' + actionable + '件）</button><button type="button" class="btn" data-action="close">キャンセル</button></div>');
+ }
+ function importConfirm(){
+   var plan = pendingImport; if (!plan) return;
+   var added = 0, updated = 0, skipped = 0, failed = [], stamp = now(), taken = {};
+   store.ids().forEach(function(x){ taken[x] = 1; }); Object.keys(unsavedCache).forEach(function(x){ taken[x] = 1; });
+   plan.forEach(function(p){
+     if (p.status !== 'new' && p.status !== 'new-id' && p.status !== 'replace') return;
+     var s = C.clone(p.session);
+     if (p.status === 'new-id') { var nid, n = 0; do { nid = C.makeId(s.meta.date); n++; } while (taken[nid] && n < 50); if (taken[nid]) { failed.push(who(s.meta) + '：IDを発行できませんでした'); return; } s.id = nid; }
+     if (p.status === 'replace' && store.lockState(p.id, TAB_ID, Date.now(), LOCK_STALE).state === 'held') { skipped++; return; }
+     if (p.status === 'new' && store.load(p.id).status !== 'missing') { skipped++; return; }
+     s.importedAt = stamp;
+     var r = store.save(s);
+     if (r.ok) { taken[s.id] = 1; delete importedOk[s.id]; clearSyncedRev(s.id); if (p.status === 'replace') updated++; else added++; }
+     else failed.push(who(s.meta) + '：' + r.error);
+   });
+   closeModal(); renderHome(); if (added || updated) scheduleSync();
+   toast((added || updated ? (added ? added + '件を追加' : '') + (updated ? (added ? '・' : '') + updated + '件を更新' : '') + 'しました' : '取り込んだデータはありません') + (skipped ? '（' + skipped + '件スキップ）' : ''));
+   if (failed.length) modal('取り込めなかったデータ', '<p class="danger-text">次のデータは保存できませんでした。</p><ul>' + failed.map(function(f){ return '<li>' + esc(f) + '</li>'; }).join('') + '</ul><div class="button-row"><button type="button" class="btn" data-action="close">閉じる</button></div>');
+ }
+ function v1Prompt(v){
+   pendingV1 = v;
+   var keys = Object.keys(v.data.days).sort(), q1 = 0, q2 = 0;
+   keys.forEach(function(k){ ['student','adult'].forEach(function(t){ var s = C.stats(v.data.days[k][t]); q1 += s.q1; q2 += s.q2; }); });
+   var d = (v.data.days['1'] && v.data.days['1'].date) || (v.data.days['2'] && v.data.days['2'].date) || C.localDate();
+   modal('旧版のバックアップを取り込む', '<p><strong>' + esc(v.file) + '</strong> は旧版（Ver.1）のバックアップです（' + scopeLabel(keys) + '、①合計 ' + num(q1) + '・②合計 ' + num(q2) + '）。入力者名・会社名・日付を付けて、新しいデータとして取り込みます。</p>' +
+     '<label class="field"><span>入力者名</span><input id="v1-name" type="text" maxlength="80" autocomplete="name"></label><label class="field"><span>会社名</span><input id="v1-company" type="text" maxlength="120" autocomplete="organization"></label><label class="field"><span>日付</span><input id="v1-date" type="date" min="1900-01-01" max="2199-12-31" value="' + esc(d) + '"></label>' +
+     '<div class="button-row"><button type="button" class="btn primary" data-action="v1-create">新しいデータとして取り込む</button><button type="button" class="btn" data-action="close">キャンセル</button></div>');
+ }
+ function v1Create(){
+   var v = pendingV1; if (!v) return;
+   var meta; try { meta = C.normalizeMeta({name:$('v1-name').value, company:$('v1-company').value, date:$('v1-date').value}); } catch (e) { toast(e.message); return; }
+   var dup = listSessions().some(function(it){ return it.session && C.identityKey(it.session.meta) === C.identityKey(meta); });
+   var r = createSession(meta, v.data.days);
+   closeModal(); renderHome();
+   toast((r.saved.ok ? '旧版データを取り込みました（ID ' + r.id + '）' : '取り込みましたが端末内に未保存です') + (dup ? '。同じ入力者・日付のデータが他にもあります' : ''));
+ }
+
+ /* ---------- combined (read-only) view ---------- */
+ function saveSumSelection(){ try { sessionStorage.setItem(SUM_SEL, JSON.stringify({source:S.sumSource || 'local', ids:S.sumIds})); } catch (ignore) {} }
+ function readSumSelection(){ try { var v = JSON.parse(sessionStorage.getItem(SUM_SEL) || 'null'); if (v && Array.isArray(v.ids)) { if (!S.sumSource) S.sumSource = v.source === 'server' ? 'server' : 'local'; return v.ids.filter(function(x){ return typeof x === 'string' && C.ID_RE.test(x); }); } } catch (e) {} return []; }
+ function sumPool(){ if (S.sumSource === 'server') { if (!sync.cache) loadServerCache(); return sync.cache ? sync.cache.sessions.map(function(x){ return {id:x.id, session:x}; }) : []; } return listSessions().filter(function(it){ return it.session; }); }
+ function sumPrompt(){
+   if (S.route === 'sum' && S.sumSource === 'server') { serverListPrompt(); return; }
+   var items = listSessions().filter(function(it){ return it.session; });
+   if (!items.length) { toast('保存データがありません'); return; }
+   var counts = identityCounts(items), sel = {}, has = S.sumIds.length > 0 && S.sumSource !== 'server';
+   S.sumIds.forEach(function(id){ sel[id] = 1; });
+   var rows = items.map(function(it){
+     var s = it.session, t = C.sessionTotals(s), checked = has ? !!sel[it.id] : true, dup = counts[C.identityKey(s.meta)] > 1;
+     return '<label class="check-row"><input type="checkbox" class="sum-check" value="' + esc(it.id) + '"' + (checked ? ' checked' : '') + '><span><span class="who">' + esc(s.meta.name) + '</span>（' + esc(s.meta.company) + '）' + (dup ? ' <span class="badge warn">同じ入力者・日付が複数</span>' : '') + '<br><span class="secondary-text">' + esc(fmtDate(s.meta.date)) + '・ID ' + esc(s.id) + '・①' + num(t.q1) + '人・②' + num(t.q2) + '票</span></span></label>';
+   }).join('');
+   modal('合算するデータを選ぶ', '<p>選んだデータの票数を足し合わせて表示します（読み取り専用。元のデータは変わりません）。</p><p class="secondary-text">同じ票を2つのデータに入力していないか確認してください。二重計上の原因になります。</p><div class="button-row"><button type="button" class="btn" data-action="sum-all">すべて選択</button><button type="button" class="btn" data-action="sum-none">すべて解除</button></div><div class="check-list">' + rows + '</div><div class="button-row"><button type="button" class="btn primary" data-action="sum-open">合算を表示</button><button type="button" class="btn" data-action="close">キャンセル</button></div>');
+ }
+ function sumOpen(){
+   var ids = Array.prototype.slice.call(document.querySelectorAll('.sum-check:checked')).map(function(x){ return x.value; });
+   if (!ids.length) { toast('合算するデータを選んでください'); return; }
+   S.sumSource = 'local'; S.sumIds = ids; saveSumSelection(); closeModal(true);
+   if (S.route === 'sum') { leaveCurrent(); openCombined(); } else go('#/sum', true);
+ }
+ function combinedFrom(ids){
+   var items = sumPool();
+   var chosen = ids.length ? items.filter(function(it){ return ids.indexOf(it.id) >= 0; }) : items;
+   return {items:items, chosen:chosen};
+ }
+ function openCombined(){
+   var ids = S.sumIds.length ? S.sumIds : readSumSelection(), r = combinedFrom(ids);
+   if (!r.chosen.length) { goHomeWithMessage(S.sumSource === 'server' ? '共有サーバーの読み込み内容がありません。「全員分を見る」から開き直してください。' : r.items.length ? '合算するデータが見つかりません。選び直してください。' : '保存データがありません。'); return; }
+   var combined; try { combined = C.sumSessions(r.chosen.map(function(it){ return it.session; })); } catch (e) { goHomeWithMessage(e.message); return; }
+   S.route = 'sum'; S.id = null; data = combined; S.readOnly = true; S.lost = false; S.blocked = false; S.unsaved = false; S.hasSaved = false; S.saveError = ''; S.rawRecovery = null;
+   S.sumIds = r.chosen.map(function(it){ return it.id; }); S.sumNames = r.chosen.map(function(it){ return who(it.session.meta); }); saveSumSelection();
+   ui.view = 'summary'; ui.remove = false; ui.day = '1'; ui.type = 'student';
+   document.title = '合算｜' + APP_LABEL;
+   showView('session'); renderedType = ''; render();
+ }
+ function refreshCombined(){
+   if (S.route !== 'sum' || S.sumSource === 'server') return;
+   var r = combinedFrom(S.sumIds), chosen = r.chosen.filter(function(it){ return S.sumIds.indexOf(it.id) >= 0; });
+   if (!chosen.length) { goHomeWithMessage('合算の対象データがなくなりました'); return; }
+   try { data = C.sumSessions(chosen.map(function(it){ return it.session; })); } catch (e) { toast(e.message); return; }
+   S.sumIds = chosen.map(function(it){ return it.id; }); S.sumNames = chosen.map(function(it){ return who(it.session.meta); }); saveSumSelection();
+   render(); toast('合算を最新の内容に更新しました');
+ }
+
+ /* ---------- routing ---------- */
+ function parseRoute(){
+   var h = location.hash || '', m = /^#\/s\/(\d{8}-[0-9A-Z]{6})$/.exec(h);
+   if (m && C.ID_RE.test(m[1])) return {name:'session', id:m[1]};
+   if (h === '#/sum') return {name:'sum'};
+   return {name:'home'};
+ }
+ function go(hash, push){
+   try { if (push) history.pushState({sealApp:1}, '', hash); else history.replaceState(null, '', hash); }
+   catch (e) { if (location.hash !== hash) { location.hash = hash; return; } }
+   route();
+ }
+ function route(){
+   navSeq++;
+   var r = parseRoute();
+   if (r.name === 'session') { if (S.route === 'session' && S.id === r.id) return; leaveCurrent(); openSession(r.id); }
+   else if (r.name === 'sum') { if (S.route === 'sum') return; leaveCurrent(); openCombined(); }
+   else { if (S.route === 'home') { renderHome(); return; } leaveCurrent(); showHome(); }
+ }
+ function navigateHome(){
+   if (history.state && history.state.sealApp) { var seq = navSeq; history.back(); setTimeout(function(){ if (navSeq === seq && parseRoute().name !== 'home') go('#/', false); }, 700); }
+   else go('#/', false);
+ }
+ function backToList(){
+   if (S.route === 'session' && S.unsaved) {
+     modal('端末内に保存できていません', '<p>この画面の入力内容は、まだ端末内に保存できていません。一覧へ戻っても、この画面を閉じるまでは保持しますが、閉じると失われます。</p><div class="button-row"><button type="button" class="btn primary" data-action="json-export">バックアップを保存</button><button type="button" class="btn" data-action="leave-anyway">一覧へ戻る</button><button type="button" class="btn" data-action="close">キャンセル</button></div>');
+     return;
+   }
+   navigateHome();
+ }
+ function showView(name){ $('home-view').hidden = name !== 'home'; $('session-view').hidden = name !== 'session'; try { window.scrollTo(0, 0); } catch (ignore) {} }
+ function showHome(){
+   S.route = 'home'; data = null; document.documentElement.dataset.day = '1'; document.title = APP_LABEL + '｜九州電力送配電';
+   if (!$('start-date').value) $('start-date').value = C.localDate();
+   showView('home'); renderHome();
+ }
+ function goHomeWithMessage(msg){ go('#/', false); if (msg) toast(msg); }
+ function leaveCurrent(){
+   stopHeartbeat(); clearTimeout(toastTimer); $('toast').hidden = true;
+   if (S.route === 'session' && S.id) { if (!S.lost) store.release(S.id, TAB_ID); if (S.unsaved && data) unsavedCache[S.id] = data; }
+   if (!$('app-modal').hidden) closeModal(true);
+   S.route = ''; S.id = null; data = null; S.readOnly = false; S.lost = false; S.blocked = false; S.saveError = ''; S.rawRecovery = null; S.unsaved = false; S.hasSaved = false;
+   ui.remove = false; ui.view = 'vote'; undoStacks = {}; lastTaps = {}; pendingRestore = null; renderedType = '';
+ }
+ function restoreUi(id){ ui.day = '1'; ui.type = 'student'; try { var v = JSON.parse(storage && storage.getItem(store.uiKey(id)) || 'null'); if (v && ['1','2'].indexOf(v.day) >= 0 && ['student','adult'].indexOf(v.type) >= 0) { ui.day = v.day; ui.type = v.type; } } catch (ignore) {} }
+ function rememberUI(){ if (S.route !== 'session' || !S.id) return; try { if (storage) storage.setItem(store.uiKey(S.id), JSON.stringify({day:ui.day, type:ui.type})); } catch (ignore) {} }
+ function openSession(id){
+   var loaded = store.load(id), cached = unsavedCache[id], session = null, status = loaded.status;
+   if (status === 'ok' || status === 'recovered') session = loaded.data;
+   if (cached && (!session || cached.revision >= session.revision)) { session = cached; status = 'cached'; }
+   if (!session) { goHomeWithMessage(status === 'corrupt' ? '読み取れないデータです。保存一覧から退避または削除してください。' : status === 'unavailable' ? 'この環境では保存データを読み込めません。' : '指定のデータが見つかりません（ID ' + id + '）。'); return; }
+   var acq = store.acquire(id, TAB_ID, Date.now(), LOCK_STALE, false);
+   if (!acq.ok) { go('#/', false); inUsePrompt(id, acq.lock); return; }
+   S.route = 'session'; S.id = id; data = session; S.readOnly = false; S.lost = false;
+   S.unsaved = status === 'cached'; S.hasSaved = status === 'ok' || status === 'recovered';
+   S.blocked = status === 'recovered'; S.rawRecovery = status === 'recovered' ? (loaded.raw === undefined ? null : loaded.raw) : null;
+   S.saveError = status === 'recovered' ? '保存データに異常があるため、直前の保存を表示しています。最新分が欠けている可能性があります。入力は停止中です。「保存・CSV」で確認してください。' : '';
+   restoreUi(id); ui.view = 'vote'; ui.remove = false; clearUndo();
+   document.title = session.meta.name + '｜' + APP_LABEL;
+   showView('session'); renderedType = ''; render(); startHeartbeat();
+   if (S.unsaved) { var r = store.save(data); if (r.ok) { S.unsaved = false; S.hasSaved = true; delete unsavedCache[id]; } else S.saveError = r.error; updateSaveStatus(); }
+ }
+
+ /* ---------- one editor per session (lock) ---------- */
+ function startHeartbeat(){ stopHeartbeat(); heartbeatTimer = setInterval(beat, LOCK_BEAT); }
+ function stopHeartbeat(){ if (heartbeatTimer) clearInterval(heartbeatTimer); heartbeatTimer = null; }
+ function beat(){
+   if (unloading || S.route !== 'session' || !S.id || S.lost || document.visibilityState === 'hidden') return;
+   if (store.lockState(S.id, TAB_ID, Date.now(), LOCK_STALE).state === 'held') { markLost(); return; }
+   if (!store.acquire(S.id, TAB_ID, Date.now(), LOCK_STALE, false).ok) markLost();
+ }
+ function markLost(){
+   if (S.lost || S.route !== 'session') return;
+   S.lost = true; ui.remove = false; stopHeartbeat();
+   if (!$('app-modal').hidden) closeModal(true);
+   render(); toast('このデータは別の画面で開かれたため、この画面での入力を停止しました');
+ }
+ function takeover(){
+   if (S.route !== 'session' || !S.id) return;
+   if (!store.acquire(S.id, TAB_ID, Date.now(), LOCK_STALE, true).ok) { toast('引き継げませんでした。もう一度お試しください'); return; }
+   S.lost = false;
+   var latest = store.load(S.id);
+   if (latest.status === 'ok') { data = latest.data; S.hasSaved = true; S.blocked = false; S.saveError = ''; S.rawRecovery = null; }
+   else if (latest.status === 'recovered' || latest.status === 'corrupt') { S.blocked = true; S.rawRecovery = latest.raw === undefined ? null : latest.raw; S.saveError = '保存データに異常があります。「保存・CSV」で確認してください。'; }
+   else if (latest.status === 'missing' && S.hasSaved) { S.blocked = true; S.saveError = 'このデータは保存領域から削除されています。表示中のデータをバックアップしてください。'; }
+   clearUndo(); startHeartbeat(); if (!$('app-modal').hidden) closeModal(true); render(); toast('この画面で入力を再開しました');
+ }
+ function syncBeforeEdit(){
+   if (S.route !== 'session' || !data || S.blocked || S.unsaved) return;
+   var latest = store.load(S.id);
+   if (latest.status === 'ok') { if (latest.data.revision > data.revision) { data = latest.data; clearUndo(); toast('別の画面の保存内容を反映しました'); } }
+   else if (latest.status === 'corrupt' || latest.status === 'recovered') { S.blocked = true; S.rawRecovery = latest.raw === undefined ? null : latest.raw; S.saveError = '保存領域に異常があるため入力を停止しました。「保存・CSV」で確認してください。'; }
+   else if (latest.status === 'missing' && S.hasSaved) { S.blocked = true; S.saveError = 'このデータが保存領域から削除されたため、入力を停止しました。表示中のデータをバックアップするか、「表示中のデータで継続」を選んでください。'; }
+   else if (latest.status === 'unavailable') { S.unsaved = true; }
+ }
+ function ensureEditable(allowBlocked){
+   if (S.route !== 'session' || !data || S.readOnly) return false;
+   if (S.lost) { toast('別の画面で入力中のため、この画面では入力できません'); return false; }
+   var st = store.lockState(S.id, TAB_ID, Date.now(), LOCK_STALE);
+   if (st.state === 'held') { markLost(); return false; }
+   if (st.state !== 'mine' && !store.acquire(S.id, TAB_ID, Date.now(), LOCK_STALE, false).ok) { markLost(); return false; }
+   if (!S.blocked) syncBeforeEdit();
+   if (S.blocked && !allowBlocked) { render(); return false; }
+   return true;
+ }
+ function persist(dayKeys){
+   var time = now(); data.updatedAt = time; data.revision++;
+   (dayKeys || [ui.day]).forEach(function(k){ data.days[k].updatedAt = time; });
+   var saved = store.save(data);
+   if (saved.ok) { S.hasSaved = true; S.unsaved = false; delete unsavedCache[data.id]; }
+   else { S.unsaved = true; S.saveError = saved.error; unsavedCache[data.id] = data; }
+   updateSaveStatus(); scheduleSync();
+   return saved.ok;
+ }
+
+ /* ---------- survey board ---------- */
+ function updateSaveStatus(){
+   var node = $('save-state'), text;
+   if (S.route === 'sum') text = '合算表示（読み取り専用）';
+   else if (S.blocked) text = '保存データの確認が必要';
+   else if (S.lost) text = '別の画面で入力中';
+   else if (S.unsaved) text = '端末内に未保存';
+   else if (S.hasSaved && data && data.updatedAt) text = '自動保存済み ' + new Date(data.updatedAt).toLocaleTimeString('ja-JP', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+   else text = '入力ごとに自動保存';
+   node.textContent = text; node.classList.toggle('problem', S.route === 'session' && (S.blocked || S.unsaved || S.lost));
+   var warning = '';
+   if (S.route === 'session') { if (S.blocked) warning = S.saveError || '保存データの確認が必要です。入力は停止しています。'; else if (S.unsaved) warning = 'この環境では端末内への保存ができていません' + (S.saveError ? '（' + S.saveError + '）' : '') + '。終了前に「保存・CSV」からバックアップを保存してください。'; }
+   $('storage-warning').hidden = !warning; $('storage-warning-text').textContent = warning;
+ }
+ function renderSessionBar(){
+   var html;
+   if (S.route === 'sum') { var names = S.sumNames.slice(0, 4).join('、') + (S.sumNames.length > 4 ? ' ほか' + (S.sumNames.length - 4) + '件' : ''); html = '<span class="sum-tag">合算（' + S.sumIds.length + '件・' + (S.sumSource === 'server' ? '共有サーバー' : 'この端末') + '）</span><span>' + esc(names) + '</span>'; }
+   else { var m = data.meta; html = '<span>入力者 <strong>' + esc(m.name) + '</strong></span><span>' + esc(m.company) + '</span><span>日付 ' + esc(fmtDate(m.date)) + '</span><span>ID <span class="session-id">' + esc(data.id) + '</span></span>'; }
+   $('session-bar').innerHTML = html;
+ }
+ function renderStateBanner(){
+   var b = $('state-banner'), html = '', info = false;
+   if (S.route === 'sum') { info = true; html = '<div>' + (S.sumSource === 'server' ? '共有サーバーの全員分から ' + S.sumIds.length + '件の合算です（' + esc(sync.cache ? fmtDateTime(sync.cache.at) : '') + ' 読み込み・読み取り専用）。' : '合算表示です（' + S.sumIds.length + '件・読み取り専用）。') + '票の入力はできません。</div><div class="button-row"><button type="button" class="btn" data-banner="sum-select">' + (S.sumSource === 'server' ? '最新を読み込む' : '対象を選び直す') + '</button><button type="button" class="btn" data-banner="home">保存一覧へ</button></div>'; }
+   else if (S.lost) html = '<div>このデータは別のタブ・画面で開かれたため、この画面での入力を停止しました。</div><div class="button-row"><button type="button" class="btn danger" data-banner="takeover">この画面で入力を再開</button><button type="button" class="btn" data-banner="home">保存一覧へ</button></div>';
+   b.className = 'state-banner' + (info ? ' info' : ''); b.innerHTML = html; b.hidden = !html;
+ }
+ function targetFromButton(button){ var t = {q:button.dataset.q}; if (button.dataset.r !== undefined) t.r = Number(button.dataset.r); if (button.dataset.c !== undefined) t.c = Number(button.dataset.c); return t; }
+ function hitButton(t, id, extra){ return '<button type="button" class="vote-hit empty' + (extra ? ' ' + extra : '') + '" id="' + id + '" data-q="' + t.q + '"' + (t.r === undefined ? '' : ' data-r="' + t.r + '"') + (t.c === undefined ? '' : ' data-c="' + t.c + '"') + ' aria-label="投票を追加"></button>'; }
+ function buildMatrix(){
+   var c = C.CONFIG[ui.type], type = ui.type;
+   var html = '<table class="vote-table ' + type + '" aria-label="① ' + esc(c.q1) + '"><colgroup>';
+   if (type === 'student') { html += '<col style="width:15.8%">'; c.cols.forEach(function(){ html += '<col style="width:8.25%">'; }); html += '<col style="width:6.5%"><col style="width:11.7%">'; }
+   else { html += '<col style="width:24%">'; c.cols.forEach(function(){ html += '<col style="width:16%">'; }); html += '<col style="width:12%">'; }
+   html += '</colgroup><thead><tr><th scope="col">' + esc(c.first) + '</th>';
+   c.heads.forEach(function(head){ html += '<th scope="col">' + head + '</th>'; });
+   html += '<th scope="col">集計</th>' + (c.hasUnknown ? '<th scope="col">シール集計不可<br>業界不明</th>' : '') + '</tr></thead><tbody>';
+   c.rows.forEach(function(label, r){
+     html += '<tr><th scope="row" class="row-name">' + esc(label) + '</th>';
+     c.cols.forEach(function(col, v){ html += '<td>' + hitButton({q:'matrix', r:r, c:v}, 'vote-m-' + r + '-' + v) + '</td>'; });
+     html += '<td class="sum-cell"><span id="row-total-' + r + '">0</span><small>人</small></td>';
+     if (c.hasUnknown && r === 0) html += '<td class="unknown-td" rowspan="' + (c.rows.length + 1) + '">' + hitButton({q:'unknown'}, 'vote-unknown', 'unknown-hit') + '</td>';
+     html += '</tr>';
+   });
+   html += '<tr class="total-row"><th class="row-name" scope="row">列計</th>';
+   c.cols.forEach(function(_, v){ html += '<td class="sum-cell"><span id="column-total-' + v + '">0</span><small>人</small></td>'; });
+   html += '<td class="sum-cell"><span id="table-total">0</span><small>人</small></td></tr></tbody></table>';
+   return html;
+ }
+ function buildChoices(){
+   var c = C.CONFIG[ui.type], type = ui.type;
+   var html = '<div class="choice-grid ' + type + '">';
+   c.choices.forEach(function(label, i){
+     var unknown = type === 'adult' && i === 8;
+     var position = type === 'adult' && !unknown ? ' style="grid-column:' + (i % 4 + 1) + ';grid-row:' + (Math.floor(i / 4) + 1) + '"' : '';
+     html += '<div class="choice-card' + (unknown ? ' unknown-choice' : '') + '"' + position + '><div class="choice-label">' + (unknown ? 'シール集計不可<br>業界不明' : esc(label)) + '</div>' + hitButton({q:'q2', c:i}, 'vote-q2-' + i) + '</div>';
+   });
+   return html + '</div>';
+ }
+ function fillVoteButton(button){
+   var t = targetFromButton(button), value = C.valueAt(activeForm(), ui.type, t), ro = S.readOnly || S.lost, mode = ro ? 'ro' : (ui.remove ? 'remove' : 'add');
+   if (button._count !== value || button._mode !== mode) {
+     if (value === 0) button.innerHTML = '<span class="empty-mark" aria-hidden="true">' + (ro ? '0' : ui.remove ? '−' : '+') + '</span>' + (t.q === 'unknown' ? '<span class="unknown-caption">' + (ro || ui.remove ? '0票' : 'タップして追加') + '</span>' : '');
+     else { var dots = ''; for (var i = 0; i < Math.min(value, t.q === 'matrix' ? 3 : 6); i++) dots += '<span class="seal"></span>'; button.innerHTML = '<span class="seal-stack" aria-hidden="true">' + dots + '</span><span class="vote-number">' + num(value) + '</span>' + (t.q === 'unknown' ? '<span class="unknown-caption">票' + (ro ? '' : ui.remove ? ' ／ 1票取り消し' : ' ／ タップで追加') + '</span>' : ''); }
+     button._count = value; button._mode = mode;
+   }
+   button.classList.toggle('empty', value === 0); button.classList.toggle('has-votes', value > 0); button.classList.toggle('remove-mode', ui.remove && !ro); button.classList.toggle('readonly', ro);
+   button.disabled = S.blocked || ro || (ui.remove && value === 0);
+   button.setAttribute('aria-label', (S.route === 'sum' ? '合算 ' : '') + ui.day + '日目 ' + C.CONFIG[ui.type].name + ' ' + C.targetLabel(ui.type, t) + '、現在' + value + '票。' + (ro ? '読み取り専用' : ui.remove ? '1票取り消す' : '1票追加する'));
+ }
+ function updateBoard(){
+   var c = C.CONFIG[ui.type], s = C.stats(activeForm()), ro = S.readOnly || S.lost;
+   if (renderedType !== ui.type) { $('matrix-host').innerHTML = buildMatrix(); $('choices-host').innerHTML = buildChoices(); renderedType = ui.type; cellButtons = Array.prototype.slice.call(document.querySelectorAll('#session-view .vote-hit[data-q]')); }
+   $('q1-heading').textContent = '① ' + c.q1; $('q1-hint').textContent = c.hint; $('q2-heading').textContent = '② ' + c.q2;
+   $('q2-hint').textContent = ro ? '各マスの数字は票数です（読み取り専用）' : '1つだけ選んで、シールを1枚（該当するマスを1回タップ）';
+   $('q1-total').textContent = num(s.q1); $('q2-total').textContent = num(s.q2); $('respondents').textContent = num(s.q1);
+   s.rows.forEach(function(v, r){ $('row-total-' + r).textContent = num(v); });
+   s.cols.forEach(function(v, i){ $('column-total-' + i).textContent = num(v); }); $('table-total').textContent = num(s.known);
+   cellButtons.forEach(fillVoteButton);
+   var removing = ui.remove && !ro;
+   $('correction-banner').hidden = !removing; $('remove-toggle').setAttribute('aria-pressed', String(removing)); $('remove-toggle').textContent = removing ? '修正モードを終了' : '1票取り消す';
+   $('remove-toggle').disabled = S.blocked || ro;
+   $('undo-button').disabled = S.blocked || ro || !undoStack().length;
+   $('student-guide').hidden = ui.type !== 'student'; $('adult-guide').hidden = ui.type !== 'adult';
+   $('unknown-note').hidden = !c.hasUnknown;
+   $('footer-day').textContent = ui.day + '日目：' + (ui.day === '1' ? '青' : 'オレンジ') + 'のシール';
+ }
+ function bars(items, total){
+   var max = Math.max.apply(null, [1].concat(items.map(function(x){ return x.value; }))), html = '';
+   if (total === 0) html += '<p class="empty-chart">まだ投票はありません。</p>';
+   items.forEach(function(item){ var p = item.value / max * 100; html += '<div class="bar-record"><div>' + esc(item.label) + '</div><div class="bar-track"><div class="bar-fill" style="width:' + p.toFixed(4) + '%"></div></div><div class="bar-number">' + num(item.value) + '</div></div>'; });
+   return html;
+ }
+ function updateSummary(){
+   var c = C.CONFIG[ui.type], f = activeForm(), s = C.stats(f);
+   $('summary-q1').textContent = num(s.q1); $('summary-q2').textContent = num(s.q2); $('summary-gap').textContent = (s.difference > 0 ? '+' : '') + num(s.difference);
+   $('summary-gap-note').textContent = s.difference === 0 ? '①と②の票数は一致しています。' : '①と②の票数が一致していません。回答漏れや操作内容をご確認ください。';
+   var industry = c.rows.map(function(label, i){ return {label:label, value:s.rows[i]}; }); if (c.hasUnknown) industry.push({label:'業界不明', value:f.unknown});
+   $('summary-industry-heading').textContent = '① ' + (ui.type === 'student' ? '気になる業界' : 'ご所属の業界');
+   $('summary-industry').innerHTML = bars(industry, s.q1); $('summary-choices-heading').textContent = '② ' + c.q2;
+   $('summary-choices').innerHTML = bars(c.choices.map(function(label, i){ return {label:label, value:f.q2[i]}; }), s.q2);
+   var html = '<table class="plain-table"><thead><tr><th>日別</th><th>日付</th><th>対象</th><th class="num">①回答者数</th><th class="num">②票数</th><th class="num">差</th></tr></thead><tbody>';
+   ['1','2'].forEach(function(k){ ['student','adult'].forEach(function(type){ var day = data.days[k], v = C.stats(day[type]); html += '<tr' + (k === ui.day && type === ui.type ? ' class="is-current"' : '') + '><td>' + k + '日目</td><td>' + esc(day.date || '未設定') + '</td><td>' + C.CONFIG[type].name + '</td><td class="num">' + num(v.q1) + '</td><td class="num">' + num(v.q2) + '</td><td class="num">' + (v.difference > 0 ? '+' : '') + num(v.difference) + '</td></tr>'; }); });
+   html += '</tbody></table>'; $('summary-day-table').innerHTML = html;
+ }
+ function render(){
+   if ((S.route !== 'session' && S.route !== 'sum') || !data) return;
+   document.documentElement.dataset.day = ui.day;
+   document.querySelectorAll('[data-select-day]').forEach(function(b){ b.setAttribute('aria-pressed', String(b.dataset.selectDay === ui.day)); });
+   document.querySelectorAll('[data-select-type]').forEach(function(b){ b.setAttribute('aria-pressed', String(b.dataset.selectType === ui.type)); });
+   document.querySelectorAll('[data-select-view]').forEach(function(b){ b.setAttribute('aria-pressed', String(b.dataset.selectView === ui.view)); });
+   $('audience-label').textContent = dateLabel(ui.day) + ' ／ ' + C.CONFIG[ui.type].audience;
+   $('board-title').textContent = ui.view === 'vote' ? C.CONFIG[ui.type].title : (S.route === 'sum' ? '合算の集計' : 'アンケート集計');
+   $('board-instruction').textContent = S.route === 'sum' ? (ui.view === 'vote' ? '選んだデータの票数を合計した表示です（読み取り専用）。' : '選んだデータの合計です。下の一覧で1日目・2日目を確認できます。') : (ui.view === 'vote' ? '①と②にシールを1枚ずつ（計2枚）。マスをタップすると1票追加されます。' : '選択した日・対象の集計です。下の一覧で1日目・2日目を確認できます。');
+   var label = S.route === 'sum' ? '合算（' + S.sumIds.length + '件）' : who(data.meta) + ' ' + fmtDate(data.meta.date) + ' ID ' + data.id;
+   $('print-context').textContent = label + ' ／ ' + dateLabel(ui.day) + ' ／ ' + C.CONFIG[ui.type].name + ' ／ ' + (ui.view === 'vote' ? '投票様式' : '集計結果');
+   $('vote-view').hidden = ui.view !== 'vote'; $('summary-view').hidden = ui.view !== 'summary';
+   $('board-actions').hidden = ui.view !== 'vote' || S.route === 'sum';
+   $('summary-export-button').textContent = S.route === 'sum' ? 'CSVを保存' : 'CSV・バックアップを保存';
+   renderSessionBar(); renderStateBanner();
+   updateBoard(); if (ui.view === 'summary') updateSummary(); updateSaveStatus(); renderSyncState();
+ }
+ function vote(button){
+   if (ui.view !== 'vote' || !$('app-modal').hidden || S.route !== 'session') return;
+   var t = targetFromButton(button), key = ui.day + ':' + C.targetKey(ui.type, t), time = Date.now();
+   if (lastTaps[key] !== undefined && time - lastTaps[key] < TAP_GAP) return;
+   if (!ensureEditable()) { render(); return; }
+   lastTaps[key] = time;
+   var delta = ui.remove ? -1 : 1;
+   if (!C.change(activeForm(), ui.type, t, delta)) { toast(delta < 0 ? '0票のため取り消せません' : '票数の上限に達しました'); updateBoard(); return; }
+   var h = undoStack(); h.push({target:C.clone(t), delta:delta}); if (h.length > UNDO_LIMIT) h.shift();
+   persist(); updateBoard();
+   button.classList.remove('just-tapped'); void button.offsetWidth; button.classList.add('just-tapped'); setTimeout(function(){ button.classList.remove('just-tapped'); }, 200);
+   toast(C.targetLabel(ui.type, t) + ' ' + (delta > 0 ? '＋1票' : '−1票'));
+ }
+ function undo(){
+   if (S.route !== 'session') return;
+   if (!ensureEditable()) { render(); return; }
+   var h = undoStack(), action = h[h.length - 1]; if (!action) { updateBoard(); return; }
+   if (!C.change(activeForm(), ui.type, action.target, -action.delta)) { toast('この操作は元に戻せません。票数をご確認ください。'); return; }
+   h.pop(); delete lastTaps[ui.day + ':' + C.targetKey(ui.type, action.target)]; persist(); updateBoard(); toast('直前の操作を元に戻しました');
+ }
+
+ /* ---------- dialogs ---------- */
+ function modal(title, html){
+   if ($('app-modal').hidden) lastFocus = document.activeElement;
+   modalBack = null;
+   $('modal-title').textContent = title; $('modal-body').innerHTML = html; $('app-modal').hidden = false; document.body.style.overflow = 'hidden';
+   $('modal-content').scrollTop = 0;
+   try { $('modal-close').focus({preventScroll:true}); } catch (e) { $('modal-close').focus(); }
+ }
+ function closeModal(skipFocus){
+   $('app-modal').hidden = true; document.body.style.overflow = ''; pendingImport = null; pendingMeta = null; pendingV1 = null; modalBack = null;
+   if (!skipFocus && lastFocus && lastFocus.isConnected && typeof lastFocus.focus === 'function') { try { lastFocus.focus({preventScroll:true}); } catch (e) {} }
+ }
+ function howtoHtml(){
+   return '<section><h3>使い方・運用上の注意</h3><ol>' +
+     '<li>保存一覧の画面で「入力者名・会社名・日付」を入れて「開始」を押すと、IDが発行され、入力者ごとに別々に保存されます。同じ端末を複数人で使っても混ざりません。</li>' +
+     '<li>続きは保存一覧の「再開」から。マスをタップするたびに自動保存されます。</li>' +
+     '<li>同じデータを、同じ端末の別のタブ・画面で同時に入力することはできません。別の画面で開くと前の画面は入力を停止します（「この画面で入力を再開」で引き継げます）。</li>' +
+     '<li>上部で「1日目／2日目」と「学生／一般・社会人」を選び、①と②で各1マスをタップします。「1つ戻す」は直近100操作まで、「1票取り消す」は修正モードです。</li>' +
+     '<li>同じマスへの0.12秒未満の連続タップは、誤タップ防止のため1回として扱います。</li>' +
+     '<li>横幅が足りない場合は、表の中を横にスワイプしてください。業界名は左端に固定されます。</li>' +
+     (SYNC_ENABLED ? '<li>共有サーバー（代表者のGoogleスプレッドシート）に接続すると、入力は自動で送られ、全員分が1か所に集まります。代表者は「全員分を見る」から合算・CSV・バックアップを一括で取り出せます。電波がないときは端末に保存し、つながったときに自動で再送します。</li>' +
+     '<li>共有サーバーに接続していない端末の入力は、その端末にしか保存されません。代表者から届いた共有リンクを各端末で1回開いてください。同じIDのデータは重複せず、新しい方に置き換わります。</li>'
+     : '<li>保存はこの端末・ブラウザーの中だけで、外部へは送信しません。全員分を集めるときは、各自が保存一覧の「バックアップ」（または「全件バックアップ」）でJSONファイルを保存してAirDrop・LINE・メールで送り、集める人が「データを取り込む」でまとめて読み込み、「合算を見る」「全件CSV」で集計します。同じIDのデータは重複せず、新しい方に置き換わります。</li>' +
+     '<li>取り込んだデータを集める人の端末で書き換えると、元の端末と食い違います。入力は元の端末で続け、最後にもう一度バックアップを取り込み直してください。</li>') +
+     '<li>終了時・休憩時にはバックアップを保存してください。サイトデータの削除、プライベートブラウズ、端末変更のほか、iPhone・iPadでしばらく（7日程度）開かない場合にも、端末内のデータが消えることがあります。</li>' +
+     '<li>Safariで開いた場合と、ホーム画面に追加したアイコンから開いた場合とでは、保存一覧が別々になることがあります。いつも同じ開き方で使ってください。</li>' +
+     '<li>①の合計を原様式どおり回答者数としています。①と②の回答の組合せ、同一人物の重複回答は判定しません。会期中お一人1回の運用はスタッフで確認してください。</li></ol>' +
+     '<p>元様式の項目・表の構成を維持しています。学生①の右端「業界不明」は業界別・展示別の行列計には含めず、①全体の合計に加算します。社会人②の右端表記も元様式を維持しています。</p></section>';
+ }
+ function footerNoteHtml(){ return '<p class="footer-note">元様式：学生C案・一般社会人A案。配色は社内「デザイン要則」の白地・ブルー・黒を参考にした画面用の近似色です。正式なRGB指定やロゴデータの再現ではありません。2日目のオレンジは日別識別用です。' + (SYNC_ENABLED ? '入力者名・会社名・票数は、この端末内と保存したバックアップ・CSVに記録されます。共有サーバーに接続した場合だけ、代表者のGoogleスプレッドシートへ送信します（それ以外の外部送信はありません）。' : '入力者名・会社名・票数は、この端末内と保存したバックアップ・CSVにだけ記録され、外部へは送信しません。') + '<br>※重要な判断には必ず原文を確認してください。</p>'; }
+ function manager(){
+   if (S.route === 'sum') { sumManager(); return; }
+   if (S.route !== 'session' || !data) return;
+   var editable = canEdit(), m = data.meta;
+   var status = S.blocked ? '保存データの確認が必要です。入力は停止中です。' : S.lost ? '別の画面で入力中のため、この画面では入力できません（表示とファイル出力はできます）。' : S.unsaved ? 'この画面のデータは保持していますが、端末内には保存できていません。バックアップを保存してください。' : '入力のたびに、この端末・ブラウザー内へ自動保存しています。';
+   var warningControls = S.blocked ? '<section class="manage-section"><h3 class="danger-text">保存異常への対応</h3><p>' + esc(S.saveError) + '</p><div class="button-row">' + (S.rawRecovery !== null ? '<button type="button" class="btn" data-action="raw-export">異常データを退避</button>' : '') + '<button type="button" class="btn danger" data-action="ack-recovery"' + (S.lost ? ' disabled' : '') + '>表示中のデータで継続</button></div><p class="secondary-text">表示中のデータが正しいと確認できない場合は、「バックアップから復元」で読み込んでください。</p></section>' : '';
+   modal('保存・CSV・使い方',
+     '<p class="scope-label">' + esc(who(m)) + ' ／ ' + esc(fmtDate(m.date)) + ' ／ ID ' + esc(data.id) + '<br>表示中：' + esc(dateLabel(ui.day)) + ' ／ ' + C.CONFIG[ui.type].name + '</p>' +
+     '<div class="local-status-box">' + esc(status) + '<br>同じデータは同時に1つの画面でだけ入力できます。別の端末とは自動同期しません。</div>' +
+     (S.lost ? '<div class="button-row"><button type="button" class="btn danger" data-action="takeover">この画面で入力を再開</button></div>' : '') + warningControls +
+     '<div class="manage-grid"><div><section class="manage-section"><h3>集計CSV・バックアップ</h3>' + exportFieldsHtml() +
+     '<div class="button-row"><button type="button" class="btn primary" data-action="csv-export">CSV出力</button><button type="button" class="btn" data-action="json-export">バックアップ保存</button><button type="button" class="btn" data-action="print">表示中を印刷・PDF</button></div><p class="secondary-text">CSVはExcel向けのUTF-8（BOM付き）で、各行の先頭に ID・入力者・会社名・入力日 が付きます。バックアップ（JSON）は両日分をまとめて保存し、復元や別の端末への取り込みに使います。</p></section></div>' +
+     '<div><section class="manage-section"><h3>バックアップから復元</h3><p>このツールで保存したJSONを読み込み、選んだ日の票数を置き換えます（合算ではありません）。旧版のバックアップも読み込めます。</p><button type="button" class="btn" data-action="restore-pick"' + (restorable() ? '' : ' disabled') + '>JSONを選んで復元</button><p class="secondary-text">復元前に、いまのデータのバックアップを保存してください。</p></section>' +
+     '<section class="manage-section"><h3>入力者情報（IDは変わりません）</h3><label class="field"><span>入力者名</span><input id="meta-name" type="text" maxlength="80" autocomplete="name" value="' + esc(m.name) + '"' + (editable ? '' : ' disabled') + '></label><label class="field"><span>会社名</span><input id="meta-company" type="text" maxlength="120" autocomplete="organization" value="' + esc(m.company) + '"' + (editable ? '' : ' disabled') + '></label><label class="field"><span>日付</span><input id="meta-date" type="date" min="1900-01-01" max="2199-12-31" value="' + esc(m.date) + '"' + (editable ? '' : ' disabled') + '></label><div class="button-row"><button type="button" class="btn" data-action="meta-save"' + (editable ? '' : ' disabled') + '>入力者情報を保存</button></div></section>' +
+     '<section class="manage-section"><h3>会期の日付（任意）</h3><label class="field"><span>1日目の日付</span><input type="date" min="1900-01-01" max="2199-12-31" id="day-date-1" value="' + esc(data.days['1'].date) + '"' + (editable ? '' : ' disabled') + '></label><label class="field"><span>2日目の日付</span><input type="date" min="1900-01-01" max="2199-12-31" id="day-date-2" value="' + esc(data.days['2'].date) + '"' + (editable ? '' : ' disabled') + '></label></section></div></div>' +
+     howtoHtml() +
+     '<section class="manage-section"><h3>表示中の様式だけを初期化</h3><p>' + esc(dateLabel(ui.day)) + ' ／ ' + C.CONFIG[ui.type].name + ' だけを0票にします。他の日・他の対象は変更しません。</p><button type="button" class="btn danger" data-action="reset-prompt"' + (editable ? '' : ' disabled') + '>表示中の様式を初期化</button></section>' +
+     footerNoteHtml());
+ }
+ function sumManager(){
+   modal('合算のCSV・印刷', '<p class="scope-label">合算（' + S.sumIds.length + '件）／ 表示中：' + esc(dateLabel(ui.day)) + ' ／ ' + C.CONFIG[ui.type].name + '</p><div class="local-status-box">選んだデータの票数を足し合わせた読み取り専用の表示です。元のデータは変更しません。</div>' +
+     '<section class="manage-section"><h3>合算のCSV</h3>' + exportFieldsHtml() + '<div class="button-row"><button type="button" class="btn primary" data-action="csv-export">CSV出力</button><button type="button" class="btn" data-action="print">表示中を印刷・PDF</button></div><p class="secondary-text">入力者ごとの内訳が必要な場合は、保存一覧の「全件CSV」を使ってください。</p></section>' +
+     '<section class="manage-section"><h3>合算に含めたデータ</h3><ul>' + S.sumNames.map(function(n){ return '<li>' + esc(n) + '</li>'; }).join('') + '</ul><div class="button-row"><button type="button" class="btn" data-action="sum-reselect">対象を選び直す</button></div></section>');
+ }
+ function releaseExport(){ if (activeExport && activeExport.url) { var url = activeExport.url; setTimeout(function(){ URL.revokeObjectURL(url); }, 120000); } activeExport = null; }
+ function exportFile(o){
+   releaseExport();
+   var blob = new Blob([o.text], {type:o.mime}), url = '', file = null;
+   try { url = URL.createObjectURL(blob); } catch (ignore) {}
+   try { file = new File([blob], o.filename, {type:o.mime}); } catch (ignore) {}
+   activeExport = {text:o.text, filename:o.filename, blob:blob, url:url, file:file};
+   var canShare = false; try { canShare = !!(file && navigator.share && navigator.canShare && navigator.canShare({files:[file]})); } catch (ignore) {}
+   var preview = !o.hidePreview && o.text.length <= PREVIEW_LIMIT;
+   modal('ファイルを保存', '<p>' + esc(o.description) + '</p><div class="export-box"><div class="export-name">' + esc(o.filename) + '</div><p class="secondary-text">' + num(blob.size) + ' バイト ／ ファイルを作成しました。保存先はブラウザー側で指定してください。</p><div class="button-row">' +
+     (url ? '<a class="btn primary" id="download-link" href="' + esc(url) + '" download="' + esc(o.filename) + '" data-action="download">ダウンロード</a>' : '') + '<button type="button" class="btn" data-action="share-file"' + (canShare ? '' : ' disabled') + '>共有して保存</button></div></div>' +
+     '<p class="secondary-text">iPhone・iPadでダウンロードできない場合は「共有して保存」から「&quot;ファイル&quot;に保存」やAirDropを選んでください。共有に非対応のブラウザーではボタンが無効になります。</p>' +
+     (preview ? '<h3>内容を表示・コピー</h3><textarea id="export-preview" class="preview-text" readonly spellcheck="false" aria-label="保存ファイルの内容"></textarea><div class="button-row"><button type="button" class="btn" data-action="copy-export">内容をコピー</button></div>' : '') +
+     '<div class="button-row"><button type="button" class="btn" data-action="back">' + esc(o.backLabel || '閉じる') + '</button></div>');
+   modalBack = o.back || null;
+   if ($('export-preview')) $('export-preview').value = o.text;
+ }
+ function sessionFileLabel(){ return S.route === 'sum' ? '合算' + S.sumIds.length + '件' : data.id + '_' + safePart(data.meta.name); }
+ function csvExport(){
+   var keys = readExportSettings(), entries = S.route === 'sum' ? [{cols:['合算', S.sumIds.length + '件の合算', '', ''], data:data}] : [{cols:[data.id, data.meta.name, data.meta.company, data.meta.date], data:data}];
+   exportFile({text:C.toCsv(C.csvRows(entries, keys, exportKind)), filename:'九州電力送配電_アンケート_' + sessionFileLabel() + '_' + scopeLabel(keys) + '_' + (exportKind === 'summary' ? 'サマリー' : '項目別集計') + '_' + fileStamp() + '.csv', mime:'text/csv;charset=utf-8',
+     description:(S.route === 'sum' ? '合算（' + S.sumIds.length + '件）の' : '') + scopeLabel(keys) + '・学生／一般社会人の集計です。項目別CSVは0票を含め、各マス・各選択肢を1行で出力します。', back:manager, backLabel:S.route === 'sum' ? '合算のCSVへ戻る' : '保存・CSVへ戻る'});
+ }
+ function jsonExport(back, backLabel){
+   if (S.route !== 'session') return;
+   exportFile({text:JSON.stringify(C.normalizeSession(data), null, 2), filename:'九州電力送配電_アンケート_' + sessionFileLabel() + '_' + fileStamp() + '.json', mime:'application/json;charset=utf-8',
+     description:who(data.meta) + '・' + fmtDate(data.meta.date) + '（ID ' + data.id + '）の両日分を含むバックアップです。復元や、別の端末の「データを取り込む」で使えます。', back:back || manager, backLabel:backLabel || '保存・CSVへ戻る'});
+ }
+ function pickRestore(){ if (!restorable()) return; readExportSettings(); var f = $('restore-file'); f.value = ''; f.click(); }
+ function previewRestore(){
+   var p = pendingRestore; if (!p || S.route !== 'session') return;
+   var keys = Object.keys(p.days).sort(), other = p.source.kind === 'v2' && p.source.id !== data.id;
+   var html = '<p><strong>' + esc(p.name) + '</strong></p>' +
+     (other ? '<p class="danger-text"><strong>別のデータのバックアップです</strong>（' + esc(who(p.source.meta)) + '・' + esc(fmtDate(p.source.meta.date)) + '・ID ' + esc(p.source.id) + '）。取り込むと同じ票が2つのデータに入り、合算すると二重計上になります。</p>' : '') +
+     (p.source.kind === 'v1' ? '<p class="secondary-text">旧版（Ver.1）のバックアップです。</p>' : '') +
+     '<p>チェックした日の両様式（学生・一般社会人）を置き換えます。<strong>現在の票数とは合算しません。</strong></p><div class="table-scroll"><table class="plain-table"><thead><tr><th>復元する日</th><th>対象</th><th class="num">現在 ①／②</th><th class="num">ファイル ①／②</th></tr></thead><tbody>';
+   keys.forEach(function(k){ ['student','adult'].forEach(function(type, i){ var cur = C.stats(data.days[k][type]), inc = C.stats(p.days[k][type]); html += '<tr>' + (i === 0 ? '<td rowspan="2"><label class="check-inline"><input type="checkbox" class="restore-day" value="' + k + '" checked>' + k + '日目</label></td>' : '') + '<td>' + C.CONFIG[type].name + '</td><td class="num">' + num(cur.q1) + '／' + num(cur.q2) + '</td><td class="num">' + num(inc.q1) + '／' + num(inc.q2) + '</td></tr>'; }); });
+   html += '</tbody></table></div><div class="button-row"><button type="button" class="btn" data-action="before-restore-export">復元前のバックアップを保存</button></div><label class="field"><span>置き換えてよければ「復元」と入力</span><input id="restore-confirm-text" type="text" autocomplete="off" placeholder="復元" maxlength="4"></label><div class="button-row"><button type="button" class="btn primary" data-action="restore-confirm">確認して復元</button><button type="button" class="btn" data-action="manager">キャンセル</button></div>';
+   modal('バックアップの復元確認', html);
+ }
+ function confirmRestore(){
+   var p = pendingRestore; if (!p) return;
+   if ($('restore-confirm-text').value.trim() !== '復元') { toast('確認欄に「復元」と入力してください'); return; }
+   var keys = Array.prototype.slice.call(document.querySelectorAll('.restore-day:checked')).map(function(x){ return x.value; }).filter(function(k){ return !!p.days[k]; });
+   if (!keys.length) { toast('復元する日を選んでください'); return; }
+   if (!ensureEditable(true)) { closeModal(); render(); return; }
+   keys.forEach(function(k){ data.days[k] = C.clone(p.days[k]); });
+   S.blocked = false; S.saveError = ''; S.rawRecovery = null;
+   clearUndo(keys); var ok = persist(keys); pendingRestore = null; closeModal(); render();
+   toast(ok ? scopeLabel(keys) + 'を復元し、端末内へ保存しました' : '復元しましたが端末内に未保存です。バックアップを保存してください');
+ }
+ function resetPrompt(){
+   modal('表示中の様式を初期化', '<p><strong>' + esc(dateLabel(ui.day)) + ' ／ ' + C.CONFIG[ui.type].name + '</strong> の①・②を0票にします。他の日・他の対象は変更しません。</p><p class="danger-text">元に戻せません。先にバックアップを保存してください。</p><label class="field"><span>よければ「初期化」と入力</span><input id="reset-confirm-text" type="text" autocomplete="off" maxlength="5" placeholder="初期化"></label><div class="button-row"><button type="button" class="btn danger" data-action="reset-confirm">この様式だけ初期化</button><button type="button" class="btn" data-action="manager">キャンセル</button></div>');
+ }
+ function resetConfirm(){
+   if ($('reset-confirm-text').value.trim() !== '初期化') { toast('確認欄に「初期化」と入力してください'); return; }
+   if (!ensureEditable()) { closeModal(); render(); return; }
+   data.days[ui.day][ui.type] = C.freshForm(ui.type); undoStacks[stackKey()] = []; lastTaps = {};
+   var ok = persist(); ui.remove = false; closeModal(); render(); toast(ok ? '表示中の様式だけ初期化しました' : '初期化しましたが、端末内に未保存です');
+ }
+ function recoveryPrompt(){ modal('保存データを確認して継続', '<p>現在画面に表示している票数を正として、このデータの保存を続けます。保存領域の異常データは上書きされます。</p><p class="danger-text">必要なら先に異常データを退避し、バックアップと照合してください。最新分が欠けている可能性があります。</p><label class="field"><span>確認した場合は「継続」と入力</span><input id="recovery-confirm-text" type="text" maxlength="4" autocomplete="off" placeholder="継続"></label><div class="button-row"><button type="button" class="btn danger" data-action="recovery-confirm">表示中のデータで継続</button><button type="button" class="btn" data-action="manager">キャンセル</button></div>'); }
+ function recoveryConfirm(){
+   if ($('recovery-confirm-text').value.trim() !== '継続') { toast('確認欄に「継続」と入力してください'); return; }
+   if (!ensureEditable(true)) { closeModal(); render(); return; }
+   S.blocked = false; S.saveError = ''; S.rawRecovery = null;
+   var ok = persist(['1','2']); closeModal(); render(); toast(ok ? '表示中のデータで継続します' : '端末内に未保存です。必ずバックアップを保存してください');
+ }
+ function metaSave(){
+   if (!ensureEditable()) { closeModal(); render(); return; }
+   var m; try { m = C.normalizeMeta({name:$('meta-name').value, company:$('meta-company').value, date:$('meta-date').value, createdAt:data.meta.createdAt}); } catch (e) { toast(e.message); return; }
+   var dup = listSessions().some(function(it){ return it.session && it.id !== data.id && C.identityKey(it.session.meta) === C.identityKey(m); });
+   data.meta = m; var ok = persist([]); document.title = m.name + '｜' + APP_LABEL; render(); manager();
+   toast(!ok ? '端末内に未保存です。バックアップを保存してください' : dup ? '保存しました。同じ入力者・日付のデータが他にもあります' : '入力者情報を保存しました');
+ }
+ async function shareFile(){ if (!activeExport || !activeExport.file || !navigator.share) return; try { await navigator.share({files:[activeExport.file], title:activeExport.filename}); } catch (e) { if (e && e.name !== 'AbortError') toast('共有できませんでした。ダウンロードをご利用ください'); } }
+ async function copyExport(){
+   if (!activeExport) return; var text = activeExport.text, success = false;
+   try { if (navigator.clipboard && navigator.clipboard.writeText) { await navigator.clipboard.writeText(text); success = true; } } catch (ignore) {}
+   if (!success && $('export-preview')) { try { $('export-preview').focus(); $('export-preview').select(); success = document.execCommand('copy'); } catch (ignore) {} }
+   toast(success ? '内容をコピーしました' : 'コピーできませんでした。表示された内容を選択してコピーしてください');
+ }
+
+ /* ---------- events ---------- */
+ var ACTIONS = {
+   'close':function(){ closeModal(); },
+   'back':function(){ if (modalBack) { var f = modalBack; f(); } else closeModal(); },
+   'manager':function(){ manager(); },
+   'csv-export':csvExport, 'json-export':function(){ jsonExport(); }, 'print':function(){ window.print(); },
+   'share-file':function(){ shareFile(); }, 'copy-export':function(){ copyExport(); },
+   'restore-pick':pickRestore, 'restore-confirm':confirmRestore,
+   'before-restore-export':function(){ jsonExport(previewRestore, '復元の確認へ戻る'); },
+   'reset-prompt':resetPrompt, 'reset-confirm':resetConfirm,
+   'raw-export':function(){ exportFile({text:S.rawRecovery || '', filename:'九州電力送配電_アンケート_異常データ退避_' + fileStamp() + '.txt', mime:'text/plain;charset=utf-8', description:'保存領域に残っていた異常データの退避です。復元できるJSONとは限りません。', back:manager, backLabel:'保存・CSVへ戻る'}); },
+   'ack-recovery':recoveryPrompt, 'recovery-confirm':recoveryConfirm,
+   'takeover':function(){ takeover(); }, 'meta-save':metaSave,
+   'leave-anyway':function(){ closeModal(true); navigateHome(); },
+   'dup-resume':function(b){ var id = b.dataset.id; closeModal(true); resume(id); },
+   'dup-create':function(){ var m = pendingMeta; closeModal(true); if (m) openNew(m); },
+   'inuse-takeover':function(b){ var id = b.dataset.id; closeModal(true); if (!store.acquire(id, TAB_ID, Date.now(), LOCK_STALE, true).ok) { toast('引き継げませんでした'); return; } importedOk[id] = true; go('#/s/' + id, true); },
+   'imported-open':function(b){ var id = b.dataset.id; importedOk[id] = true; closeModal(true); resume(id); },
+   'delete-backup':function(b){ var id = b.dataset.id; backupOne(id, function(){ deletePrompt(id); }); },
+   'raw-one':function(b){ var id = b.dataset.id; rawOne(id, function(){ deletePrompt(id); }); },
+   'delete-confirm':function(b){ deleteConfirm(b.dataset.id); },
+   'import-confirm':importConfirm, 'v1-create':v1Create,
+   'bulk-csv-export':bulkCsvExport,
+   'sum-all':function(){ document.querySelectorAll('.sum-check').forEach(function(x){ x.checked = true; }); },
+   'sum-none':function(){ document.querySelectorAll('.sum-check').forEach(function(x){ x.checked = false; }); },
+   'sum-open':sumOpen, 'sum-reselect':sumPrompt,
+   'sync-setup':syncSetupPrompt, 'sync-connect':syncConnect, 'sync-share':function(){ shareLinkPrompt(false); }, 'sync-accept':syncAccept,
+   'sync-now':function(){ syncAll().then(function(r){ toast(r.ok ? (r.sent ? '共有サーバーに送信しました' : '送信待ちのデータはありません') : '送信できませんでした：' + (r.error || '')); if (!$('app-modal').hidden && document.getElementById('sync-url')) syncSetupPrompt(); }); },
+   'sync-disconnect':function(){ modal('共有サーバーとの接続を解除', '<p>この端末から共有サーバーへの送信を止めます。端末内のデータと、共有サーバー（スプレッドシート）にあるデータはそのまま残ります。</p><div class="button-row"><button type="button" class="btn danger" data-action="sync-disconnect-ok">接続を解除</button><button type="button" class="btn" data-action="sync-setup">キャンセル</button></div>'); },
+   'sync-disconnect-ok':function(){ setSyncUrl(''); sync.memUrl = ''; closeModal(); if (S.route === 'home') renderHome(); renderSyncState(); toast('共有サーバーとの接続を解除しました'); },
+   'gas-copy':function(){ copyText(gasCode()).then(function(ok){ toast(ok ? 'スクリプトをコピーしました。Apps Scriptのエディタに貼り付けてください' : 'コピーできませんでした。「スクリプトを表示」から選択してコピーしてください'); }); },
+   'gas-show':gasShow,
+   'share-link-copy':function(){ copyText(shareLink()).then(function(ok){ toast(ok ? '共有リンクをコピーしました' : 'コピーできませんでした。表示中のリンクを選択してコピーしてください'); }); },
+   'share-link-send':function(){ if (!navigator.share) return; navigator.share({title:'展示アンケート集約', text:'展示アンケートの入力用リンクです（開くと共有サーバーにつながります）', url:shareLink()}).catch(function(e){ if (e && e.name !== 'AbortError') toast('共有できませんでした。リンクをコピーしてください'); }); },
+   'server-list':serverListPrompt,
+   'server-show-cache':function(){ renderServerList(); },
+   'server-all':function(){ document.querySelectorAll('.server-check').forEach(function(x){ x.checked = true; }); },
+   'server-none':function(){ document.querySelectorAll('.server-check').forEach(function(x){ x.checked = false; }); },
+   'server-sum':function(){ var list = serverSelected(); if (!list.length) { toast('合算するデータを選んでください'); return; } S.sumSource = 'server'; S.sumIds = list.map(function(x){ return x.id; }); saveSumSelection(); closeModal(true); if (S.route === 'sum') { leaveCurrent(); openCombined(); } else go('#/sum', true); },
+   'server-csv':function(){ var list = serverSelected(); if (!list.length) { toast('出力するデータを選んでください'); return; } sync.selected = list; serverCsvPrompt(); },
+   'server-csv-export':function(){ var list = (sync.selected || []).slice().sort(bySessionOrder), keys = readExportSettings(); if (!list.length) { toast('出力するデータがありません'); return; } exportFile({text:C.toCsv(C.csvRows(list.map(function(x){ return {cols:[x.id, x.meta.name, x.meta.company, x.meta.date], data:x}; }), keys, exportKind)), filename:'九州電力送配電_アンケート_全員分' + list.length + '件_' + scopeLabel(keys) + '_' + (exportKind === 'summary' ? 'サマリー' : '項目別集計') + '_' + fileStamp() + '.csv', mime:'text/csv;charset=utf-8', description:'共有サーバーの全員分から' + list.length + '件を、入力者ごとの行でまとめたCSVです（' + scopeLabel(keys) + '）。', back:renderServerList, backLabel:'全員分へ戻る'}); },
+   'server-json':function(){ var list = serverSelected(); if (!list.length) { toast('出力するデータを選んでください'); return; } exportFile({text:JSON.stringify(C.makeBundle(list, now()), null, 1), filename:'九州電力送配電_アンケート_全員分バックアップ_' + list.length + '件_' + fileStamp() + '.json', mime:'application/json;charset=utf-8', description:'共有サーバーの全員分から' + list.length + '件をまとめたバックアップです。', back:renderServerList, backLabel:'全員分へ戻る'}); }
+ };
+ function serverCsvPrompt(){ modal('全員分CSV', '<p>共有サーバーの全員分から選んだ ' + (sync.selected || []).length + '件を、1つのCSVにまとめます。各行の先頭に ID・入力者・会社名・入力日 が付きます。</p>' + exportFieldsHtml() + '<div class="button-row"><button type="button" class="btn primary" data-action="server-csv-export">CSV出力</button><button type="button" class="btn" data-action="server-show-cache">全員分へ戻る</button></div>'); }
+ function guard(fn){ return function(){ try { return fn.apply(this, arguments); } catch (e) { toast('操作を完了できませんでした：' + (e && e.message || e)); if (window.console) console.error(e); } }; }
+ $('modal-body').addEventListener('click', function(event){
+   var button = event.target.closest('[data-action]'); if (!button || button.disabled) return;
+   var action = button.dataset.action;
+   if (action === 'download') { toast('ダウンロードを開始しました。保存先をご確認ください'); return; }
+   event.preventDefault();
+   var fn = ACTIONS[action]; if (fn) guard(fn)(button);
+ });
+ $('modal-body').addEventListener('change', guard(function(event){
+   var id = event.target.id;
+   if (id === 'export-scope') { exportScope = event.target.value; return; }
+   if (id === 'csv-kind') { exportKind = event.target.value; return; }
+   if (id === 'day-date-1' || id === 'day-date-2') {
+     var k = id.slice(-1), value = event.target.value;
+     if (!C.validDate(value)) { toast('日付を確認してください'); event.target.value = data.days[k].date; return; }
+     if (!ensureEditable()) { event.target.value = data && data.days[k] ? data.days[k].date : ''; toast('この画面では変更できません'); return; }
+     data.days[k].date = value; var ok = persist([k]); render(); toast(ok ? '日付を保存しました' : '日付は端末内に未保存です');
+   }
+ }));
+ $('restore-file').addEventListener('change', async function(){
+   var file = this.files && this.files[0]; if (!file) return;
+   if (!restorable()) return;
+   if (file.size > C.IMPORT_LIMIT) { toast('8 MB以下のJSONバックアップを選択してください'); return; }
+   try {
+     var p = C.parseImport(await readFileAsText(file)), days, source;
+     if (p.kind === 'v1') { days = p.data.days; source = {kind:'v1'}; }
+     else {
+       if (p.sessions.length !== 1) throw new Error(p.sessions.length ? '複数のデータを含むファイルです。保存一覧の「データを取り込む」を使ってください。' : (p.errors[0] || 'データがありません。'));
+       days = p.sessions[0].days; source = {kind:'v2', id:p.sessions[0].id, meta:p.sessions[0].meta};
+     }
+     if (!restorable()) return;
+     pendingRestore = {days:days, source:source, name:file.name}; previewRestore();
+   } catch (e) { toast('復元できません：' + e.message); }
+ });
+ $('import-file').addEventListener('change', function(){ var files = Array.prototype.slice.call(this.files || []); if (files.length) handleImportFiles(files).catch(function(e){ toast('取り込めません：' + e.message); }); });
+ $('session-list-host').addEventListener('click', guard(function(e){
+   var b = e.target.closest('[data-act]'); if (!b || b.disabled) return;
+   var id = b.dataset.id, act = b.dataset.act;
+   if (act === 'resume') resume(id); else if (act === 'backup') backupOne(id); else if (act === 'delete') deletePrompt(id); else if (act === 'raw') rawOne(id);
+ }));
+ $('start-button').addEventListener('click', guard(startNew));
+ $('start-name').addEventListener('keydown', function(e){ if (e.key === 'Enter' && !e.isComposing && e.keyCode !== 229) { e.preventDefault(); $('start-company').focus(); } });
+ $('start-company').addEventListener('keydown', function(e){ if (e.key === 'Enter' && !e.isComposing && e.keyCode !== 229) { e.preventDefault(); $('start-date').focus(); } });
+ $('start-date').addEventListener('keydown', function(e){ if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); guard(startNew)(); } });
+ ['start-name','start-company','start-date'].forEach(function(id){ $(id).addEventListener('input', function(){ if (!$('start-error').hidden) showStartError(''); }); });
+ $('home-filter').addEventListener('input', function(){ clearTimeout(homeTimer); homeTimer = setTimeout(renderHome, 100); });
+ $('home-help').addEventListener('click', function(){ modal('使い方', howtoHtml() + footerNoteHtml()); });
+ $('sum-button').addEventListener('click', guard(sumPrompt));
+ $('bulk-csv-button').addEventListener('click', guard(bulkCsvPrompt));
+ $('bulk-json-button').addEventListener('click', guard(bulkJson));
+ $('import-button').addEventListener('click', guard(pickImport));
+ $('back-button').addEventListener('click', guard(backToList));
+ $('state-banner').addEventListener('click', guard(function(e){ var b = e.target.closest('[data-banner]'); if (!b) return; var a = b.dataset.banner; if (a === 'home') navigateHome(); else if (a === 'takeover') takeover(); else if (a === 'sum-select') sumPrompt(); }));
+ $('sync-panel').addEventListener('click', guard(function(e){ var b = e.target.closest('[data-sync]'); if (!b) return; var a = b.dataset.sync; if (a === 'setup') syncSetupPrompt(); else if (a === 'list') serverListPrompt(); else if (a === 'share') shareLinkPrompt(false); }));
+ window.addEventListener('online', function(){ if (sync.url) syncNow(); });
+ setInterval(function(){ if (sync.url && !sync.busy && !sync.timer && !sync.retryTimer && document.visibilityState !== 'hidden' && pendingSessions().length) syncNow(); }, 60000);
+ document.querySelectorAll('[data-select-day]').forEach(function(button){ button.addEventListener('click', function(){ if (!data) return; ui.day = button.dataset.selectDay; ui.remove = false; rememberUI(); render(); }); });
+ document.querySelectorAll('[data-select-type]').forEach(function(button){ button.addEventListener('click', function(){ if (!data) return; ui.type = button.dataset.selectType; ui.remove = false; rememberUI(); render(); }); });
+ document.querySelectorAll('[data-select-view]').forEach(function(button){ button.addEventListener('click', function(){ if (!data) return; ui.view = button.dataset.selectView; ui.remove = false; render(); }); });
+ $('vote-view').addEventListener('click', guard(function(event){ var button = event.target.closest('.vote-hit[data-q]'); if (button && !button.disabled) vote(button); }));
+ $('undo-button').addEventListener('click', guard(undo));
+ $('remove-toggle').addEventListener('click', function(){ if (!canEdit()) return; ui.remove = !ui.remove; updateBoard(); if (ui.remove) toast('修正モード：タップしたマスから1票取り消します'); });
+ $('manage-button').addEventListener('click', guard(manager)); $('warning-manager').addEventListener('click', guard(manager)); $('summary-export-button').addEventListener('click', guard(manager));
+ $('modal-close').addEventListener('click', function(){ closeModal(); });
+ $('app-modal').addEventListener('click', function(e){ if (e.target === $('app-modal')) closeModal(); });
+ document.addEventListener('keydown', function(event){
+   if (!$('app-modal').hidden) {
+     if (event.key === 'Escape') { event.preventDefault(); closeModal(); return; }
+     if (event.key === 'Tab') { var controls = Array.prototype.slice.call($('modal-content').querySelectorAll('button:not([disabled]),a[href],input:not([disabled]),select:not([disabled]),textarea')).filter(function(el){ return el.offsetParent !== null; }); if (!controls.length) return; var first = controls[0], last = controls[controls.length - 1]; if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); } else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); } }
+     if (event.key === 'Enter' && event.target.tagName === 'INPUT') event.preventDefault();
+     return;
+   }
+   if (S.route !== 'session') return;
+   if (event.key === 'Escape' && ui.remove) { ui.remove = false; updateBoard(); }
+   if ((event.ctrlKey || event.metaKey) && event.key && event.key.toLowerCase() === 'z' && ui.view === 'vote' && !event.shiftKey && !/^(INPUT|TEXTAREA|SELECT)$/.test(event.target.tagName)) { event.preventDefault(); guard(undo)(); }
+ });
+ window.addEventListener('storage', function(e){
+   try {
+     if (!e.key) { if (S.route === 'home') scheduleHomeRender(); else if (S.route === 'session') { syncBeforeEdit(); render(); } else if (S.route === 'sum') { clearTimeout(sumTimer); sumTimer = setTimeout(refreshCombined, 200); } return; }
+     if (e.key.indexOf(C.PREFIX) !== 0) return;
+     if (e.key === SYNC_KEY) { loadSyncConfig(); renderSyncState(); }
+     if (e.key.indexOf(SYNC_STATE) === 0) { renderSyncState(); if (S.route === 'home') scheduleHomeRender(); return; }
+     if (S.route === 'home') { scheduleHomeRender(); return; }
+     if (S.route === 'sum') { var sk = e.key.indexOf(C.PREFIX + 's.') === 0 ? e.key.slice((C.PREFIX + 's.').length) : ''; if (C.ID_RE.test(sk) && S.sumIds.indexOf(sk) >= 0) { clearTimeout(sumTimer); sumTimer = setTimeout(refreshCombined, 200); } return; }
+     if (S.route !== 'session' || !S.id) return;
+     if (e.key === store.lockKey(S.id)) { if (!S.lost && e.newValue) { var l = null; try { l = JSON.parse(e.newValue); } catch (ignore) {} if (l && l.tab !== TAB_ID) markLost(); } return; }
+     if (e.key === store.key(S.id)) {
+       if (S.unsaved) { toast('別の画面で変更がありました。この画面の未保存データを先にバックアップしてください'); return; }
+       var latest = store.load(S.id);
+       if (latest.status === 'ok') { if (latest.data.revision > data.revision) { data = latest.data; S.hasSaved = true; clearUndo(); render(); toast('別の画面の保存内容を反映しました'); } }
+       else if (latest.status === 'missing') { if (S.hasSaved) { S.blocked = true; S.saveError = 'このデータが別の画面で削除されたため、入力を停止しました。表示中のデータをバックアップしてください。'; render(); } }
+       else if (latest.status === 'corrupt' || latest.status === 'recovered') { S.blocked = true; S.rawRecovery = latest.raw === undefined ? null : latest.raw; S.saveError = '保存領域が別の画面で変更されたため、入力を停止しました。「保存・CSV」で確認してください。'; render(); }
+     }
+   } catch (err) { if (window.console) console.error(err); }
+ });
+ function onReturn(){
+   if (unloading) return;
+   if (S.route === 'home') { renderHome(); return; }
+   if (S.route !== 'session' || !S.id || S.lost) { if (S.route === 'session') render(); return; }
+   if (store.lockState(S.id, TAB_ID, Date.now(), LOCK_STALE).state === 'held') { markLost(); return; }
+   store.acquire(S.id, TAB_ID, Date.now(), LOCK_STALE, false);
+   syncBeforeEdit(); startHeartbeat(); render();
+ }
+ document.addEventListener('visibilitychange', function(){
+   try {
+     if (document.visibilityState === 'hidden') { if (S.route === 'session' && S.id && !S.lost) store.release(S.id, TAB_ID); flushOnHide(); }
+     else { onReturn(); if (sync.url && !unloading) syncNow(); }
+   } catch (err) { if (window.console) console.error(err); }
+ });
+ window.addEventListener('pagehide', function(){ unloading = true; stopHeartbeat(); if (S.route === 'session' && S.id && !S.lost) store.release(S.id, TAB_ID); flushOnHide(); });
+ window.addEventListener('pageshow', function(e){ unloading = false; if (e.persisted) { try { onReturn(); } catch (err) {} } });
+ window.addEventListener('beforeunload', function(e){ if (Object.keys(unsavedCache).length || (S.route === 'session' && S.unsaved)) { e.preventDefault(); e.returnValue = ''; } });
+ window.addEventListener('error', function(e){
+   var file = e && e.filename ? String(e.filename).split('#')[0] : '';
+   if (file && file !== location.href.split('#')[0]) return;
+   if (!file && !(e && e.error)) return;
+   if (S.route === 'session' && !S.blocked) { S.blocked = true; S.saveError = '画面の処理でエラーが発生したため、入力を停止しました。保存済みのデータはそのままです。「保存・CSV」からバックアップを保存し、ページを開き直してください。'; try { updateSaveStatus(); cellButtons.forEach(function(b){ b.disabled = true; }); } catch (ignore) {} }
+ });
+ window.addEventListener('popstate', function(){ guard(route)(); });
+ window.addEventListener('hashchange', function(){ guard(route)(); });
+
+ window.SurveyApp = {
+   getData:function(){ return data ? C.clone(data) : null; }, getUI:function(){ return C.clone(ui); },
+   getState:function(){ return {route:S.route, id:S.id, readOnly:S.readOnly, lost:S.lost, blocked:S.blocked, unsaved:S.unsaved, hasSaved:S.hasSaved, sumIds:S.sumIds.slice(), storage:!!storage, writable:writable}; },
+   tabId:TAB_ID, lockStale:LOCK_STALE, tapGap:TAP_GAP, beat:function(){ beat(); },
+   syncNow:function(){ return syncNow(); }, flush:function(){ flushOnHide(); },
+   syncInfo:function(){ return {url:sync.url, busy:sync.busy, lastOkAt:sync.lastOkAt, lastError:sync.lastError, failures:sync.failures, pending:pendingSessions().length, timer:!!sync.timer, retry:!!sync.retryTimer, conflicts:C.clone(sync.conflicts)}; }
+ };
+
+ $('start-date').value = C.localDate();
+ loadSyncConfig();
+ route();
+ handleSyncParam();
+ if (sync.url) setTimeout(function(){ syncNow(); }, 1500);
+ if ('serviceWorker' in navigator && location.protocol === 'https:') { try { navigator.serviceWorker.register('sw.js').catch(function(){}); } catch (ignore) {} }
+})();
+</script>
+</body>
+</html>
