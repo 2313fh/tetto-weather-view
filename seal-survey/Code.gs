@@ -1,22 +1,19 @@
 /**
  * 展示アンケート集約 — 共有サーバー（Google Apps Script）
  *
- * 設定手順（PCのブラウザー推奨・約5分。代表者が1回だけ）
- *  1. https://script.google.com を開き「新しいプロジェクト」を作る
- *  2. 最初からあるコードを全部消して、このコードを貼り付けて保存（Ctrl+S / ⌘+S）
- *  3. 右上「デプロイ」→「新しいデプロイ」→ 種類の選択（歯車）で「ウェブアプリ」
- *       次のユーザーとして実行：自分
- *       アクセスできるユーザー：全員
- *     →「デプロイ」→「アクセスを承認」（「詳細」→「…（安全ではないページ）に移動」→「許可」）
- *  4. 表示された「ウェブアプリ」のURL（…/exec）をコピーし、アプリの「共有サーバー」に貼り付けて「接続」
+ * 設定手順（集計担当が1回だけ。PC推奨）
+ *  1. https://script.google.com で「新しいプロジェクト」を作る
+ *  2. 最初からあるコードを消して、このコードを貼り付けて保存
+ *  3. 「デプロイ」→「新しいデプロイ」→ 種類「ウェブアプリ」
+ *       実行するユーザー：自分 ／ アクセスできるユーザー：全員
+ *     →「デプロイ」→ アクセスを許可
+ *  4. 表示されたURL（…/exec）をアプリの「共有サーバーの設定」に貼って「接続」
  *
- * データは、あなたのGoogleドライブに自動で作られるスプレッドシート
- * 「展示アンケート集約データ」に、入力者ごと（ID単位）に1行で保存されます。
- * 同じIDは新しい内容で上書きされ、行が重複することはありません。
- * 集計から外したい行は「除外」列に何か入力してください（例：除外）。
- * コードを直したときは「デプロイ」→「デプロイを管理」→ 編集 →「新バージョン」で更新します（URLは変わりません）。
+ * データはGoogleドライブの「展示アンケート集約データ」に、1人1行（ID単位）で保存されます。
+ * 集計から外す行は「除外」列に何か入力します。
+ * コードを直したら「デプロイ」→「デプロイを管理」→ 編集 →「新バージョン」（URLは変わりません）。
  */
-var APP = 'kyudentd-seal-survey';
+var APP = 'seal-survey';
 var SHEET_NAME = 'データ';
 var BOOK_NAME = '展示アンケート集約データ';
 var HEADER = ['ID', '入力者', '会社名', '日付', '①合計', '②合計', '最終更新', '保存番号', '受信日時', '除外', 'データ'];
@@ -57,7 +54,7 @@ function out_(obj) {
 function withLock_(fn) {
   var lock = LockService.getScriptLock();
   if (!lock.tryLock(25000)) return {ok: false, busy: true, error: '混み合っています。少し待ってから自動で再送します'};
-  try { return fn(); } finally { lock.releaseLock(); }
+  try { return fn(); } finally { try { SpreadsheetApp.flush(); } catch (err) {} lock.releaseLock(); }
 }
 
 function sheet_() {
@@ -91,14 +88,17 @@ function readRows_(sh) {
 
 function safe_(s) { s = String(s); return /^[=+\-@\t\r]/.test(s) ? "'" + s : s; }
 function stamp_(s) { return (s && s.updatedAt) || ''; }
-function newer_(a, b) { return stamp_(a) > stamp_(b) || (stamp_(a) === stamp_(b) && a.revision > b.revision); }
-function same_(a, b) { return stamp_(a) === stamp_(b) && a.revision === b.revision; }
+// 保存番号（revision）で新旧を決め、時刻は同じ番号のときだけ使う（端末の時計がずれていても正しく判定）
+function newer_(a, b) { return a.revision > b.revision || (a.revision === b.revision && stamp_(a) > stamp_(b)); }
+function same_(a, b) { return a.revision === b.revision && stamp_(a) === stamp_(b); }
 
 function check_(s) {
-  if (!s || typeof s !== 'object' || s.format !== APP || s.version !== 2 || !ID_RE.test(String(s.id))) return null;
+  if (!s || typeof s !== 'object' || !/(^|-)seal-survey$/.test(String(s.format)) || s.version !== 2 || !ID_RE.test(String(s.id))) return null;
   var m = s.meta;
   if (!m || typeof m.name !== 'string' || typeof m.company !== 'string' || typeof m.date !== 'string' || typeof m.createdAt !== 'string') return null;
   if (!m.name || !m.company || m.name.length > 80 || m.company.length > 120 || !/^\d{4}-\d{2}-\d{2}$/.test(m.date)) return null;
+  var day = new Date(m.date + 'T00:00:00Z');
+  if (isNaN(day.getTime()) || day.toISOString().slice(0, 10) !== m.date) return null;
   if (typeof s.revision !== 'number' || s.revision < 0 || Math.floor(s.revision) !== s.revision) return null;
   if (JSON.stringify(s).length > 40000) return null;
   var q1 = 0, q2 = 0, ok = true;
@@ -121,12 +121,15 @@ function put_(sessions) {
   if (!Array.isArray(sessions)) return {ok: false, error: 'データがありません'};
   return withLock_(function () {
     var sh = sheet_(), rows = readRows_(sh), index = {}, results = [];
-    rows.forEach(function (r, i) { index[r.id] = i; });
+    var reindex = function () { index = {}; rows.forEach(function (r, k) { index[r.id] = k; }); };
+    reindex();
     sessions.slice(0, 100).forEach(function (s) {
       var v = check_(s);
       if (!v) { results.push({id: s && s.id ? String(s.id).slice(0, 40) : '', status: 'invalid'}); return; }
-      var i = index[s.id];
       var row = [s.id, safe_(s.meta.name), safe_(s.meta.company), s.meta.date, v.q1, v.q2, stamp_(s), String(s.revision), new Date(), '', JSON.stringify(s)];
+      var i = index[s.id];
+      // 手作業で並べ替え・編集されていても、その行が同じIDかを確かめてから書く
+      if (i !== undefined && String(sh.getRange(i + 2, 1).getValue()).replace(/^'/, '') !== s.id) { rows = readRows_(sh); reindex(); i = index[s.id]; }
       if (i === undefined) {
         sh.appendRow(row);
         index[s.id] = rows.length;
@@ -137,8 +140,8 @@ function put_(sessions) {
       var cur = rows[i].data;
       if (cur && cur.meta && cur.meta.createdAt !== s.meta.createdAt) { results.push({id: s.id, status: 'conflict'}); return; }
       if (cur && !newer_(s, cur)) { results.push({id: s.id, status: same_(s, cur) ? 'saved' : 'stale', revision: cur.revision}); return; }
-      row[9] = rows[i].excluded;
-      sh.getRange(i + 2, 1, 1, row.length).setValues([row]);
+      sh.getRange(i + 2, 1, 1, 9).setValues([row.slice(0, 9)]);   // 「除外」列（J）はそのまま
+      sh.getRange(i + 2, 11).setValue(row[10]);
       rows[i].data = s;
       results.push({id: s.id, status: 'saved', revision: s.revision});
     });
@@ -148,9 +151,15 @@ function put_(sessions) {
 
 function listAll_() {
   return withLock_(function () {
-    var sessions = [], excluded = 0;
+    var best = {}, order = [], sessions = [], excluded = 0;
     readRows_(sheet_()).forEach(function (r) {
-      if (!r.data) return;
+      if (!r.data || typeof r.data !== 'object') return;
+      var cur = best[r.id];
+      if (!cur) { best[r.id] = r; order.push(r.id); }
+      else if (typeof r.data.revision === 'number' && (typeof cur.data.revision !== 'number' || newer_(r.data, cur.data))) best[r.id] = r;
+    });
+    order.forEach(function (id) {
+      var r = best[id];
       if (String(r.excluded || '').trim()) { excluded++; return; }
       sessions.push(r.data);
     });

@@ -4,11 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
-<meta name="description" content="電子シール式アンケートの集約（スマホ完結版）。入力者ごとにIDで端末内に保存し、各自のバックアップ（JSON）を取り込んで全員分を合算。外部へは送信しません。">
+<meta name="description" content="電子シール式アンケートの集約アプリ（スマホ完結版）">
 <meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#0060ae">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230060ae'/%3E%3Ccircle cx='22' cy='24' r='8' fill='%23fff'/%3E%3Ccircle cx='42' cy='24' r='8' fill='%23fff'/%3E%3Ccircle cx='22' cy='44' r='8' fill='%23fff'/%3E%3Ccircle cx='42' cy='44' r='8' fill='%23ffc293'/%3E%3C/svg%3E">
-<title>展示アンケート集約（スマホ完結版）｜九州電力送配電</title>
+<title>展示アンケート集約（スマホ完結版）</title>
 <style>
 :root{
  --artifact-bg:var(--theme-background,#ffffff);--artifact-fg:var(--theme-text-primary,#132636);--artifact-muted:var(--theme-text-secondary,#536879);--artifact-line:var(--theme-border-light,#cbd9e3);
@@ -144,55 +144,54 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
 .sync-dot.on{background:#1a7a43}.sync-dot.problem{background:var(--artifact-warn)}
 .sync-chip{font-size:12px;line-height:1.5;color:var(--artifact-muted);padding:3px 0 0}
 .sync-chip.ok{color:#1a7a43}.sync-chip.problem{color:var(--artifact-warn);font-weight:700}
-.sync-ok{color:#1a7a43;font-weight:650}.sync-wait{color:var(--artifact-warn);font-weight:650}
+.sync-ok{color:#1a7a43;font-weight:650}.sync-wait{color:var(--artifact-warn);font-weight:650}.sync-ng{color:#b42318;font-weight:700}
 .preview-text.link-text{min-height:76px;font-size:13px;word-break:break-all}
 @media screen and (max-width:900px){.start-grid{grid-template-columns:1fr 1fr}.start-grid .start-submit{grid-column:1 / -1}}
 @media screen and (max-width:720px){.session-brand{display:none}.panel{padding:14px}.home-hero{margin-top:12px}.list-head{margin-top:18px}.bulk-actions .btn{flex:1 1 calc(50% - 9px)}.session-bar{padding-top:8px}.session-bar strong{font-size:15px}}
 @media screen and (max-width:560px){.start-grid{grid-template-columns:1fr}.app-header .brand-company{font-size:15px}.home-tools .btn{padding:8px 10px;font-size:12px}}
 @media screen and (max-width:380px){.header-tools .btn,.back-btn{padding:8px 8px;font-size:12px}.save-state{max-width:88px}}
 @media print{#home-view,.back-btn,#state-banner,.home-tools,#sync-chip{display:none!important}.session-bar{font-size:10px;padding:4px 0 0}.session-bar strong{font-size:12px}}
+@media (pointer:coarse){.preview-text{font-size:16px}}
 </style>
 </head>
 <body>
-<noscript><div class="no-script">このアンケートはJavaScriptを使用します。iPhone・iPadの「ファイル」プレビューやアプリ内プレビューではなく、JavaScriptが有効なSafari等の通常ブラウザーで開いてください。</div></noscript>
+<noscript><div class="no-script">SafariやChromeで開いてください（JavaScriptが必要です）。</div></noscript>
 
 <div id="home-view" class="app-shell" hidden>
  <header class="app-header">
-  <div class="brand"><div class="brand-company">九州電力送配電</div><div class="brand-product">電子シール アンケート集約</div></div>
+  <div class="brand"><div class="brand-company">電子シール アンケート</div></div>
   <div class="home-tools"><button type="button" id="home-help" class="btn">使い方</button></div>
  </header>
  <div id="home-warning" class="warning" role="alert" hidden></div>
- <div class="home-hero"><h1>展示アンケート集約<span class="variant-tag">スマホ完結版</span></h1><p>入力者ごとにIDを付けて、この端末の中に保存します（外部へは送信しません）。全員分は、各自のバックアップ（JSON）を集めて取り込みます。</p></div>
+ <div class="home-hero"><h1>展示アンケート集約<span class="variant-tag">スマホ完結版</span></h1><p>入力はこの端末の中だけに保存します。全員分はバックアップを集めて合算します。</p></div>
  <section id="sync-panel" class="panel sync-panel" aria-label="共有サーバー"></section>
  <section class="panel" aria-labelledby="start-heading">
-  <h2 id="start-heading">新しく集約を始める</h2>
-  <p class="panel-lead">入力者名・会社名・日付を入れて「開始」を押すと、IDが発行されます。</p>
+  <h2 id="start-heading">新しく始める</h2>
   <div class="start-grid">
-   <label class="field"><span>入力者名<span class="req">必須</span></span><input id="start-name" type="text" autocomplete="name" enterkeyhint="next" maxlength="80" placeholder="例：九電 太郎"></label>
-   <label class="field"><span>会社名<span class="req">必須</span></span><input id="start-company" type="text" autocomplete="organization" enterkeyhint="next" maxlength="120" placeholder="例：九州電力送配電"></label>
+   <label class="field"><span>入力者名<span class="req">必須</span></span><input id="start-name" type="text" autocomplete="name" enterkeyhint="next" maxlength="80" placeholder="例：山田 太郎"></label>
+   <label class="field"><span>会社名<span class="req">必須</span></span><input id="start-company" type="text" autocomplete="organization" enterkeyhint="next" maxlength="120" placeholder="例：〇〇株式会社"></label>
    <label class="field"><span>日付<span class="req">必須</span></span><input id="start-date" type="date" min="1900-01-01" max="2199-12-31"></label>
    <button type="button" id="start-button" class="btn primary start-submit">開始</button>
   </div>
   <p id="start-error" class="form-error" role="alert" hidden></p>
  </section>
  <section aria-labelledby="list-heading">
-  <div class="list-head"><h2 id="list-heading">保存一覧<span id="list-count" class="list-count"></span></h2><div id="filter-wrap" class="list-tools" hidden><input id="home-filter" class="filter-input" type="search" placeholder="名前・会社名・ID・日付で絞り込み" aria-label="保存一覧の絞り込み" autocomplete="off" enterkeyhint="search"></div></div>
+  <div class="list-head"><h2 id="list-heading">保存一覧<span id="list-count" class="list-count"></span></h2><div id="filter-wrap" class="list-tools" hidden><input id="home-filter" class="filter-input" type="search" placeholder="名前・会社名・日付で検索" aria-label="保存一覧の絞り込み" autocomplete="off" enterkeyhint="search"></div></div>
   <div id="session-list-host"></div>
  </section>
  <section class="panel" aria-labelledby="bulk-heading">
-  <h2 id="bulk-heading">まとめて扱う（複数人・複数端末）</h2>
-  <p class="panel-lead">全員分を集めるときは、各自が「全件バックアップ」でJSONファイルを保存してAirDrop・LINE・メールで送り、集める人が「データを取り込む」でまとめて読み込みます（複数ファイルを一度に選べます）。同じIDのデータは重複せず、新しい方に置き換わります。</p>
+  <h2 id="bulk-heading">まとめて扱う</h2>
+  <p class="panel-lead">各自が「全件バックアップ」を集計担当へ送り、集計担当が「データを取り込む」でまとめて読み込みます。同じデータは重複しません。</p>
   <div class="bulk-actions"><button type="button" class="btn primary" id="sum-button">合算を見る</button><button type="button" class="btn" id="bulk-csv-button">全件CSV</button><button type="button" class="btn" id="bulk-json-button">全件バックアップ</button><button type="button" class="btn" id="import-button">データを取り込む</button></div>
  </section>
  <ul class="home-notes">
-  <li>保存先はこの端末・このブラウザーの中です。別の端末とは自動で同期せず、外部へも送信しません。</li>
-  <li>iPhone・iPadでは、しばらく開かないとサイトのデータが消えることがあります。毎日の終わりに「全件バックアップ」を保存して、集める人に送ってください。</li>
+  <li>iPhone・iPadは、しばらく開かないとデータが消えることがあります。毎日「全件バックアップ」を送ってください。</li>
  </ul>
 </div>
 
 <div id="session-view" class="app-shell" hidden>
  <header class="app-header">
-  <div class="brand"><button type="button" id="back-button" class="btn back-btn">‹ 保存一覧</button><div class="brand-company session-brand">九州電力送配電</div></div>
+  <div class="brand"><button type="button" id="back-button" class="btn back-btn">‹ 保存一覧</button><div class="brand-company session-brand">電子シール アンケート</div></div>
   <div class="header-tools"><div id="save-state" class="save-state" role="status" aria-live="polite">起動中…</div><button type="button" id="manage-button" class="btn">保存・CSV</button></div>
  </header>
  <div id="session-bar" class="session-bar"></div>
@@ -206,48 +205,52 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
  <div id="storage-warning" class="warning" role="alert" hidden><div id="storage-warning-text"></div><button type="button" id="warning-manager" class="btn">保存・確認</button></div>
  <main>
   <div id="print-context" class="print-only"></div>
-  <div class="board-heading"><div><p id="audience-label" class="eyebrow">1日目 ／ 学生の方へ</p><h1 id="board-title">どの業界・展示に興味がわいた？</h1><p id="board-instruction" class="board-instruction">①と②にシールを1枚ずつ（計2枚）。マスをタップすると1票追加されます。</p></div><div class="board-actions interactive-only" id="board-actions"><button type="button" class="btn" id="undo-button" disabled>1つ戻す</button><button type="button" class="btn correction" id="remove-toggle" aria-pressed="false">1票取り消す</button></div></div>
+  <div class="board-heading"><div><p id="audience-label" class="eyebrow">1日目 ／ 学生の方へ</p><h1 id="board-title">どの業界・展示に興味がわいた？</h1><p id="board-instruction" class="board-instruction">①と②にシールを1枚ずつ。マスをタップすると1票増えます。</p></div><div class="board-actions interactive-only" id="board-actions"><button type="button" class="btn" id="undo-button" disabled>1つ戻す</button><button type="button" class="btn correction" id="remove-toggle" aria-pressed="false">1票取り消す</button></div></div>
   <div id="vote-view">
-   <div id="correction-banner" class="correction-banner" role="status" hidden>修正モード：タップしたマスから1票取り消します。終わったら「修正モードを終了」を押してください。</div>
+   <div id="correction-banner" class="correction-banner" role="status" hidden>修正モード：タップしたマスを1票減らします。終わったら「修正モードを終了」。</div>
    <section class="board-section" aria-labelledby="q1-heading">
     <div class="section-heading"><h2 id="q1-heading">① 気になる業界 × 一番興味がわいた展示</h2><div class="question-total">合計 <strong id="q1-total">0</strong>票</div></div>
     <p id="q1-hint" class="question-hint">一番気になる業界の行と、一番興味がわいた展示の列が交わるマスを1回タップ</p>
-    <p id="student-guide" class="scroll-guide student-guide">表の中を横にスワイプできます →　業界名は左端に固定</p><p id="adult-guide" class="scroll-guide" hidden>横幅が足りない場合は、表の中を横にスワイプできます →</p>
+    <p id="student-guide" class="scroll-guide student-guide">表は横にスワイプできます →</p><p id="adult-guide" class="scroll-guide" hidden>表は横にスワイプできます →</p>
     <div id="matrix-host" class="table-scroll" tabindex="0" aria-label="①投票表。横スクロール可能"></div>
    </section>
    <section class="board-section" aria-labelledby="q2-heading">
     <div class="section-heading"><h2 id="q2-heading">② 送電の仕事を、就職先として考えたい？</h2><div class="question-total">合計 <strong id="q2-total">0</strong>票</div></div>
-    <p id="q2-hint" class="question-hint">1つだけ選んで、シールを1枚（該当するマスを1回タップ）</p>
+    <p id="q2-hint" class="question-hint">1つだけ選んで1回タップ</p>
     <div id="choices-host" class="choice-scroll" tabindex="0" aria-label="②選択肢。横スクロール可能"></div>
    </section>
-   <footer class="board-footer"><div class="footer-day"><span class="legend-dot" aria-hidden="true"></span><span id="footer-day">1日目：青のシール</span></div><div class="foot-policy">各設問で1つだけ・会期中お一人1回・回答任意</div><div>回答者数（①の合計）<strong id="respondents">0</strong>人<button type="button" class="info" aria-label="回答者数の集計方法">ⓘ<span class="tooltip" role="tooltip">表示中の日・対象の①の票数の合計です。学生は右端の業界不明も加算します。個人の識別や重複回答の判定はしません。</span></button></div></footer>
-   <p id="unknown-note" class="small-note">学生①の「業界不明」は行計・列計の対象外です。右端の票数として別管理し、①の合計に含めます。</p>
+   <footer class="board-footer"><div class="footer-day"><span class="legend-dot" aria-hidden="true"></span><span id="footer-day">1日目：青のシール</span></div><div class="foot-policy">各設問で1つだけ・会期中お一人1回・回答任意</div><div>回答者数（①の合計）<strong id="respondents">0</strong>人<button type="button" class="info" aria-label="回答者数の集計方法">ⓘ<span class="tooltip" role="tooltip">表示中の①の合計です（学生は業界不明も含む）。</span></button></div></footer>
+   <p id="unknown-note" class="small-note">学生①の「業界不明」は行・列の計に入れず、①の合計にだけ含めます。</p>
   </div>
   <section id="summary-view" hidden aria-label="集計結果">
-   <div class="summary-kpis"><div class="kpi"><div class="kpi-label">回答者数（①合計）<button type="button" class="info" aria-label="①集計方法">ⓘ<span class="tooltip" role="tooltip">選択した日・対象の①全マスの合計です。学生①は業界不明を加算。個人の識別や重複排除は行いません。</span></button></div><div class="kpi-value"><span id="summary-q1">0</span><small>人</small></div></div><div class="kpi"><div class="kpi-label">②の回答票数<button type="button" class="info" aria-label="②集計方法">ⓘ<span class="tooltip" role="tooltip">選択した日・対象の②の全選択肢の票数の合計です。社会人②は集計不可の欄も加算します。</span></button></div><div class="kpi-value"><span id="summary-q2">0</span><small>票</small></div></div><div class="kpi"><div class="kpi-label">①と②の差<button type="button" class="info" aria-label="差の計算方法">ⓘ<span class="tooltip" role="tooltip">①合計 − ②合計。0なら票数は一致しますが、同一人物が両方に回答したことや重複がないことは保証しません。</span></button></div><div class="kpi-value"><span id="summary-gap">0</span><small>票</small></div></div></div>
+   <div class="summary-kpis"><div class="kpi"><div class="kpi-label">回答者数（①合計）<button type="button" class="info" aria-label="①集計方法">ⓘ<span class="tooltip" role="tooltip">①の全マスの合計です（学生は業界不明も含む）。</span></button></div><div class="kpi-value"><span id="summary-q1">0</span><small>人</small></div></div><div class="kpi"><div class="kpi-label">②の回答票数<button type="button" class="info" aria-label="②集計方法">ⓘ<span class="tooltip" role="tooltip">②の全選択肢の合計です（社会人は集計不可も含む）。</span></button></div><div class="kpi-value"><span id="summary-q2">0</span><small>票</small></div></div><div class="kpi"><div class="kpi-label">①と②の差<button type="button" class="info" aria-label="差の計算方法">ⓘ<span class="tooltip" role="tooltip">①合計 − ②合計です。</span></button></div><div class="kpi-value"><span id="summary-gap">0</span><small>票</small></div></div></div>
    <p id="summary-gap-note" class="summary-note"></p>
    <div class="summary-charts"><section><h3 id="summary-industry-heading">① 気になる業界</h3><div id="summary-industry"></div></section><section><h3 id="summary-choices-heading">② 送電の仕事を、就職先として考えたい？</h3><div id="summary-choices"></div></section></div>
    <h2 class="section-subtitle">1日目・2日目の一覧</h2><div id="summary-day-table" class="table-scroll" tabindex="0" aria-label="日別集計一覧"></div>
-   <p class="summary-note">①合計は原様式の回答者数。②は回答票数です。両問の個人単位の対応・重複回答は判定していません。各棒は0から始まり、項目名・正確な票数を表示します。</p>
+   <p class="summary-note">回答者数は①の合計です。</p>
    <div class="button-row interactive-only"><button type="button" class="btn primary" id="summary-export-button">CSV・バックアップを保存</button></div>
   </section>
  </main>
- <p class="small-note">入力のたびにこの端末内へ自動保存します。別の端末とは自動同期しません。終了時は「保存・CSV」からバックアップを保存してください。</p>
+ <p class="small-note">入力はこの端末に自動保存されます。</p>
 </div>
 
 <div id="app-modal" class="modal-backdrop" hidden><section id="modal-content" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="modal-header"><h2 id="modal-title">保存・CSV・使い方</h2><button type="button" class="close-btn" id="modal-close" aria-label="閉じる">×</button></div><div id="modal-body"></div></section></div>
 <div id="toast" class="toast" hidden role="status" aria-live="polite" aria-atomic="true"></div>
 <input type="file" id="restore-file" class="sr-file" accept=".json,application/json" tabindex="-1" aria-hidden="true">
 <input type="file" id="import-file" class="sr-file" accept=".json,application/json" multiple tabindex="-1" aria-hidden="true">
-<script>window.SEAL_VARIANT = {"id": "local", "prefix": "kyudentd.seal-survey.local.v2.", "sync": false, "label": "スマホ完結版"};</script>
+<script>window.SEAL_VARIANT = {"id": "local", "prefix": "seal-survey.local.v2.", "sync": false, "label": "スマホ完結版"};</script>
 <script>
-/* KYUDEN T&D electronic-seal survey core (Ver.2) — pure logic, no DOM, no network. */
+/* Electronic-seal survey core (Ver.2) — pure logic, no DOM, no network. */
 (function (global) {
   'use strict';
-  var FORMAT = 'kyudentd-seal-survey', VERSION = 1, VERSION2 = 2, BUNDLE_FORMAT = 'kyudentd-seal-survey-bundle';
+  var FORMAT = 'seal-survey', VERSION = 1, VERSION2 = 2, BUNDLE_FORMAT = 'seal-survey-bundle';
   var MAX_COUNT = 1000000, IMPORT_LIMIT = 8 * 1024 * 1024;
   var VARIANT = global.SEAL_VARIANT || {};
-  var PREFIX = typeof VARIANT.prefix === 'string' && /^kyudentd\.seal-survey\.[a-z0-9.]+\.$/.test(VARIANT.prefix) ? VARIANT.prefix : 'kyudentd.seal-survey.v2.';
+  if (VARIANT.prefix !== undefined && !(typeof VARIANT.prefix === 'string' && /^seal-survey\.[a-z0-9.]+\.$/.test(VARIANT.prefix))) throw new Error('storage prefix is not valid: ' + VARIANT.prefix);
+  var PREFIX = VARIANT.prefix || 'seal-survey.v2.';
+  // Files written before the rename carry an older prefix in front of the same name; accept both.
+  function isFormat(f) { return typeof f === 'string' && /(^|-)seal-survey$/.test(f); }
+  function isBundle(f) { return typeof f === 'string' && /(^|-)seal-survey-bundle$/.test(f); }
   var ID_CHARS = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
   var ID_RE = /^\d{8}-[0-9A-HJKMNP-TV-Z]{6}$/;
   var NAME_MAX = 40, COMPANY_MAX = 60;
@@ -316,7 +319,7 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
   }
   /* Ver.1 whole-file data (still accepted for restore / import). */
   function normalizeData(input, allowPartial) {
-    if (!plain(input) || input.format !== FORMAT || input.version !== VERSION || !plain(input.days)) throw new Error('このアンケートのバックアップ（旧版）ではありません。');
+    if (!plain(input) || !isFormat(input.format) || input.version !== VERSION || !plain(input.days)) throw new Error('このアンケートのバックアップ（旧版）ではありません。');
     var keys = Object.keys(input.days);
     if (!keys.length || keys.some(function(k){ return k !== '1' && k !== '2'; }) || (!allowPartial && keys.length !== 2)) throw new Error('日別データの構成が不正です。');
     var revision = input.revision === undefined ? 0 : input.revision;
@@ -372,7 +375,7 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
     return {format:FORMAT, version:VERSION2, id:id, meta:m, revision:0, updatedAt:m.createdAt, importedAt:null, days:{'1':freshDay(), '2':freshDay()}};
   }
   function normalizeSession(input) {
-    if (!plain(input) || input.format !== FORMAT || input.version !== VERSION2) throw new Error('このアンケート（Ver.2）のデータではありません。');
+    if (!plain(input) || !isFormat(input.format) || input.version !== VERSION2) throw new Error('このアンケート（Ver.2）のデータではありません。');
     if (typeof input.id !== 'string' || !ID_RE.test(input.id)) throw new Error('IDの形式が不正です。');
     var meta = normalizeMeta(input.meta);
     if (!meta.createdAt) throw new Error('作成日時がありません。');
@@ -393,7 +396,7 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
   /* Accepts: Ver.2 bundle, Ver.2 single session, Ver.1 backup. */
   function parseImport(text) {
     var x = parseJsonText(text, IMPORT_LIMIT);
-    if (plain(x) && x.format === BUNDLE_FORMAT) {
+    if (plain(x) && isBundle(x.format)) {
       if (x.version !== VERSION2 || !Array.isArray(x.sessions)) throw new Error('まとめバックアップの形式が不正です。');
       if (x.sessions.length > 5000) throw new Error('データの件数が多すぎます。');
       var sessions = [], errors = [];
@@ -401,17 +404,18 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
       if (!sessions.length && !errors.length) throw new Error('データが含まれていません。');
       return {kind:'sessions', sessions:sessions, errors:errors};
     }
-    if (plain(x) && x.format === FORMAT && x.version === VERSION2) return {kind:'sessions', sessions:[normalizeSession(x)], errors:[]};
-    if (plain(x) && x.format === FORMAT && x.version === VERSION) return {kind:'v1', data:normalizeData(x, true)};
+    if (plain(x) && isFormat(x.format) && x.version === VERSION2) return {kind:'sessions', sessions:[normalizeSession(x)], errors:[]};
+    if (plain(x) && isFormat(x.format) && x.version === VERSION) return {kind:'v1', data:normalizeData(x, true)};
     throw new Error('このアンケートのバックアップ（JSON）ではありません。');
   }
   function makeBundle(sessions, nowIso) {
     return {format:BUNDLE_FORMAT, version:VERSION2, exportedAt:isoOrNull(nowIso), sessions:sessions.map(normalizeSession)};
   }
   function sameContent(a, b) { return JSON.stringify(a.meta) === JSON.stringify(b.meta) && JSON.stringify(a.days) === JSON.stringify(b.days); }
+  // The save counter decides; the clock only breaks ties (a phone's clock can be wrong or move backwards).
   function isNewer(a, b) {
-    var x = a.updatedAt || '', y = b.updatedAt || '';
-    return x > y || (x === y && a.revision > b.revision);
+    if (a.revision !== b.revision) return a.revision > b.revision;
+    return (a.updatedAt || '') > (b.updatedAt || '');
   }
 
   /* ---------- statistics / totals ---------- */
@@ -611,6 +615,18 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
  var storage = null, writable = false;
  try { storage = window.localStorage; } catch (ignore) { storage = null; }
  if (storage) { try { var probeKey = C.PREFIX + 'probe.' + TAB_ID; storage.setItem(probeKey, '1'); writable = storage.getItem(probeKey) === '1'; storage.removeItem(probeKey); } catch (ignore) { writable = false; } }
+ // One-time move of data saved under the older key prefix ("<word>.seal-survey…") to the current one.
+ if (writable) { try {
+   var legacyMoves = [];
+   for (var li = 0; li < storage.length; li++) { var lk = storage.key(li), lm = lk && /^[a-z]+\.(seal-survey\..+)$/.exec(lk); if (lm && lm[1].indexOf(C.PREFIX) === 0) legacyMoves.push([lk, lm[1]]); }
+   legacyMoves.forEach(function(mv){
+     var suffix = mv[1].slice(C.PREFIX.length), oldVal = storage.getItem(mv[0]), cur = storage.getItem(mv[1]);
+     if (suffix.indexOf('lock.') === 0) { storage.removeItem(mv[0]); return; }
+     if (cur !== null && suffix.indexOf('s.') === 0) { try { var a = JSON.parse(oldVal), b = JSON.parse(cur); if (a && b && a.revision > b.revision) cur = null; } catch (e) {} }
+     if (cur === null) { try { storage.setItem(mv[1], oldVal); } catch (e) { return; } }
+     if (storage.getItem(mv[1]) !== null) storage.removeItem(mv[0]);
+   });
+ } catch (ignore) {} }
  var store = new C.SessionStore(storage, C.PREFIX);
 
  var ui = {day:'1', type:'student', view:'vote', remove:false};
@@ -622,7 +638,7 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
  var exportScope = 'all', exportKind = 'detail', heartbeatTimer = null, homeTimer = null, sumTimer = null, persistAsked = false, navSeq = 0, unloading = false;
  var SYNC_KEY = C.PREFIX + 'sync.config', SYNC_STATE = C.PREFIX + 'sync.state.', SERVER_CACHE = C.PREFIX + 'server.cache', SUM_SEL = C.PREFIX + 'sum';
  var SYNC_URL_RE = /^https:\/\/script\.google\.com\/(?:a\/macros\/[A-Za-z0-9.\-]+\/|macros\/)s\/[A-Za-z0-9_\-]{20,200}\/exec$/;
- var SYNC_DEBOUNCE = 8000, SYNC_MAXWAIT = 45000, SYNC_RETRY = [15000, 30000, 60000, 120000, 300000];
+ var SYNC_DEBOUNCE = 8000, SYNC_MAXWAIT = 45000, SYNC_RETRY = [15000, 30000, 60000, 120000];
  var sync = {url:'', timer:null, firstDirtyAt:0, busy:false, busyPromise:null, again:false, lastOkAt:null, lastError:'', failures:0, retryTimer:null, conflicts:{}, cache:null, loadToken:0, mem:{}};
  var pendingSyncUrl = '';
 
@@ -656,22 +672,26 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    try { if (storage) { if (url) storage.setItem(SYNC_KEY, JSON.stringify({url:url, at:now()})); else storage.removeItem(SYNC_KEY); } } catch (ignore) {}
    try { sessionStorage.removeItem(SERVER_CACHE); } catch (ignore) {}
  }
- function syncedRev(id){ try { var v = JSON.parse(storage && storage.getItem(SYNC_STATE + id) || 'null'); if (v && Number.isSafeInteger(v.rev)) return v.rev; } catch (ignore) {} return sync.mem[id] === undefined ? -1 : sync.mem[id]; }
- function setSyncedRev(id, rev){ sync.mem[id] = rev; try { if (storage) storage.setItem(SYNC_STATE + id, JSON.stringify({rev:rev, at:now()})); } catch (ignore) {} }
+ function syncedRev(id){ var m = sync.mem[id] === undefined ? -1 : sync.mem[id], v = null; try { v = JSON.parse(storage && storage.getItem(SYNC_STATE + id) || 'null'); } catch (ignore) {} return Math.max(m, v && Number.isSafeInteger(v.rev) ? v.rev : -1); }
+ function setSyncedRev(id, rev){ sync.mem[id] = rev; try { if (storage) storage.setItem(SYNC_STATE + id, JSON.stringify({rev:rev, at:now()})); } catch (e) { try { storage.removeItem(SYNC_STATE + id); } catch (ignore) {} } }
  function clearSyncedRev(id){ delete sync.mem[id]; delete sync.conflicts[id]; try { if (storage) storage.removeItem(SYNC_STATE + id); } catch (ignore) {} }
  function clearAllSyncedRev(){ sync.mem = {}; sync.conflicts = {}; if (!storage) return; try { var keys = []; for (var i = 0; i < storage.length; i++) { var k = storage.key(i); if (k && k.indexOf(SYNC_STATE) === 0) keys.push(k); } keys.forEach(function(k){ storage.removeItem(k); }); } catch (ignore) {} }
- function pendingSessions(){ if (!sync.url) return []; return validSessions().filter(function(s){ return syncedRev(s.id) < s.revision; }); }
+ function problemOf(s){ var c = sync.url && sync.conflicts[s.id]; return c && c.rev >= s.revision && syncedRev(s.id) < s.revision ? c.status : ''; }
+ function pendingSessions(){ if (!sync.url) return []; return validSessions().filter(function(s){ return syncedRev(s.id) < s.revision && !problemOf(s); }); }
+ function problemSessions(){ if (!sync.url) return []; return validSessions().filter(function(s){ return !!problemOf(s); }); }
+ var PROBLEM_TEXT = {stale:'送れていません（サーバーの方が新しい内容）', conflict:'送れていません（サーバーに同じIDの別データ）', invalid:'送れていません（サーバーが受け付けません）'};
  function fetchJson(url, opts){
    var ctrl = typeof AbortController === 'function' ? new AbortController() : null, timer = null;
    if (ctrl) { opts.signal = ctrl.signal; timer = setTimeout(function(){ ctrl.abort(); }, 30000); }
+   var done = function(){ if (timer) { clearTimeout(timer); timer = null; } };
+   var net = function(e){ done(); throw new Error(e && e.name === 'AbortError' ? '応答なし（時間切れ）' : '接続できません'); };
    return fetch(url, opts).then(function(r){
-     if (timer) clearTimeout(timer);
-     if (!r.ok) throw new Error('共有サーバーのエラー（' + r.status + '）');
-     return r.text();
-   }, function(e){ if (timer) clearTimeout(timer); throw new Error(e && e.name === 'AbortError' ? '共有サーバーの応答がありません（時間切れ）' : '共有サーバーに接続できません'); })
+     if (!r.ok) { done(); throw new Error('サーバーエラー ' + r.status); }
+     return r.text().then(function(t){ done(); return t; }, net);
+   }, net)
    .then(function(t){
-     var j; try { j = JSON.parse(t); } catch (e) { throw new Error('共有サーバーの応答を読めません（URLと「アクセスできるユーザー：全員」の設定を確認してください）'); }
-     if (!j || typeof j !== 'object') throw new Error('共有サーバーの応答が不正です');
+     var j; try { j = JSON.parse(t); } catch (e) { throw new Error('応答を読めません（公開設定「全員」を確認）'); }
+     if (!j || typeof j !== 'object') throw new Error('応答が正しくありません');
      return j;
    });
  }
@@ -679,6 +699,7 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
  function serverGet(action, url){ var u = url || sync.url; return fetchJson(u + '?action=' + encodeURIComponent(action) + '&t=' + Date.now(), {method:'GET', redirect:'follow', credentials:'omit', cache:'no-store'}); }
  function scheduleSync(){
    if (!sync.url) return;
+   if (sync.retryTimer) { renderSyncState(); return; }
    var t = Date.now();
    if (!sync.firstDirtyAt) sync.firstDirtyAt = t;
    var wait = Math.max(0, Math.min(SYNC_DEBOUNCE, sync.firstDirtyAt + SYNC_MAXWAIT - t));
@@ -694,7 +715,8 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    if (!list.length) { sync.firstDirtyAt = 0; renderSyncState(); return Promise.resolve({ok:true, sent:0}); }
    clearTimeout(sync.retryTimer); sync.retryTimer = null;
    if (navigator.onLine === false) { sync.failures++; sync.lastError = 'オフライン'; scheduleRetry(); renderSyncState(); return Promise.resolve({ok:false, error:'オフライン'}); }
-   var batch = list.slice(0, 40).map(function(x){ return C.normalizeSession(x); }), url = sync.url;
+   var batch = list.slice(0, 40).map(function(x){ return C.normalizeSession(x); }), url = sync.url, byRev = {};
+   batch.forEach(function(x){ byRev[x.id] = x.revision; });
    sync.busy = true; renderSyncState();
    sync.busyPromise = serverPost({action:'put', sessions:batch}, url).then(function(res){
      if (!res.ok) throw new Error(res.error || '共有サーバーに保存できませんでした');
@@ -702,16 +724,17 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
      var byId = {}, problems = 0; batch.forEach(function(x){ byId[x.id] = x; });
      (res.results || []).forEach(function(r){
        var x = byId[r.id]; if (!x) return;
-       if (r.status !== 'saved') { problems++; sync.conflicts[x.id] = r.status; } else delete sync.conflicts[x.id];
-       setSyncedRev(x.id, x.revision);
+       if (r.status === 'saved') { delete sync.conflicts[x.id]; setSyncedRev(x.id, x.revision); }
+       else { problems++; sync.conflicts[x.id] = {status:r.status === 'stale' || r.status === 'conflict' ? r.status : 'invalid', rev:x.revision}; }
      });
      sync.lastOkAt = now(); sync.lastError = ''; sync.failures = 0; sync.firstDirtyAt = 0;
      return {ok:true, sent:batch.length, problems:problems};
-   }).catch(function(e){ sync.failures++; sync.lastError = e.message || '送信できませんでした'; scheduleRetry(); return {ok:false, error:sync.lastError}; })
+   }).catch(function(e){ sync.failures++; sync.lastError = e.message || '送信できませんでした'; sync.firstDirtyAt = 0; scheduleRetry(); return {ok:false, error:sync.lastError}; })
    .then(function(r){
      sync.busy = false; sync.busyPromise = null;
      var again = sync.again; sync.again = false;
-     if (r.ok && (again || pendingSessions().length)) { clearTimeout(sync.timer); sync.timer = setTimeout(function(){ sync.timer = null; syncNow(); }, again ? SYNC_DEBOUNCE : 800); }
+     var moved = r.ok && pendingSessions().some(function(x){ return !byRev.hasOwnProperty(x.id) || byRev[x.id] !== x.revision; });
+     if (r.ok && (again || moved)) { clearTimeout(sync.timer); sync.timer = setTimeout(function(){ sync.timer = null; syncNow(); }, again ? SYNC_DEBOUNCE : 800); }
      renderSyncState(); if (S.route === 'home') scheduleHomeRender();
      return r;
    });
@@ -721,6 +744,9 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
  function flushOnHide(){
    if (!sync.url) return;
    var list = pendingSessions(); if (!list.length) return;
+   var sig = list.map(function(x){ return x.id + ':' + x.revision; }).join(',');
+   if (sync.lastBeacon && sync.lastBeacon.sig === sig && Date.now() - sync.lastBeacon.at < 5000) return;
+   sync.lastBeacon = {sig:sig, at:Date.now()};
    var body = JSON.stringify({action:'put', sessions:list.slice(0, 20).map(function(x){ return C.normalizeSession(x); })});
    if (body.length > 60000) return;
    try { if (navigator.sendBeacon && navigator.sendBeacon(sync.url, new Blob([body], {type:'text/plain;charset=UTF-8'}))) return; } catch (ignore) {}
@@ -728,15 +754,16 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
  }
  function syncSummary(){
    if (!sync.url) return {text:'', cls:''};
-   var pend = pendingSessions().length;
-   if (sync.busy) return {text:'共有サーバーへ送信中…', cls:''};
-   if (pend && sync.lastError) return {text:'共有サーバーに未送信 ' + pend + '件（' + sync.lastError + '。自動で再送します）', cls:'problem'};
-   if (pend) return {text:'共有サーバーへ送信待ち ' + pend + '件', cls:''};
-   return {text:'共有サーバーに送信済み' + (sync.lastOkAt ? ' ' + fmtTime(sync.lastOkAt) : ''), cls:'ok'};
+   var pend = pendingSessions().length, prob = problemSessions().length;
+   if (sync.busy) return {text:'送信中…', cls:''};
+   if (pend && sync.lastError) return {text:'未送信 ' + pend + '件・' + sync.lastError + '。自動で再送します', cls:'problem'};
+   if (prob) return {text:'送れていないデータ ' + prob + '件（保存一覧で確認）', cls:'problem'};
+   if (pend) return {text:'送信待ち ' + pend + '件', cls:''};
+   return {text:'送信済み' + (sync.lastOkAt ? ' ' + fmtTime(sync.lastOkAt) : ''), cls:'ok'};
  }
  function renderSyncState(){
    var chip = $('sync-chip');
-   if (chip) { var s = S.route === 'session' ? (SYNC_ENABLED && !sync.url ? {text:'共有サーバー未接続：この端末だけに保存しています（共有リンクを開くと全員分に送られます）', cls:'problem'} : syncSummary()) : {text:''}; chip.textContent = s.text; chip.className = 'sync-chip ' + (s.cls || ''); chip.hidden = !s.text; }
+   if (chip) { var s = S.route === 'session' ? (SYNC_ENABLED && !sync.url ? {text:'未接続：この端末にだけ保存中。共有リンクを開いてください', cls:'problem'} : data && problemOf(data) ? {text:PROBLEM_TEXT[problemOf(data)], cls:'problem'} : syncSummary()) : {text:''}; chip.textContent = s.text; chip.className = 'sync-chip ' + (s.cls || ''); chip.hidden = !s.text; }
    if (S.route === 'home') renderSyncPanel();
  }
  function renderSyncPanel(){
@@ -744,8 +771,8 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    host.hidden = !SYNC_ENABLED; if (!SYNC_ENABLED) return;
    host.classList.toggle('sync-off', !sync.url);
    var html;
-   if (!sync.url) html = '<div class="sync-text"><strong><span class="sync-dot problem"></span>共有サーバーに未接続です</strong><br>このままでは入力がこの端末にしか保存されず、全員分に集まりません。代表者から届いた<strong>共有リンク</strong>を開いてください（1回開けば以後は自動で接続します）。</div><div class="button-row"><button type="button" class="btn" data-sync="setup">共有サーバーを設定（代表者向け）</button></div>';
-   else { var s = syncSummary(); html = '<div class="sync-text"><strong><span class="sync-dot ' + (s.cls === 'problem' ? 'problem' : 'on') + '"></span>共有サーバー：接続中</strong><br><span class="' + (s.cls === 'problem' ? 'danger-text' : 'secondary-text') + '">' + esc(s.text) + '</span></div><div class="button-row"><button type="button" class="btn primary" data-sync="list">全員分を見る</button><button type="button" class="btn" data-sync="share">共有リンクを送る</button><button type="button" class="btn" data-sync="setup">設定</button></div>'; }
+   if (!sync.url) html = '<div class="sync-text"><strong><span class="sync-dot problem"></span>共有サーバーに未接続</strong><br>このままだと入力はこの端末にしか残りません。集計担当から届いた<strong>共有リンク</strong>を1回開いてください。</div><div class="button-row"><button type="button" class="btn" data-sync="setup">共有サーバーの設定（集計担当）</button></div>';
+   else { var s = syncSummary(); html = '<div class="sync-text"><strong><span class="sync-dot ' + (s.cls === 'problem' ? 'problem' : 'on') + '"></span>共有サーバーに接続中</strong><br><span class="' + (s.cls === 'problem' ? 'danger-text' : 'secondary-text') + '">' + esc(s.text) + '</span></div><div class="button-row"><button type="button" class="btn primary" data-sync="list">全員分を見る</button><button type="button" class="btn" data-sync="share">共有リンクを送る</button><button type="button" class="btn" data-sync="setup">設定</button></div>'; }
    host.innerHTML = html;
  }
  function gasCode(){ var el = $('gas-code'); return el ? el.textContent.replace(/^\s+/, '') : ''; }
@@ -753,96 +780,97 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    var p = navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(text).then(function(){ return true; }, function(){ return false; }) : Promise.resolve(false);
    return p.then(function(ok){ if (ok) return true; try { var ta = document.createElement('textarea'); ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.left = '-9999px'; document.body.appendChild(ta); ta.select(); var r = document.execCommand('copy'); document.body.removeChild(ta); return !!r; } catch (e) { return false; } });
  }
- function shareLink(){ return location.origin + location.pathname + '?sync=' + encodeURIComponent(sync.url); }
+ function shareLink(){ return location.origin + location.pathname + '?sync=' + encodeURIComponent(sync.url) + '&openExternalBrowser=1'; }
  function syncSetupPrompt(){
    var connected = !!sync.url;
    modal('共有サーバーの設定',
      (connected ? '<div class="local-status-box">接続中：<span class="session-id">' + esc(shortUrl(sync.url)) + '</span><br>' + esc(syncSummary().text) + '</div><div class="button-row"><button type="button" class="btn primary" data-action="sync-share">共有リンクを送る</button><button type="button" class="btn" data-action="sync-now">今すぐ送信</button><button type="button" class="btn danger" data-action="sync-disconnect">接続を解除</button></div>' : '') +
-     '<p>全員の入力を、代表者のGoogleスプレッドシートに自動で集めます（無料）。設定は代表者が1回だけ行います（PCがおすすめ）。入力する人は、代表者から届く「共有リンク」を開くだけです。</p>' +
-     '<h3>設定の手順（約5分）</h3><ol>' +
-     '<li><a href="https://script.google.com/home" target="_blank" rel="noopener noreferrer">script.google.com</a> を開き、「新しいプロジェクト」を押します（Googleにログイン）。</li>' +
-     '<li>下の「スクリプトをコピー」を押し、エディタの中身を全部消して貼り付け、保存します。</li>' +
-     '<li>右上「デプロイ」→「新しいデプロイ」→ 種類の選択（歯車）で「ウェブアプリ」。次のユーザーとして実行：<strong>自分</strong>、アクセスできるユーザー：<strong>全員</strong> →「デプロイ」→ アクセスを承認します（「詳細」→「…に移動」→「許可」）。</li>' +
-     '<li>表示された「ウェブアプリ」のURL（…/exec で終わる）をコピーし、下に貼り付けて「接続」を押します。</li>' +
-     '<li>「共有リンクを送る」で、入力する人にリンクを送ります。</li></ol>' +
+     '<p>全員の入力を、集計担当のGoogleスプレッドシートに集めます。設定は集計担当が1回だけ（PC推奨）。入力する人は共有リンクを開くだけです。</p>' +
+     '<h3>設定の手順</h3><ol>' +
+     '<li><a href="https://script.google.com/home" target="_blank" rel="noopener noreferrer">script.google.com</a> で「新しいプロジェクト」を作る。</li>' +
+     '<li>「スクリプトをコピー」で写し、エディタの中身と置き換えて保存。</li>' +
+     '<li>「デプロイ」→「新しいデプロイ」→「ウェブアプリ」。実行：<strong>自分</strong>／アクセス：<strong>全員</strong>で「デプロイ」し、アクセスを許可。</li>' +
+     '<li>表示されたURL（…/exec）を下に貼って「接続」。</li>' +
+     '<li>「共有リンクを送る」で全員に送る。</li></ol>' +
      '<div class="button-row"><button type="button" class="btn" data-action="gas-copy">スクリプトをコピー</button><button type="button" class="btn" data-action="gas-show">スクリプトを表示</button></div>' +
      '<label class="field"><span>ウェブアプリのURL</span><input id="sync-url" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://script.google.com/macros/s/…/exec" value="' + esc(sync.url) + '"></label>' +
      '<div class="button-row"><button type="button" class="btn primary" data-action="sync-connect">接続</button><button type="button" class="btn" data-action="close">閉じる</button></div>' +
-     '<p class="secondary-text">データは代表者のGoogleドライブの「展示アンケート集約データ」に、入力者ごと（ID単位）に1行で保存されます。同じIDは上書きされ、重複しません。共有リンクを知っている人は全員分を読み書きできるため、関係者以外に送らないでください。各端末にも今までどおり保存されます。</p>');
+     '<p class="secondary-text">保存先はGoogleドライブの「展示アンケート集約データ」。1人1行（ID単位）で重複しません。共有リンクは関係者以外に送らないでください。</p>');
  }
  function gasShow(){
-   modal('共有サーバー用スクリプト', '<p>Apps Scriptのエディタに、この内容をそのまま貼り付けます。</p><textarea id="gas-text" class="preview-text" readonly spellcheck="false" aria-label="スクリプト"></textarea><div class="button-row"><button type="button" class="btn primary" data-action="gas-copy">スクリプトをコピー</button><button type="button" class="btn" data-action="sync-setup">設定に戻る</button></div>');
+   modal('共有サーバー用スクリプト', '<p>Apps Scriptのエディタに貼り付けます。</p><textarea id="gas-text" class="preview-text" readonly spellcheck="false" aria-label="スクリプト"></textarea><div class="button-row"><button type="button" class="btn primary" data-action="gas-copy">スクリプトをコピー</button><button type="button" class="btn" data-action="sync-setup">設定に戻る</button></div>');
    $('gas-text').value = gasCode();
  }
  function syncConnect(){
    var input = $('sync-url'), url = (input && input.value || '').trim();
-   if (!SYNC_URL_RE.test(url)) { toast('「https://script.google.com/…/exec」の形のURLを貼り付けてください'); return; }
+   if (!SYNC_URL_RE.test(url)) { toast('https://script.google.com/…/exec の形のURLを貼り付けてください'); return; }
    var btn = document.querySelector('[data-action="sync-connect"]'); if (btn) { btn.disabled = true; btn.textContent = '接続を確認中…'; }
    serverGet('ping', url).then(function(res){
-     if (!res.ok || res.app !== 'kyudentd-seal-survey') throw new Error('このアンケート用の共有サーバーではありません');
-     setSyncUrl(url); clearAllSyncedRev(); renderHome(); toast('共有サーバーに接続しました'); shareLinkPrompt(true); syncNow();
-   }).catch(function(e){ if (btn && btn.isConnected) { btn.disabled = false; btn.textContent = '接続'; } toast('接続できません：' + e.message); });
+     if (!res.ok) throw new Error(res.error || '応答が正しくありません');
+     if (!/(^|-)seal-survey$/.test(String(res.app || ''))) throw new Error('このアプリ用の共有サーバーではありません');
+     setSyncUrl(url); clearAllSyncedRev(); renderHome(); toast('接続しました'); shareLinkPrompt(true); syncNow();
+   }).catch(function(e){ if (btn && btn.isConnected) { btn.disabled = false; btn.textContent = '接続'; } toast(e.message === '接続できません' ? '接続できません。URLと「アクセスできるユーザー：全員」を確認してください' : '接続できません：' + e.message); });
  }
  function shareLinkPrompt(justConnected){
    if (!sync.url) return;
-   modal('共有リンク', (justConnected ? '<p><strong>接続できました。</strong>この端末の入力は、自動で共有サーバーに送られます。</p>' : '') +
-     '<p>このリンクを、入力する人全員に送ってください。開くと共有サーバーにつながり、以後は自動で集まります（各端末で1回開けばOK）。</p>' +
+   modal('共有リンク', (justConnected ? '<p><strong>接続しました。</strong>入力は自動で送られます。</p>' : '') +
+     '<p>入力する人全員にこのリンクを送ってください。各端末で1回開けば接続されます。</p>' +
      '<textarea id="share-link" class="preview-text link-text" readonly spellcheck="false" aria-label="共有リンク"></textarea>' +
      '<div class="button-row"><button type="button" class="btn primary" data-action="share-link-copy">リンクをコピー</button>' + (navigator.share ? '<button type="button" class="btn" data-action="share-link-send">LINE・メールで送る</button>' : '') + '</div>' +
-     '<p class="secondary-text">リンクを知っている人は全員分を読み書きできます。関係者以外に送らないでください。</p><div class="button-row"><button type="button" class="btn" data-action="close">閉じる</button></div>');
+     '<p class="secondary-text">リンクを知っている人は誰でも書き込めます。関係者以外に送らないでください。</p><div class="button-row"><button type="button" class="btn" data-action="close">閉じる</button></div>');
    $('share-link').value = shareLink();
  }
  function handleSyncParam(){
    var q; try { q = new URLSearchParams(location.search); } catch (e) { return; }
    var url = q.get('sync'); if (url === null) return;
-   q.delete('sync'); var rest = q.toString();
+   q.delete('sync'); q.delete('openExternalBrowser'); var rest = q.toString();
    try { history.replaceState(history.state, '', location.pathname + (rest ? '?' + rest : '') + location.hash); } catch (ignore) {}
-   if (!SYNC_ENABLED) { toast('このページはスマホ完結版です（共有サーバーには接続しません）'); return; }
+   if (!SYNC_ENABLED) { toast('スマホ完結版は共有サーバーに接続しません'); return; }
    url = url.trim();
-   if (!SYNC_URL_RE.test(url)) { toast('共有リンクの接続先が正しくありません'); return; }
-   if (url === sync.url) { toast('共有サーバーに接続済みです'); return; }
+   if (!SYNC_URL_RE.test(url)) { toast('共有リンクが正しくありません'); return; }
+   if (url === sync.url) { toast('接続済みです'); return; }
    pendingSyncUrl = url;
-   modal('共有サーバーに接続しますか？', '<p>このリンクは、展示アンケートの入力を代表者の共有サーバー（Googleスプレッドシート）に集めるためのものです。接続すると、この端末の入力（入力者名・会社名・票数）が自動で送られます。</p><p class="secondary-text">接続先：' + esc(shortUrl(url)) + '</p>' + (sync.url ? '<p class="danger-text">いまは別の共有サーバーに接続しています。切り替えると、以後の送信先が変わります。</p>' : '') + '<div class="button-row"><button type="button" class="btn primary" data-action="sync-accept">接続する</button><button type="button" class="btn" data-action="close">接続しない</button></div>');
+   modal('共有サーバーに接続しますか？', '<p>接続すると、この端末の入力（入力者名・会社名・票数）が集計担当のスプレッドシートに自動で送られます。</p><p class="secondary-text">接続先：' + esc(shortUrl(url)) + '</p>' + (sync.url ? '<p class="danger-text">別の共有サーバーに接続中です。切り替えると送信先が変わります。</p>' : '') + '<div class="button-row"><button type="button" class="btn primary" data-action="sync-accept">接続する</button><button type="button" class="btn" data-action="close">接続しない</button></div>');
  }
  function syncAccept(){
    var url = pendingSyncUrl; pendingSyncUrl = ''; closeModal(true);
    if (!url) return;
-   toast('接続先を確認しています…');
+   toast('接続を確認中…');
    serverGet('ping', url).then(function(res){
-     if (!res.ok || res.app !== 'kyudentd-seal-survey') throw Object.assign(new Error('このアンケート用の共有サーバーではありません'), {fatal:true});
-     return true;
+     if (res.ok && !/(^|-)seal-survey$/.test(String(res.app || ''))) throw Object.assign(new Error('このアプリ用の共有サーバーではありません'), {fatal:true});
+     return !!res.ok;   // a busy/temporary error is not a reason to refuse the link
    }).catch(function(e){ if (e && e.fatal) throw e; return false; }).then(function(verified){
      setSyncUrl(url); clearAllSyncedRev(); if (S.route === 'home') renderHome(); renderSyncState();
-     toast(verified ? '共有サーバーに接続しました' : '接続先を確認できませんでした。電波のある所で自動的に送信します');
+     toast(verified ? '接続しました' : '確認できませんでした。電波が戻れば自動で送ります');
      syncNow();
    }, function(e){ toast('接続しませんでした：' + e.message); });
  }
  function saveServerCache(){ try { if (sync.cache) sessionStorage.setItem(SERVER_CACHE, JSON.stringify(sync.cache)); } catch (ignore) {} }
- function loadServerCache(){ try { var v = JSON.parse(sessionStorage.getItem(SERVER_CACHE) || 'null'); if (v && Array.isArray(v.sessions)) { var list = []; v.sessions.forEach(function(x){ try { list.push(C.normalizeSession(x)); } catch (ignore) {} }); sync.cache = {at:v.at, sessions:list, excluded:v.excluded || 0}; } } catch (ignore) {} }
+ function loadServerCache(){ try { var v = JSON.parse(sessionStorage.getItem(SERVER_CACHE) || 'null'); if (v && Array.isArray(v.sessions)) { var list = []; v.sessions.forEach(function(x){ try { list.push(C.normalizeSession(x)); } catch (ignore) {} }); sync.cache = {at:v.at, sessions:list, excluded:Math.max(0, Math.floor(Number(v.excluded) || 0)), bad:Math.max(0, Math.floor(Number(v.bad) || 0))}; } } catch (ignore) {} }
  function serverListPrompt(){
    if (!sync.url) { syncSetupPrompt(); return; }
    var token = ++sync.loadToken;
-   modal('全員分（共有サーバー）', '<p>共有サーバーから全員分を読み込んでいます…</p><p class="secondary-text">この端末の未送信分を先に送ってから読み込みます。</p>');
+   modal('全員分', '<p>全員分を読み込み中…</p>');
    syncAll().then(function(){ return serverGet('list'); }).then(function(res){
      if (token !== sync.loadToken || $('app-modal').hidden) return;
-     if (!res.ok || !Array.isArray(res.sessions)) throw new Error(res.error || '共有サーバーの応答が不正です');
-     var list = [], bad = 0;
-     res.sessions.forEach(function(x){ try { list.push(C.normalizeSession(x)); } catch (e) { bad++; } });
-     sync.cache = {at:now(), sessions:list, excluded:res.excluded || 0, bad:bad}; saveServerCache();
+     if (!res.ok || !Array.isArray(res.sessions)) throw new Error(res.error || '共有サーバーの応答が正しくありません');
+     var list = [], bad = 0, seen = {};
+     res.sessions.forEach(function(x){ var s; try { s = C.normalizeSession(x); } catch (e) { bad++; return; } if (seen[s.id] === undefined) { seen[s.id] = list.length; list.push(s); } else if (C.isNewer(s, list[seen[s.id]])) list[seen[s.id]] = s; });
+     sync.cache = {at:now(), sessions:list, excluded:Math.max(0, Math.floor(Number(res.excluded) || 0)), bad:bad}; saveServerCache();
      renderServerList();
    }).catch(function(e){
      if (token !== sync.loadToken || $('app-modal').hidden) return;
-     modal('全員分（共有サーバー）', '<p class="danger-text">読み込めませんでした：' + esc(e.message) + '</p>' + (sync.cache ? '<p>前回（' + esc(fmtDateTime(sync.cache.at)) + '）に読み込んだ内容なら表示できます。</p><div class="button-row"><button type="button" class="btn" data-action="server-show-cache">前回の内容を表示</button></div>' : '') + '<div class="button-row"><button type="button" class="btn primary" data-action="server-list">再読み込み</button><button type="button" class="btn" data-action="close">閉じる</button></div>');
+     modal('全員分', '<p class="danger-text">読み込めませんでした：' + esc(e.message) + '</p>' + (sync.cache ? '<p>前回（' + esc(fmtDateTime(sync.cache.at)) + '）の内容なら表示できます。</p><div class="button-row"><button type="button" class="btn" data-action="server-show-cache">前回の内容を表示</button></div>' : '') + '<div class="button-row"><button type="button" class="btn primary" data-action="server-list">再読み込み</button><button type="button" class="btn" data-action="close">閉じる</button></div>');
    });
  }
  function renderServerList(){
    var c = sync.cache; if (!c) return;
    var items = c.sessions.slice().sort(bySessionOrder), counts = {}, q1 = 0, q2 = 0;
    items.forEach(function(x){ var k = C.identityKey(x.meta), t = C.sessionTotals(x); counts[k] = (counts[k] || 0) + 1; q1 += t.q1; q2 += t.q2; });
-   var rows = items.map(function(x){ var t = C.sessionTotals(x), dup = counts[C.identityKey(x.meta)] > 1; return '<label class="check-row"><input type="checkbox" class="server-check" value="' + esc(x.id) + '" checked><span><span class="who">' + esc(x.meta.name) + '</span>（' + esc(x.meta.company) + '）' + (dup ? ' <span class="badge warn">同じ入力者・日付が複数</span>' : '') + '<br><span class="secondary-text">' + esc(fmtDate(x.meta.date)) + '・ID ' + esc(x.id) + '・①' + num(t.q1) + '人・②' + num(t.q2) + '票・更新 ' + esc(fmtDateTime(x.updatedAt)) + '</span></span></label>'; }).join('');
-   modal('全員分（共有サーバー）', '<p><strong>' + items.length + '件</strong>（①合計 ' + num(q1) + '人・②合計 ' + num(q2) + '票）／ 読み込み ' + esc(fmtDateTime(c.at)) + (c.excluded ? '／ 除外 ' + c.excluded + '件' : '') + '</p>' +
-     (items.length ? '<div class="button-row"><button type="button" class="btn primary" data-action="server-sum">合算を表示</button><button type="button" class="btn" data-action="server-csv">全員分CSV</button><button type="button" class="btn" data-action="server-json">全員分バックアップ</button><button type="button" class="btn" data-action="server-list">再読み込み</button></div><p class="secondary-text">チェックしたデータだけを合算・出力します。同じ票を2つのデータに入力していないか確認してください。</p><div class="button-row"><button type="button" class="btn" data-action="server-all">すべて選択</button><button type="button" class="btn" data-action="server-none">すべて解除</button></div><div class="check-list">' + rows + '</div>'
-       : '<p>共有サーバーにはまだデータがありません。</p><div class="button-row"><button type="button" class="btn" data-action="server-list">再読み込み</button></div>') +
+   var rows = items.map(function(x){ var t = C.sessionTotals(x), dup = counts[C.identityKey(x.meta)] > 1; return '<label class="check-row"><input type="checkbox" class="server-check" value="' + esc(x.id) + '" checked><span><span class="who">' + esc(x.meta.name) + '</span>（' + esc(x.meta.company) + '）' + (dup ? ' <span class="badge warn">同じ人・同じ日が複数</span>' : '') + '<br><span class="secondary-text">' + esc(fmtDate(x.meta.date)) + '・ID ' + esc(x.id) + '・①' + num(t.q1) + '人・②' + num(t.q2) + '票・更新 ' + esc(fmtDateTime(x.updatedAt)) + '</span></span></label>'; }).join('');
+   modal('全員分', '<p><strong>' + items.length + '件</strong>（①合計 ' + num(q1) + '人・②合計 ' + num(q2) + '票）／ 読み込み ' + esc(fmtDateTime(c.at)) + (c.excluded ? '／ 除外 ' + num(c.excluded) + '件' : '') + (c.bad ? '／ 読めないデータ ' + num(c.bad) + '件' : '') + '</p>' +
+     (items.length ? '<div class="button-row"><button type="button" class="btn primary" data-action="server-sum">合算を表示</button><button type="button" class="btn" data-action="server-csv">全員分CSV</button><button type="button" class="btn" data-action="server-json">全員分バックアップ</button><button type="button" class="btn" data-action="server-list">再読み込み</button></div><p class="secondary-text">チェックしたデータだけを合算・出力します。</p><div class="button-row"><button type="button" class="btn" data-action="server-all">すべて選択</button><button type="button" class="btn" data-action="server-none">すべて解除</button></div><div class="check-list">' + rows + '</div>'
+       : '<p>まだデータがありません。</p><div class="button-row"><button type="button" class="btn" data-action="server-list">再読み込み</button></div>') +
      '<div class="button-row"><button type="button" class="btn" data-action="close">閉じる</button></div>');
  }
  function serverSelected(){ var set = {}; Array.prototype.slice.call(document.querySelectorAll('.server-check:checked')).forEach(function(x){ set[x.value] = 1; }); return (sync.cache ? sync.cache.sessions : []).filter(function(x){ return set[x.id]; }); }
@@ -875,28 +903,30 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
  /* ---------- home screen ---------- */
  function updateHomeWarning(){
    var w = $('home-warning'), text = '';
-   if (!storage) text = 'この環境ではブラウザー内の保存が使えません（プライベートブラウズやサイトデータの設定が原因の可能性があります）。入力はできますが、画面を閉じると消えるため、必ずバックアップを保存してください。';
-   else if (!writable) text = 'このブラウザー内に保存できない状態です（保存容量の不足や設定による制限）。入力後は必ずバックアップを保存してください。';
-   else if (Object.keys(unsavedCache).length) text = '端末内に保存できていないデータがあります（「端末内に未保存」の表示）。開いて「保存・CSV」からバックアップを保存してください。';
+   if (!storage) text = 'この画面では端末に保存できません（プライベートブラウズ等）。閉じると消えるので、必ずバックアップを保存してください。';
+   else if (!writable) text = '端末に保存できません（容量不足など）。必ずバックアップを保存してください。';
+   else if (Object.keys(unsavedCache).length) text = '端末に保存できていないデータがあります。開いて「保存・CSV」からバックアップを保存してください。';
+   else if (/\bLine\/|FBAN|FBAV|Instagram/.test(navigator.userAgent || '')) text = 'LINEなどのアプリの中で開いています。保存先が別になるので、SafariかChromeで開き直してください。';
    w.textContent = text; w.hidden = !text;
  }
  function cardHtml(it, counts){
    var inUse = store.lockState(it.id, TAB_ID, Date.now(), LOCK_STALE).state === 'held', id = esc(it.id);
    if (!it.session) {
-     return '<article class="session-card broken" data-id="' + id + '"><div class="card-top"><div><div class="session-name">読み取れないデータ</div><div class="session-company">保存内容が壊れています。退避してから削除してください。</div></div></div><div class="session-meta"><span>ID <span class="session-id">' + id + '</span></span></div><div class="card-actions"><button type="button" class="btn" data-act="raw" data-id="' + id + '">内容を退避</button><button type="button" class="btn danger" data-act="delete" data-id="' + id + '"' + (inUse ? ' disabled' : '') + '>削除</button></div></article>';
+     return '<article class="session-card broken" data-id="' + id + '"><div class="card-top"><div><div class="session-name">読み取れないデータ</div><div class="session-company">壊れています。退避してから削除してください。</div></div></div><div class="session-meta"><span>ID <span class="session-id">' + id + '</span></span></div><div class="card-actions"><button type="button" class="btn" data-act="raw" data-id="' + id + '">内容を退避</button><button type="button" class="btn danger" data-act="delete" data-id="' + id + '"' + (inUse ? ' disabled' : '') + '>削除</button></div></article>';
    }
    var s = it.session, m = s.meta, t = C.sessionTotals(s), badges = [];
    if (inUse) badges.push('<span class="badge warn">別の画面で入力中</span>');
-   if (it.unsaved) badges.push('<span class="badge danger">端末内に未保存</span>');
+   if (it.unsaved) badges.push('<span class="badge danger">端末に未保存</span>');
    if (it.status === 'recovered') badges.push('<span class="badge danger">保存データの確認が必要</span>');
-   if (s.importedAt) badges.push('<span class="badge info">他の端末から取り込み</span>');
-   if (counts[C.identityKey(m)] > 1) badges.push('<span class="badge warn">同じ入力者・日付のデータが複数</span>');
-   if (sync.url && sync.conflicts[s.id] === 'stale') badges.push('<span class="badge warn">共有サーバーの方が新しい内容</span>');
-   if (sync.url && sync.conflicts[s.id] === 'conflict') badges.push('<span class="badge danger">共有サーバーに同じIDの別データ</span>');
-   if (sync.url && sync.conflicts[s.id] === 'invalid') badges.push('<span class="badge danger">共有サーバーが受け付けません</span>');
+   if (s.importedAt) badges.push('<span class="badge info">取り込み</span>');
+   if (counts[C.identityKey(m)] > 1) badges.push('<span class="badge warn">同じ人・同じ日が複数</span>');
+   var prob = problemOf(s);
+   if (prob === 'stale') badges.push('<span class="badge warn">サーバーの方が新しい</span>');
+   if (prob === 'conflict') badges.push('<span class="badge danger">サーバーに同じIDの別データ</span>');
+   if (prob === 'invalid') badges.push('<span class="badge danger">サーバーが受け付けません</span>');
    return '<article class="session-card' + (inUse ? ' in-use' : '') + (it.status === 'recovered' ? ' broken' : '') + '" data-id="' + id + '">' +
      '<div class="card-top"><div><div class="session-name">' + esc(m.name) + '</div><div class="session-company">' + esc(m.company) + '</div></div><div class="session-date">' + esc(fmtDate(m.date)) + '</div></div>' +
-     '<div class="session-meta"><span>ID <span class="session-id">' + id + '</span></span><span>最終更新 ' + esc(fmtDateTime(s.updatedAt)) + '</span>' + (sync.url ? '<span class="' + (syncedRev(s.id) >= s.revision ? 'sync-ok' : 'sync-wait') + '">' + (syncedRev(s.id) >= s.revision ? '共有済み' : '共有へ送信待ち') + '</span>' : '') + '</div>' +
+     '<div class="session-meta"><span>ID <span class="session-id">' + id + '</span></span><span>最終更新 ' + esc(fmtDateTime(s.updatedAt)) + '</span>' + (sync.url ? '<span class="' + (syncedRev(s.id) >= s.revision ? 'sync-ok' : prob ? 'sync-ng' : 'sync-wait') + '">' + (syncedRev(s.id) >= s.revision ? '送信済み' : prob ? '送れていません' : '送信待ち') + '</span>' : '') + '</div>' +
      '<div class="session-totals">①合計<strong>' + num(t.q1) + '</strong>人　②合計<strong>' + num(t.q2) + '</strong>票</div>' +
      (badges.length ? '<div class="badges">' + badges.join('') + '</div>' : '') +
      '<div class="card-actions"><button type="button" class="btn primary" data-act="resume" data-id="' + id + '">' + (inUse ? '状況を確認' : '再開') + '</button><button type="button" class="btn" data-act="backup" data-id="' + id + '">バックアップ</button><button type="button" class="btn danger" data-act="delete" data-id="' + id + '"' + (inUse ? ' disabled' : '') + '>削除</button></div></article>';
@@ -913,7 +943,7 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    $('filter-wrap').hidden = items.length < 4 && !q;
    ['sum-button','bulk-csv-button','bulk-json-button'].forEach(function(id){ $(id).disabled = !valid.length; });
    var html;
-   if (!items.length) html = '<div class="empty-list">まだ保存データはありません。<br>上の欄に入力者名・会社名・日付を入れて「開始」を押してください。</div>';
+   if (!items.length) html = '<div class="empty-list">まだデータはありません。<br>上の欄に入力して「開始」を押してください。</div>';
    else if (!shown.length) html = '<div class="empty-list">「' + esc(qRaw.trim()) + '」に一致するデータはありません。</div>';
    else html = '<div class="session-list">' + shown.map(function(it){ return cardHtml(it, counts); }).join('') + '</div>';
    $('session-list-host').innerHTML = html;
@@ -934,7 +964,7 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    var taken = {}; store.ids().forEach(function(x){ taken[x] = 1; }); Object.keys(unsavedCache).forEach(function(x){ taken[x] = 1; });
    var id, tries = 0;
    do { id = C.makeId(meta.date); tries++; } while (taken[id] && tries < 50);
-   if (taken[id]) throw new Error('IDを発行できませんでした。もう一度お試しください。');
+   if (taken[id]) throw new Error('IDを発行できませんでした。もう一度押してください。');
    var session = C.newSession(meta, id, now());
    if (days) Object.keys(days).forEach(function(k){ session.days[k] = C.clone(days[k]); });
    var saved = store.save(session);
@@ -946,13 +976,13 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    var r = createSession(meta);
    $('start-name').value = ''; $('start-company').value = ''; showStartError('');
    go('#/s/' + r.id, true);
-   if (!r.saved.ok) toast('端末内に保存できません。入力後は必ずバックアップを保存してください');
+   if (!r.saved.ok) toast('端末に保存できません。必ずバックアップを保存してください');
  }
  function dupPrompt(meta, dupes){
    pendingMeta = meta;
-   modal('同じ入力者・日付のデータがあります', '<p><strong>' + esc(who(meta)) + ' ／ ' + esc(fmtDate(meta.date)) + '</strong> のデータが、この端末にすでにあります。</p><p>続きから入力する場合は「再開」を選んでください。新しく作ると同じ人・同じ日のデータが2つになり、合算したときに二重計上の原因になります。</p><ul class="dup-list">' +
+   modal('同じ人・同じ日のデータがあります', '<p><strong>' + esc(who(meta)) + ' ／ ' + esc(fmtDate(meta.date)) + '</strong> のデータがすでにあります。</p><p>続きは「再開」から。新しく作ると、合算で二重に数えるおそれがあります。</p><ul class="dup-list">' +
      dupes.map(function(it){ var t = C.sessionTotals(it.session); return '<li><span>ID <span class="session-id">' + esc(it.id) + '</span>　最終更新 ' + esc(fmtDateTime(it.session.updatedAt)) + '　①' + num(t.q1) + '人・②' + num(t.q2) + '票</span><button type="button" class="btn primary" data-action="dup-resume" data-id="' + esc(it.id) + '">再開</button></li>'; }).join('') +
-     '</ul><div class="button-row"><button type="button" class="btn" data-action="dup-create">別のデータとして新しく作る</button><button type="button" class="btn" data-action="close">キャンセル</button></div>');
+     '</ul><div class="button-row"><button type="button" class="btn" data-action="dup-create">それでも新しく作る</button><button type="button" class="btn" data-action="close">キャンセル</button></div>');
  }
  function resume(id){
    var it = findItem(id);
@@ -965,19 +995,19 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
  function inUsePrompt(id, lock){
    var it = findItem(id), secs = lock ? Math.max(0, Math.round((Date.now() - lock.at) / 1000)) : null;
    var label = it && it.session ? '<strong>' + esc(who(it.session.meta)) + '・' + esc(fmtDate(it.session.meta.date)) + '</strong>（ID ' + esc(id) + '）' : 'ID ' + esc(id);
-   modal('このデータは入力中です', '<p>' + label + ' は、この端末の別のタブまたは画面で開かれています' + (secs !== null ? '（' + secs + '秒前に確認）' : '') + '。</p><p>同じデータを2か所で同時に入力すると、数え漏れや二重入力の原因になります。通常は、開いている画面で続けてください。</p><div class="button-row"><button type="button" class="btn danger" data-action="inuse-takeover" data-id="' + esc(id) + '">この画面に引き継ぐ</button><button type="button" class="btn" data-action="close">閉じる</button></div><p class="secondary-text">引き継ぐと、元の画面は入力を停止します。</p>');
+   modal('このデータは入力中です', '<p>' + label + ' は別の画面で開いています' + (secs !== null ? '（' + secs + '秒前に確認）' : '') + '。</p><p>開いている画面で続けてください。</p><div class="button-row"><button type="button" class="btn danger" data-action="inuse-takeover" data-id="' + esc(id) + '">この画面に引き継ぐ</button><button type="button" class="btn" data-action="close">閉じる</button></div><p class="secondary-text">引き継ぐと、元の画面では入力できなくなります。</p>');
  }
  function importedPrompt(id, s){
-   modal('取り込んだデータを開きます', '<p><strong>' + esc(who(s.meta)) + '・' + esc(fmtDate(s.meta.date)) + '</strong>（ID ' + esc(id) + '）は、別の端末から取り込んだデータです（' + esc(fmtDateTime(s.importedAt)) + ' 取り込み）。</p><p>元の端末でも入力を続けている場合、ここで入力すると内容が食い違います。あとで取り込み直すと新しい方の内容に置き換わり、もう一方の入力は反映されません。</p><div class="button-row"><button type="button" class="btn primary" data-action="imported-open" data-id="' + esc(id) + '">このまま開く</button><button type="button" class="btn" data-action="close">キャンセル</button></div>');
+   modal('取り込んだデータです', '<p><strong>' + esc(who(s.meta)) + '・' + esc(fmtDate(s.meta.date)) + '</strong>（ID ' + esc(id) + '）は他の端末から取り込んだデータです（' + esc(fmtDateTime(s.importedAt)) + ' 取り込み）。</p><p>元の端末で入力を続けるなら、ここでは入力しないでください。内容が食い違います。</p><div class="button-row"><button type="button" class="btn primary" data-action="imported-open" data-id="' + esc(id) + '">このまま開く</button><button type="button" class="btn" data-action="close">キャンセル</button></div>');
  }
  function deletePrompt(id){
    var it = findItem(id); if (!it) { renderHome(); return; }
    if (store.lockState(id, TAB_ID, Date.now(), LOCK_STALE).state === 'held') { toast('別の画面で入力中のため削除できません'); return; }
    var t = it.session ? C.sessionTotals(it.session) : null;
    var label = it.session ? '<strong>' + esc(who(it.session.meta)) + '・' + esc(fmtDate(it.session.meta.date)) + '</strong>（ID ' + esc(id) + '）' : '読み取れないデータ（ID ' + esc(id) + '）';
-   modal('データの削除', '<p>' + label + ' をこの端末から削除します。' + (t ? '①合計 ' + num(t.q1) + '人・②合計 ' + num(t.q2) + '票。' : '') + '</p><p class="danger-text">元に戻せません。先にバックアップを保存してください。</p><div class="button-row">' +
+   modal('データの削除', '<p>' + label + ' をこの端末から削除します。' + (t ? '①合計 ' + num(t.q1) + '人・②合計 ' + num(t.q2) + '票。' : '') + '</p><p class="danger-text">元に戻せません。必要なら先にバックアップを保存してください。</p><div class="button-row">' +
      (it.session ? '<button type="button" class="btn" data-action="delete-backup" data-id="' + esc(id) + '">バックアップを保存</button>' : '<button type="button" class="btn" data-action="raw-one" data-id="' + esc(id) + '">内容を退避</button>') +
-     '</div>' + (sync.url && it.session ? '<label class="check-inline"><input type="checkbox" id="delete-exclude">共有サーバーの集計からも外す</label><p class="secondary-text">チェックしない場合、共有サーバーのデータはそのまま残ります（この端末からだけ削除）。</p>' : '') + '<label class="field"><span>削除してよければ「削除」と入力</span><input id="delete-confirm-text" type="text" autocomplete="off" maxlength="4" placeholder="削除"></label><div class="button-row"><button type="button" class="btn danger" data-action="delete-confirm" data-id="' + esc(id) + '">削除する</button><button type="button" class="btn" data-action="close">キャンセル</button></div>');
+     '</div>' + (sync.url && it.session ? '<label class="check-inline"><input type="checkbox" id="delete-exclude">共有サーバーの集計からも外す</label><p class="secondary-text">チェックしなければ、サーバーのデータは残ります。</p>' : '') + '<label class="field"><span>削除してよければ「削除」と入力</span><input id="delete-confirm-text" type="text" autocomplete="off" maxlength="4" placeholder="削除"></label><div class="button-row"><button type="button" class="btn danger" data-action="delete-confirm" data-id="' + esc(id) + '">削除する</button><button type="button" class="btn" data-action="close">キャンセル</button></div>');
  }
  function deleteConfirm(id){
    if ($('delete-confirm-text').value.trim() !== '削除') { toast('確認欄に「削除」と入力してください'); return; }
@@ -985,37 +1015,37 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    var exclude = !!($('delete-exclude') && $('delete-exclude').checked && sync.url);
    var r = store.remove(id); delete unsavedCache[id]; delete importedOk[id]; clearSyncedRev(id);
    if (S.sumSource !== 'server') { S.sumIds = S.sumIds.filter(function(x){ return x !== id; }); saveSumSelection(); }
-   closeModal(); renderHome(); toast(r.ok || !storage ? 'データを削除しました' : '削除できませんでした：' + r.error);
-   if (exclude) serverPost({action:'exclude', ids:[id]}).then(function(res){ toast(res.ok && res.changed ? '共有サーバーの集計からも外しました' : res.ok ? '共有サーバーにこのデータはありませんでした' : '共有サーバーで外せませんでした：' + (res.error || '')); }, function(e){ toast('共有サーバーで外せませんでした：' + e.message); });
+   closeModal(); renderHome(); toast(r.ok || !storage ? '削除しました' : '削除できませんでした：' + r.error);
+   if (exclude) serverPost({action:'exclude', ids:[id]}).then(function(res){ toast(res.ok && res.changed ? 'サーバーの集計からも外しました' : res.ok ? 'サーバーにこのデータはありませんでした' : 'サーバーで外せませんでした：' + (res.error || '')); }, function(e){ toast('サーバーで外せませんでした：' + e.message); });
  }
  function backupOne(id, back){
    var it = findItem(id); if (!it || !it.session) { toast('データを読み込めません'); return; }
    var s = it.session;
-   exportFile({text:JSON.stringify(C.normalizeSession(s), null, 2), filename:'九州電力送配電_アンケート_' + s.id + '_' + safePart(s.meta.name) + '_' + fileStamp() + '.json', mime:'application/json;charset=utf-8',
-     description:who(s.meta) + '・' + fmtDate(s.meta.date) + '（ID ' + s.id + '）のバックアップです。別の端末の「データを取り込む」や、入力画面の「バックアップから復元」で使えます。', back:back || null, backLabel:back ? '戻る' : '閉じる'});
+   exportFile({text:JSON.stringify(C.normalizeSession(s), null, 2), filename:'アンケート_' + s.id + '_' + safePart(s.meta.name) + '_' + fileStamp() + '.json', mime:'application/json;charset=utf-8',
+     description:who(s.meta) + '・' + fmtDate(s.meta.date) + '（ID ' + s.id + '）のバックアップです。「データを取り込む」や「バックアップから復元」で使います。', back:back || null, backLabel:back ? '戻る' : '閉じる'});
  }
  function rawOne(id, back){
    var raw = store.raw(id);
    if (raw === null) { toast('退避できる内容がありません'); return; }
-   exportFile({text:raw, filename:'九州電力送配電_アンケート_読み取れないデータ_' + id + '_' + fileStamp() + '.txt', mime:'text/plain;charset=utf-8', description:'保存領域に残っていた内容をそのまま退避します。復元できるとは限りません。', back:back || null, backLabel:back ? '戻る' : '閉じる'});
+   exportFile({text:raw, filename:'アンケート_読み取れないデータ_' + id + '_' + fileStamp() + '.txt', mime:'text/plain;charset=utf-8', description:'残っていた内容をそのまま書き出します。', back:back || null, backLabel:back ? '戻る' : '閉じる'});
  }
- function exportFieldsHtml(){ return '<label class="field"><span>出力対象（日別に選べます）</span><span class="select-wrap"><select id="export-scope" class="select-control">' + selectOptions([['all','1日目・2日目をまとめて'],['1','1日目だけ'],['2','2日目だけ']], exportScope) + '</select></span></label><label class="field"><span>CSVの種類</span><span class="select-wrap"><select id="csv-kind" class="select-control">' + selectOptions([['detail','項目別集計（各マス・各選択肢の票数）'],['summary','日別サマリー（回答者数・票数・差）']], exportKind) + '</select></span></label>'; }
+ function exportFieldsHtml(){ return '<label class="field"><span>出力する日</span><span class="select-wrap"><select id="export-scope" class="select-control">' + selectOptions([['all','1日目・2日目'],['1','1日目だけ'],['2','2日目だけ']], exportScope) + '</select></span></label><label class="field"><span>CSVの種類</span><span class="select-wrap"><select id="csv-kind" class="select-control">' + selectOptions([['detail','項目別（各マスの票数）'],['summary','日別サマリー']], exportKind) + '</select></span></label>'; }
  function readExportSettings(){ if ($('export-scope')) exportScope = $('export-scope').value; if ($('csv-kind')) exportKind = $('csv-kind').value; return C.dayKeys(exportScope, ui.day); }
  function bulkCsvPrompt(){
    var n = validSessions().length; if (!n) { toast('保存データがありません'); return; }
-   modal('全件CSV', '<p>保存一覧のデータ（' + n + '件）を1つのCSVにまとめて出力します。各行の先頭に ID・入力者・会社名・入力日 が付くので、Excelで入力者ごとの集計や合計ができます。</p>' + exportFieldsHtml() + '<div class="button-row"><button type="button" class="btn primary" data-action="bulk-csv-export">CSV出力</button><button type="button" class="btn" data-action="close">閉じる</button></div>');
+   modal('全件CSV', '<p>保存一覧の ' + n + ' 件を1つのCSVにまとめます。</p>' + exportFieldsHtml() + '<div class="button-row"><button type="button" class="btn primary" data-action="bulk-csv-export">CSV出力</button><button type="button" class="btn" data-action="close">閉じる</button></div>');
  }
  function bulkCsvExport(){
    var keys = readExportSettings(), list = validSessions().sort(bySessionOrder);
    if (!list.length) { toast('保存データがありません'); return; }
    var entries = list.map(function(s){ return {cols:[s.id, s.meta.name, s.meta.company, s.meta.date], data:s}; });
-   exportFile({text:C.toCsv(C.csvRows(entries, keys, exportKind)), filename:'九州電力送配電_アンケート_全件' + list.length + '件_' + scopeLabel(keys) + '_' + (exportKind === 'summary' ? 'サマリー' : '項目別集計') + '_' + fileStamp() + '.csv', mime:'text/csv;charset=utf-8',
-     description:list.length + '件のデータを、入力者ごとの行でまとめたCSVです（' + scopeLabel(keys) + '）。', back:bulkCsvPrompt, backLabel:'戻る'});
+   exportFile({text:C.toCsv(C.csvRows(entries, keys, exportKind)), filename:'アンケート_全件' + list.length + '件_' + scopeLabel(keys) + '_' + (exportKind === 'summary' ? 'サマリー' : '項目別集計') + '_' + fileStamp() + '.csv', mime:'text/csv;charset=utf-8',
+     description:list.length + '件を入力者ごとにまとめたCSVです（' + scopeLabel(keys) + '）。', back:bulkCsvPrompt, backLabel:'戻る'});
  }
  function bulkJson(){
    var list = validSessions(); if (!list.length) { toast('保存データがありません'); return; }
-   exportFile({text:JSON.stringify(C.makeBundle(list, now()), null, 1), filename:'九州電力送配電_アンケート_全件バックアップ_' + list.length + '件_' + fileStamp() + '.json', mime:'application/json;charset=utf-8',
-     description:'保存一覧の' + list.length + '件をまとめたバックアップです。別の端末の「データを取り込む」で読み込めます。'});
+   exportFile({text:JSON.stringify(C.makeBundle(list, now()), null, 1), filename:'アンケート_全件バックアップ_' + list.length + '件_' + fileStamp() + '.json', mime:'application/json;charset=utf-8',
+     description:'保存一覧の' + list.length + '件のバックアップです。「データを取り込む」で読み込めます。'});
  }
 
  /* ---------- import (other devices / old version) ---------- */
@@ -1035,9 +1065,9 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    importPlan(results, v1);
  }
  var PLAN_LABEL = {
-   'new':['新規に追加','st-new'], 'new-id':['新規に追加（IDが重なったため新しいIDを付けます）','st-new'], 'replace':['更新（ファイルの方が新しい）','st-new'],
-   'same':['取り込み済み（変更なし）','st-skip'], 'older':['スキップ（端末側の方が新しい）','st-skip'], 'locked':['スキップ（この端末の別画面で入力中）','st-warn'],
-   'skip-broken':['スキップ（端末側のデータが読み取れません）','st-warn'], 'skip-unsaved':['スキップ（端末内に未保存のデータがあります）','st-warn']
+   'new':['追加','st-new'], 'new-id':['追加（新しいIDを付けます）','st-new'], 'replace':['更新（ファイルが新しい）','st-new'],
+   'same':['変更なし','st-skip'], 'older':['スキップ（端末の方が新しい）','st-skip'], 'locked':['スキップ（別の画面で入力中）','st-warn'],
+   'skip-broken':['スキップ（端末のデータが読めません）','st-warn'], 'skip-unsaved':['スキップ（端末に未保存あり）','st-warn']
  };
  function importPlan(results, v1){
    var incoming = {}, order = [], errors = [];
@@ -1068,15 +1098,15 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    var rows = plan.map(function(p){
      var s = p.session, t2 = C.sessionTotals(s), lab = PLAN_LABEL[p.status], dup = (p.status === 'new' || p.status === 'new-id' || p.status === 'replace') && counts[C.identityKey(s.meta)] > 1;
      if (dup) dupWarn = true;
-     var change = p.status === 'replace' && p.local ? (function(){ var a = C.sessionTotals(p.local); return '<br><span class="secondary-text">端末側 ①' + num(a.q1) + '・②' + num(a.q2) + ' → ファイル ①' + num(t2.q1) + '・②' + num(t2.q2) + '</span>'; })() : '';
-     return '<tr><td>' + esc(who(s.meta)) + (dup ? '<br><span class="badge warn">同じ入力者・日付が複数</span>' : '') + '</td><td>' + esc(fmtDate(s.meta.date)) + '</td><td class="session-id">' + esc(s.id) + '</td><td class="num">' + num(t2.q1) + '／' + num(t2.q2) + '</td><td class="' + lab[1] + '">' + esc(lab[0]) + change + '</td></tr>';
+     var change = p.status === 'replace' && p.local ? (function(){ var a = C.sessionTotals(p.local); return '<br><span class="secondary-text">端末 ①' + num(a.q1) + '・②' + num(a.q2) + ' → ファイル ①' + num(t2.q1) + '・②' + num(t2.q2) + '</span>'; })() : '';
+     return '<tr><td>' + esc(who(s.meta)) + (dup ? '<br><span class="badge warn">同じ人・同じ日が複数</span>' : '') + '</td><td>' + esc(fmtDate(s.meta.date)) + '</td><td class="session-id">' + esc(s.id) + '</td><td class="num">' + num(t2.q1) + '／' + num(t2.q2) + '</td><td class="' + lab[1] + '">' + esc(lab[0]) + change + '</td></tr>';
    }).join('');
    pendingImport = plan;
-   modal('データの取り込み確認',
-     (plan.length ? '<p>ファイルに含まれるデータ ' + plan.length + '件のうち、<strong>' + actionable + '件</strong>を取り込みます。同じIDのデータは重複させず、新しい方を残します。</p><div class="table-scroll"><table class="plain-table plan-table"><thead><tr><th>入力者（会社）</th><th>日付</th><th>ID</th><th class="num">①／②</th><th>取り込み内容</th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '<p>取り込めるデータが見つかりませんでした。</p>') +
-     (dupWarn ? '<p class="danger-text">「同じ入力者・日付が複数」のデータは、合算すると二重計上になるおそれがあります。合算のときに対象を確認してください。</p>' : '') +
-     (errors.length ? '<h3>読み取れなかったもの</h3><ul>' + errors.map(function(e){ return '<li>' + esc(e) + '</li>'; }).join('') + '</ul>' : '') +
-     (v1.length ? '<p class="secondary-text">旧版（Ver.1）のバックアップ ' + v1.length + '件は、まとめては取り込めません。1件ずつ選ぶと、入力者名・会社名を付けて取り込めます。</p>' : '') +
+   modal('取り込みの確認',
+     (plan.length ? '<p>ファイルの ' + plan.length + '件のうち <strong>' + actionable + '件</strong>を取り込みます。同じIDは新しい方を残します。</p><div class="table-scroll"><table class="plain-table plan-table"><thead><tr><th>入力者（会社）</th><th>日付</th><th>ID</th><th class="num">①／②</th><th>内容</th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '<p>取り込めるデータがありません。</p>') +
+     (dupWarn ? '<p class="danger-text">「同じ人・同じ日が複数」のデータは、合算で二重に数えるおそれがあります。</p>' : '') +
+     (errors.length ? '<h3>読めなかったファイル</h3><ul>' + errors.map(function(e){ return '<li>' + esc(e) + '</li>'; }).join('') + '</ul>' : '') +
+     (v1.length ? '<p class="secondary-text">旧版のバックアップ ' + v1.length + '件は、1件ずつ選んで取り込んでください。</p>' : '') +
      '<div class="button-row"><button type="button" class="btn primary" data-action="import-confirm"' + (actionable ? '' : ' disabled') + '>取り込む（' + actionable + '件）</button><button type="button" class="btn" data-action="close">キャンセル</button></div>');
  }
  function importConfirm(){
@@ -1103,9 +1133,9 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    var keys = Object.keys(v.data.days).sort(), q1 = 0, q2 = 0;
    keys.forEach(function(k){ ['student','adult'].forEach(function(t){ var s = C.stats(v.data.days[k][t]); q1 += s.q1; q2 += s.q2; }); });
    var d = (v.data.days['1'] && v.data.days['1'].date) || (v.data.days['2'] && v.data.days['2'].date) || C.localDate();
-   modal('旧版のバックアップを取り込む', '<p><strong>' + esc(v.file) + '</strong> は旧版（Ver.1）のバックアップです（' + scopeLabel(keys) + '、①合計 ' + num(q1) + '・②合計 ' + num(q2) + '）。入力者名・会社名・日付を付けて、新しいデータとして取り込みます。</p>' +
+   modal('旧版のバックアップを取り込む', '<p><strong>' + esc(v.file) + '</strong> は旧版のバックアップです（' + scopeLabel(keys) + '、①合計 ' + num(q1) + '・②合計 ' + num(q2) + '）。名前・会社名・日付を付けて取り込みます。</p>' +
      '<label class="field"><span>入力者名</span><input id="v1-name" type="text" maxlength="80" autocomplete="name"></label><label class="field"><span>会社名</span><input id="v1-company" type="text" maxlength="120" autocomplete="organization"></label><label class="field"><span>日付</span><input id="v1-date" type="date" min="1900-01-01" max="2199-12-31" value="' + esc(d) + '"></label>' +
-     '<div class="button-row"><button type="button" class="btn primary" data-action="v1-create">新しいデータとして取り込む</button><button type="button" class="btn" data-action="close">キャンセル</button></div>');
+     '<div class="button-row"><button type="button" class="btn primary" data-action="v1-create">取り込む</button><button type="button" class="btn" data-action="close">キャンセル</button></div>');
  }
  function v1Create(){
    var v = pendingV1; if (!v) return;
@@ -1113,7 +1143,7 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    var dup = listSessions().some(function(it){ return it.session && C.identityKey(it.session.meta) === C.identityKey(meta); });
    var r = createSession(meta, v.data.days);
    closeModal(); renderHome();
-   toast((r.saved.ok ? '旧版データを取り込みました（ID ' + r.id + '）' : '取り込みましたが端末内に未保存です') + (dup ? '。同じ入力者・日付のデータが他にもあります' : ''));
+   toast((r.saved.ok ? '旧版データを取り込みました（ID ' + r.id + '）' : '取り込みましたが端末に未保存です') + (dup ? '。同じ人・同じ日のデータが他にもあります' : ''));
  }
 
  /* ---------- combined (read-only) view ---------- */
@@ -1128,9 +1158,9 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    S.sumIds.forEach(function(id){ sel[id] = 1; });
    var rows = items.map(function(it){
      var s = it.session, t = C.sessionTotals(s), checked = has ? !!sel[it.id] : true, dup = counts[C.identityKey(s.meta)] > 1;
-     return '<label class="check-row"><input type="checkbox" class="sum-check" value="' + esc(it.id) + '"' + (checked ? ' checked' : '') + '><span><span class="who">' + esc(s.meta.name) + '</span>（' + esc(s.meta.company) + '）' + (dup ? ' <span class="badge warn">同じ入力者・日付が複数</span>' : '') + '<br><span class="secondary-text">' + esc(fmtDate(s.meta.date)) + '・ID ' + esc(s.id) + '・①' + num(t.q1) + '人・②' + num(t.q2) + '票</span></span></label>';
+     return '<label class="check-row"><input type="checkbox" class="sum-check" value="' + esc(it.id) + '"' + (checked ? ' checked' : '') + '><span><span class="who">' + esc(s.meta.name) + '</span>（' + esc(s.meta.company) + '）' + (dup ? ' <span class="badge warn">同じ人・同じ日が複数</span>' : '') + '<br><span class="secondary-text">' + esc(fmtDate(s.meta.date)) + '・ID ' + esc(s.id) + '・①' + num(t.q1) + '人・②' + num(t.q2) + '票</span></span></label>';
    }).join('');
-   modal('合算するデータを選ぶ', '<p>選んだデータの票数を足し合わせて表示します（読み取り専用。元のデータは変わりません）。</p><p class="secondary-text">同じ票を2つのデータに入力していないか確認してください。二重計上の原因になります。</p><div class="button-row"><button type="button" class="btn" data-action="sum-all">すべて選択</button><button type="button" class="btn" data-action="sum-none">すべて解除</button></div><div class="check-list">' + rows + '</div><div class="button-row"><button type="button" class="btn primary" data-action="sum-open">合算を表示</button><button type="button" class="btn" data-action="close">キャンセル</button></div>');
+   modal('合算するデータを選ぶ', '<p>選んだデータの票数を足して表示します（元のデータは変わりません）。</p><div class="button-row"><button type="button" class="btn" data-action="sum-all">すべて選択</button><button type="button" class="btn" data-action="sum-none">すべて解除</button></div><div class="check-list">' + rows + '</div><div class="button-row"><button type="button" class="btn primary" data-action="sum-open">合算を表示</button><button type="button" class="btn" data-action="close">キャンセル</button></div>');
  }
  function sumOpen(){
    var ids = Array.prototype.slice.call(document.querySelectorAll('.sum-check:checked')).map(function(x){ return x.value; });
@@ -1145,7 +1175,7 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
  }
  function openCombined(){
    var ids = S.sumIds.length ? S.sumIds : readSumSelection(), r = combinedFrom(ids);
-   if (!r.chosen.length) { goHomeWithMessage(S.sumSource === 'server' ? '共有サーバーの読み込み内容がありません。「全員分を見る」から開き直してください。' : r.items.length ? '合算するデータが見つかりません。選び直してください。' : '保存データがありません。'); return; }
+   if (!r.chosen.length) { goHomeWithMessage(S.sumSource === 'server' ? '全員分のデータがありません。「全員分を見る」から開き直してください。' : r.items.length ? '合算するデータが見つかりません。選び直してください。' : '保存データがありません。'); return; }
    var combined; try { combined = C.sumSessions(r.chosen.map(function(it){ return it.session; })); } catch (e) { goHomeWithMessage(e.message); return; }
    S.route = 'sum'; S.id = null; data = combined; S.readOnly = true; S.lost = false; S.blocked = false; S.unsaved = false; S.hasSaved = false; S.saveError = ''; S.rawRecovery = null;
    S.sumIds = r.chosen.map(function(it){ return it.id; }); S.sumNames = r.chosen.map(function(it){ return who(it.session.meta); }); saveSumSelection();
@@ -1156,10 +1186,10 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
  function refreshCombined(){
    if (S.route !== 'sum' || S.sumSource === 'server') return;
    var r = combinedFrom(S.sumIds), chosen = r.chosen.filter(function(it){ return S.sumIds.indexOf(it.id) >= 0; });
-   if (!chosen.length) { goHomeWithMessage('合算の対象データがなくなりました'); return; }
+   if (!chosen.length) { goHomeWithMessage('合算するデータがなくなりました'); return; }
    try { data = C.sumSessions(chosen.map(function(it){ return it.session; })); } catch (e) { toast(e.message); return; }
    S.sumIds = chosen.map(function(it){ return it.id; }); S.sumNames = chosen.map(function(it){ return who(it.session.meta); }); saveSumSelection();
-   render(); toast('合算を最新の内容に更新しました');
+   render(); toast('合算を更新しました');
  }
 
  /* ---------- routing ---------- */
@@ -1187,14 +1217,14 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
  }
  function backToList(){
    if (S.route === 'session' && S.unsaved) {
-     modal('端末内に保存できていません', '<p>この画面の入力内容は、まだ端末内に保存できていません。一覧へ戻っても、この画面を閉じるまでは保持しますが、閉じると失われます。</p><div class="button-row"><button type="button" class="btn primary" data-action="json-export">バックアップを保存</button><button type="button" class="btn" data-action="leave-anyway">一覧へ戻る</button><button type="button" class="btn" data-action="close">キャンセル</button></div>');
+     modal('端末に保存できていません', '<p>まだ端末に保存できていません。ページを閉じると消えます。</p><div class="button-row"><button type="button" class="btn primary" data-action="json-export">バックアップを保存</button><button type="button" class="btn" data-action="leave-anyway">一覧へ戻る</button><button type="button" class="btn" data-action="close">キャンセル</button></div>');
      return;
    }
    navigateHome();
  }
  function showView(name){ $('home-view').hidden = name !== 'home'; $('session-view').hidden = name !== 'session'; try { window.scrollTo(0, 0); } catch (ignore) {} }
  function showHome(){
-   S.route = 'home'; data = null; document.documentElement.dataset.day = '1'; document.title = APP_LABEL + '｜九州電力送配電';
+   S.route = 'home'; data = null; document.documentElement.dataset.day = '1'; document.title = APP_LABEL;
    if (!$('start-date').value) $('start-date').value = C.localDate();
    showView('home'); renderHome();
  }
@@ -1212,13 +1242,13 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    var loaded = store.load(id), cached = unsavedCache[id], session = null, status = loaded.status;
    if (status === 'ok' || status === 'recovered') session = loaded.data;
    if (cached && (!session || cached.revision >= session.revision)) { session = cached; status = 'cached'; }
-   if (!session) { goHomeWithMessage(status === 'corrupt' ? '読み取れないデータです。保存一覧から退避または削除してください。' : status === 'unavailable' ? 'この環境では保存データを読み込めません。' : '指定のデータが見つかりません（ID ' + id + '）。'); return; }
+   if (!session) { goHomeWithMessage(status === 'corrupt' ? '読み取れないデータです。一覧から退避か削除をしてください。' : status === 'unavailable' ? 'この環境では保存データを読み込めません。' : 'データが見つかりません（ID ' + id + '）。'); return; }
    var acq = store.acquire(id, TAB_ID, Date.now(), LOCK_STALE, false);
    if (!acq.ok) { go('#/', false); inUsePrompt(id, acq.lock); return; }
    S.route = 'session'; S.id = id; data = session; S.readOnly = false; S.lost = false;
    S.unsaved = status === 'cached'; S.hasSaved = status === 'ok' || status === 'recovered';
    S.blocked = status === 'recovered'; S.rawRecovery = status === 'recovered' ? (loaded.raw === undefined ? null : loaded.raw) : null;
-   S.saveError = status === 'recovered' ? '保存データに異常があるため、直前の保存を表示しています。最新分が欠けている可能性があります。入力は停止中です。「保存・CSV」で確認してください。' : '';
+   S.saveError = status === 'recovered' ? '保存データに異常があります。1つ前の保存を表示中で、入力は止めています。「保存・CSV」で確認してください。' : '';
    restoreUi(id); ui.view = 'vote'; ui.remove = false; clearUndo();
    document.title = session.meta.name + '｜' + APP_LABEL;
    showView('session'); renderedType = ''; render(); startHeartbeat();
@@ -1237,29 +1267,29 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    if (S.lost || S.route !== 'session') return;
    S.lost = true; ui.remove = false; stopHeartbeat();
    if (!$('app-modal').hidden) closeModal(true);
-   render(); toast('このデータは別の画面で開かれたため、この画面での入力を停止しました');
+   render(); toast('別の画面で開かれたため、ここでの入力を止めました');
  }
  function takeover(){
    if (S.route !== 'session' || !S.id) return;
-   if (!store.acquire(S.id, TAB_ID, Date.now(), LOCK_STALE, true).ok) { toast('引き継げませんでした。もう一度お試しください'); return; }
+   if (!store.acquire(S.id, TAB_ID, Date.now(), LOCK_STALE, true).ok) { toast('引き継げませんでした。もう一度押してください'); return; }
    S.lost = false;
    var latest = store.load(S.id);
    if (latest.status === 'ok') { data = latest.data; S.hasSaved = true; S.blocked = false; S.saveError = ''; S.rawRecovery = null; }
    else if (latest.status === 'recovered' || latest.status === 'corrupt') { S.blocked = true; S.rawRecovery = latest.raw === undefined ? null : latest.raw; S.saveError = '保存データに異常があります。「保存・CSV」で確認してください。'; }
-   else if (latest.status === 'missing' && S.hasSaved) { S.blocked = true; S.saveError = 'このデータは保存領域から削除されています。表示中のデータをバックアップしてください。'; }
-   clearUndo(); startHeartbeat(); if (!$('app-modal').hidden) closeModal(true); render(); toast('この画面で入力を再開しました');
+   else if (latest.status === 'missing' && S.hasSaved) { S.blocked = true; S.saveError = 'このデータは削除されています。表示中のデータをバックアップしてください。'; }
+   clearUndo(); startHeartbeat(); if (!$('app-modal').hidden) closeModal(true); render(); toast('この画面で再開しました');
  }
  function syncBeforeEdit(){
    if (S.route !== 'session' || !data || S.blocked || S.unsaved) return;
    var latest = store.load(S.id);
    if (latest.status === 'ok') { if (latest.data.revision > data.revision) { data = latest.data; clearUndo(); toast('別の画面の保存内容を反映しました'); } }
-   else if (latest.status === 'corrupt' || latest.status === 'recovered') { S.blocked = true; S.rawRecovery = latest.raw === undefined ? null : latest.raw; S.saveError = '保存領域に異常があるため入力を停止しました。「保存・CSV」で確認してください。'; }
-   else if (latest.status === 'missing' && S.hasSaved) { S.blocked = true; S.saveError = 'このデータが保存領域から削除されたため、入力を停止しました。表示中のデータをバックアップするか、「表示中のデータで継続」を選んでください。'; }
+   else if (latest.status === 'corrupt' || latest.status === 'recovered') { S.blocked = true; S.rawRecovery = latest.raw === undefined ? null : latest.raw; S.saveError = '保存データに異常があるため入力を止めました。「保存・CSV」で確認してください。'; }
+   else if (latest.status === 'missing' && S.hasSaved) { S.blocked = true; S.saveError = 'このデータが削除されたため入力を止めました。バックアップするか「表示中のデータで継続」を選んでください。'; }
    else if (latest.status === 'unavailable') { S.unsaved = true; }
  }
  function ensureEditable(allowBlocked){
    if (S.route !== 'session' || !data || S.readOnly) return false;
-   if (S.lost) { toast('別の画面で入力中のため、この画面では入力できません'); return false; }
+   if (S.lost) { toast('別の画面で入力中のため、ここでは入力できません'); return false; }
    var st = store.lockState(S.id, TAB_ID, Date.now(), LOCK_STALE);
    if (st.state === 'held') { markLost(); return false; }
    if (st.state !== 'mine' && !store.acquire(S.id, TAB_ID, Date.now(), LOCK_STALE, false).ok) { markLost(); return false; }
@@ -1280,15 +1310,15 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
  /* ---------- survey board ---------- */
  function updateSaveStatus(){
    var node = $('save-state'), text;
-   if (S.route === 'sum') text = '合算表示（読み取り専用）';
+   if (S.route === 'sum') text = '合算表示';
    else if (S.blocked) text = '保存データの確認が必要';
    else if (S.lost) text = '別の画面で入力中';
-   else if (S.unsaved) text = '端末内に未保存';
+   else if (S.unsaved) text = '端末に未保存';
    else if (S.hasSaved && data && data.updatedAt) text = '自動保存済み ' + new Date(data.updatedAt).toLocaleTimeString('ja-JP', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
    else text = '入力ごとに自動保存';
    node.textContent = text; node.classList.toggle('problem', S.route === 'session' && (S.blocked || S.unsaved || S.lost));
    var warning = '';
-   if (S.route === 'session') { if (S.blocked) warning = S.saveError || '保存データの確認が必要です。入力は停止しています。'; else if (S.unsaved) warning = 'この環境では端末内への保存ができていません' + (S.saveError ? '（' + S.saveError + '）' : '') + '。終了前に「保存・CSV」からバックアップを保存してください。'; }
+   if (S.route === 'session') { if (S.blocked) warning = S.saveError || '保存データの確認が必要です。入力は止めています。'; else if (S.unsaved) warning = '端末に保存できていません' + (S.saveError ? '（' + S.saveError + '）' : '') + '。「保存・CSV」からバックアップを保存してください。'; }
    $('storage-warning').hidden = !warning; $('storage-warning-text').textContent = warning;
  }
  function renderSessionBar(){
@@ -1299,8 +1329,8 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
  }
  function renderStateBanner(){
    var b = $('state-banner'), html = '', info = false;
-   if (S.route === 'sum') { info = true; html = '<div>' + (S.sumSource === 'server' ? '共有サーバーの全員分から ' + S.sumIds.length + '件の合算です（' + esc(sync.cache ? fmtDateTime(sync.cache.at) : '') + ' 読み込み・読み取り専用）。' : '合算表示です（' + S.sumIds.length + '件・読み取り専用）。') + '票の入力はできません。</div><div class="button-row"><button type="button" class="btn" data-banner="sum-select">' + (S.sumSource === 'server' ? '最新を読み込む' : '対象を選び直す') + '</button><button type="button" class="btn" data-banner="home">保存一覧へ</button></div>'; }
-   else if (S.lost) html = '<div>このデータは別のタブ・画面で開かれたため、この画面での入力を停止しました。</div><div class="button-row"><button type="button" class="btn danger" data-banner="takeover">この画面で入力を再開</button><button type="button" class="btn" data-banner="home">保存一覧へ</button></div>';
+   if (S.route === 'sum') { info = true; html = '<div>' + (S.sumSource === 'server' ? '全員分 ' + S.sumIds.length + '件の合算です（' + esc(sync.cache ? fmtDateTime(sync.cache.at) : '') + ' 時点）。' : '合算表示です（' + S.sumIds.length + '件）。') + '入力はできません。</div><div class="button-row"><button type="button" class="btn" data-banner="sum-select">' + (S.sumSource === 'server' ? '最新を読み込む' : '対象を選び直す') + '</button><button type="button" class="btn" data-banner="home">保存一覧へ</button></div>'; }
+   else if (S.lost) html = '<div>別の画面で開かれたため、ここでの入力を止めました。</div><div class="button-row"><button type="button" class="btn danger" data-banner="takeover">この画面で入力を再開</button><button type="button" class="btn" data-banner="home">保存一覧へ</button></div>';
    b.className = 'state-banner' + (info ? ' info' : ''); b.innerHTML = html; b.hidden = !html;
  }
  function targetFromButton(button){ var t = {q:button.dataset.q}; if (button.dataset.r !== undefined) t.r = Number(button.dataset.r); if (button.dataset.c !== undefined) t.c = Number(button.dataset.c); return t; }
@@ -1350,7 +1380,7 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    var c = C.CONFIG[ui.type], s = C.stats(activeForm()), ro = S.readOnly || S.lost;
    if (renderedType !== ui.type) { $('matrix-host').innerHTML = buildMatrix(); $('choices-host').innerHTML = buildChoices(); renderedType = ui.type; cellButtons = Array.prototype.slice.call(document.querySelectorAll('#session-view .vote-hit[data-q]')); }
    $('q1-heading').textContent = '① ' + c.q1; $('q1-hint').textContent = c.hint; $('q2-heading').textContent = '② ' + c.q2;
-   $('q2-hint').textContent = ro ? '各マスの数字は票数です（読み取り専用）' : '1つだけ選んで、シールを1枚（該当するマスを1回タップ）';
+   $('q2-hint').textContent = ro ? '各マスの数字は票数です' : '1つだけ選んで1回タップ';
    $('q1-total').textContent = num(s.q1); $('q2-total').textContent = num(s.q2); $('respondents').textContent = num(s.q1);
    s.rows.forEach(function(v, r){ $('row-total-' + r).textContent = num(v); });
    s.cols.forEach(function(v, i){ $('column-total-' + i).textContent = num(v); }); $('table-total').textContent = num(s.known);
@@ -1365,14 +1395,14 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
  }
  function bars(items, total){
    var max = Math.max.apply(null, [1].concat(items.map(function(x){ return x.value; }))), html = '';
-   if (total === 0) html += '<p class="empty-chart">まだ投票はありません。</p>';
+   if (total === 0) html += '<p class="empty-chart">まだ票はありません。</p>';
    items.forEach(function(item){ var p = item.value / max * 100; html += '<div class="bar-record"><div>' + esc(item.label) + '</div><div class="bar-track"><div class="bar-fill" style="width:' + p.toFixed(4) + '%"></div></div><div class="bar-number">' + num(item.value) + '</div></div>'; });
    return html;
  }
  function updateSummary(){
    var c = C.CONFIG[ui.type], f = activeForm(), s = C.stats(f);
    $('summary-q1').textContent = num(s.q1); $('summary-q2').textContent = num(s.q2); $('summary-gap').textContent = (s.difference > 0 ? '+' : '') + num(s.difference);
-   $('summary-gap-note').textContent = s.difference === 0 ? '①と②の票数は一致しています。' : '①と②の票数が一致していません。回答漏れや操作内容をご確認ください。';
+   $('summary-gap-note').textContent = s.difference === 0 ? '①と②の票数は一致しています。' : '①と②の票数が合っていません。入力を確認してください。';
    var industry = c.rows.map(function(label, i){ return {label:label, value:s.rows[i]}; }); if (c.hasUnknown) industry.push({label:'業界不明', value:f.unknown});
    $('summary-industry-heading').textContent = '① ' + (ui.type === 'student' ? '気になる業界' : 'ご所属の業界');
    $('summary-industry').innerHTML = bars(industry, s.q1); $('summary-choices-heading').textContent = '② ' + c.q2;
@@ -1389,7 +1419,7 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    document.querySelectorAll('[data-select-view]').forEach(function(b){ b.setAttribute('aria-pressed', String(b.dataset.selectView === ui.view)); });
    $('audience-label').textContent = dateLabel(ui.day) + ' ／ ' + C.CONFIG[ui.type].audience;
    $('board-title').textContent = ui.view === 'vote' ? C.CONFIG[ui.type].title : (S.route === 'sum' ? '合算の集計' : 'アンケート集計');
-   $('board-instruction').textContent = S.route === 'sum' ? (ui.view === 'vote' ? '選んだデータの票数を合計した表示です（読み取り専用）。' : '選んだデータの合計です。下の一覧で1日目・2日目を確認できます。') : (ui.view === 'vote' ? '①と②にシールを1枚ずつ（計2枚）。マスをタップすると1票追加されます。' : '選択した日・対象の集計です。下の一覧で1日目・2日目を確認できます。');
+   $('board-instruction').textContent = S.route === 'sum' ? (ui.view === 'vote' ? '選んだデータの合計です。' : '選んだデータの合計です。') : (ui.view === 'vote' ? '①と②にシールを1枚ずつ。マスをタップすると1票増えます。' : '選んだ日・対象の集計です。');
    var label = S.route === 'sum' ? '合算（' + S.sumIds.length + '件）' : who(data.meta) + ' ' + fmtDate(data.meta.date) + ' ID ' + data.id;
    $('print-context').textContent = label + ' ／ ' + dateLabel(ui.day) + ' ／ ' + C.CONFIG[ui.type].name + ' ／ ' + (ui.view === 'vote' ? '投票様式' : '集計結果');
    $('vote-view').hidden = ui.view !== 'vote'; $('summary-view').hidden = ui.view !== 'summary';
@@ -1415,8 +1445,8 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    if (S.route !== 'session') return;
    if (!ensureEditable()) { render(); return; }
    var h = undoStack(), action = h[h.length - 1]; if (!action) { updateBoard(); return; }
-   if (!C.change(activeForm(), ui.type, action.target, -action.delta)) { toast('この操作は元に戻せません。票数をご確認ください。'); return; }
-   h.pop(); delete lastTaps[ui.day + ':' + C.targetKey(ui.type, action.target)]; persist(); updateBoard(); toast('直前の操作を元に戻しました');
+   if (!C.change(activeForm(), ui.type, action.target, -action.delta)) { toast('元に戻せませんでした。票数を確認してください。'); return; }
+   h.pop(); delete lastTaps[ui.day + ':' + C.targetKey(ui.type, action.target)]; persist(); updateBoard(); toast('1つ戻しました');
  }
 
  /* ---------- dialogs ---------- */
@@ -1431,46 +1461,43 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    $('app-modal').hidden = true; document.body.style.overflow = ''; pendingImport = null; pendingMeta = null; pendingV1 = null; modalBack = null;
    if (!skipFocus && lastFocus && lastFocus.isConnected && typeof lastFocus.focus === 'function') { try { lastFocus.focus({preventScroll:true}); } catch (e) {} }
  }
- function howtoHtml(){
-   return '<section><h3>使い方・運用上の注意</h3><ol>' +
-     '<li>保存一覧の画面で「入力者名・会社名・日付」を入れて「開始」を押すと、IDが発行され、入力者ごとに別々に保存されます。同じ端末を複数人で使っても混ざりません。</li>' +
-     '<li>続きは保存一覧の「再開」から。マスをタップするたびに自動保存されます。</li>' +
-     '<li>同じデータを、同じ端末の別のタブ・画面で同時に入力することはできません。別の画面で開くと前の画面は入力を停止します（「この画面で入力を再開」で引き継げます）。</li>' +
-     '<li>上部で「1日目／2日目」と「学生／一般・社会人」を選び、①と②で各1マスをタップします。「1つ戻す」は直近100操作まで、「1票取り消す」は修正モードです。</li>' +
-     '<li>同じマスへの0.12秒未満の連続タップは、誤タップ防止のため1回として扱います。</li>' +
-     '<li>横幅が足りない場合は、表の中を横にスワイプしてください。業界名は左端に固定されます。</li>' +
-     (SYNC_ENABLED ? '<li>共有サーバー（代表者のGoogleスプレッドシート）に接続すると、入力は自動で送られ、全員分が1か所に集まります。代表者は「全員分を見る」から合算・CSV・バックアップを一括で取り出せます。電波がないときは端末に保存し、つながったときに自動で再送します。</li>' +
-     '<li>共有サーバーに接続していない端末の入力は、その端末にしか保存されません。代表者から届いた共有リンクを各端末で1回開いてください。同じIDのデータは重複せず、新しい方に置き換わります。</li>'
-     : '<li>保存はこの端末・ブラウザーの中だけで、外部へは送信しません。全員分を集めるときは、各自が保存一覧の「バックアップ」（または「全件バックアップ」）でJSONファイルを保存してAirDrop・LINE・メールで送り、集める人が「データを取り込む」でまとめて読み込み、「合算を見る」「全件CSV」で集計します。同じIDのデータは重複せず、新しい方に置き換わります。</li>' +
-     '<li>取り込んだデータを集める人の端末で書き換えると、元の端末と食い違います。入力は元の端末で続け、最後にもう一度バックアップを取り込み直してください。</li>') +
-     '<li>終了時・休憩時にはバックアップを保存してください。サイトデータの削除、プライベートブラウズ、端末変更のほか、iPhone・iPadでしばらく（7日程度）開かない場合にも、端末内のデータが消えることがあります。</li>' +
-     '<li>Safariで開いた場合と、ホーム画面に追加したアイコンから開いた場合とでは、保存一覧が別々になることがあります。いつも同じ開き方で使ってください。</li>' +
-     '<li>①の合計を原様式どおり回答者数としています。①と②の回答の組合せ、同一人物の重複回答は判定しません。会期中お一人1回の運用はスタッフで確認してください。</li></ol>' +
-     '<p>元様式の項目・表の構成を維持しています。学生①の右端「業界不明」は業界別・展示別の行列計には含めず、①全体の合計に加算します。社会人②の右端表記も元様式を維持しています。</p></section>';
+ function howtoHtml(heading){
+   return '<section>' + (heading === false ? '' : '<h3>使い方</h3>') + '<ol>' +
+     '<li>名前・会社名・日付を入れて「開始」。</li>' +
+     '<li>上で日（1日目／2日目）と対象（学生／一般・社会人）を選ぶ。</li>' +
+     '<li>回答のマスをタップすると1票。間違えたら「1つ戻す」、あとで減らすなら「1票取り消す」。</li>' +
+     (SYNC_ENABLED ? '<li>入力は自動で保存され、共有サーバーに送られます。電波がないときは、つながったときに送ります。</li>' +
+     '<li>続きは保存一覧の「再開」から。</li>' +
+     '<li>集計担当は「全員分を見る」で合算・CSVを出せます。</li>'
+     : '<li>入力はこの端末に自動保存されます（外部には送りません）。</li>' +
+     '<li>続きは保存一覧の「再開」から。</li>' +
+     '<li>1日の終わりに「全件バックアップ」を集計担当へ送る。集計担当は「データを取り込む」で読み込み、「合算を見る」「全件CSV」。</li>' +
+     '<li>iPhone・iPadは、しばらく開かないとデータが消えることがあります。</li>') +
+     '<li>回答者数は①の合計です。</li></ol></section>';
  }
- function footerNoteHtml(){ return '<p class="footer-note">元様式：学生C案・一般社会人A案。配色は社内「デザイン要則」の白地・ブルー・黒を参考にした画面用の近似色です。正式なRGB指定やロゴデータの再現ではありません。2日目のオレンジは日別識別用です。' + (SYNC_ENABLED ? '入力者名・会社名・票数は、この端末内と保存したバックアップ・CSVに記録されます。共有サーバーに接続した場合だけ、代表者のGoogleスプレッドシートへ送信します（それ以外の外部送信はありません）。' : '入力者名・会社名・票数は、この端末内と保存したバックアップ・CSVにだけ記録され、外部へは送信しません。') + '<br>※重要な判断には必ず原文を確認してください。</p>'; }
+ function footerNoteHtml(){ return '<p class="footer-note">' + (SYNC_ENABLED ? '入力者名・会社名・票数は、この端末と共有サーバー（集計担当のGoogleスプレッドシート）に保存されます。' : '入力者名・会社名・票数は、この端末の中だけに保存されます。') + '</p>'; }
  function manager(){
    if (S.route === 'sum') { sumManager(); return; }
    if (S.route !== 'session' || !data) return;
    var editable = canEdit(), m = data.meta;
-   var status = S.blocked ? '保存データの確認が必要です。入力は停止中です。' : S.lost ? '別の画面で入力中のため、この画面では入力できません（表示とファイル出力はできます）。' : S.unsaved ? 'この画面のデータは保持していますが、端末内には保存できていません。バックアップを保存してください。' : '入力のたびに、この端末・ブラウザー内へ自動保存しています。';
-   var warningControls = S.blocked ? '<section class="manage-section"><h3 class="danger-text">保存異常への対応</h3><p>' + esc(S.saveError) + '</p><div class="button-row">' + (S.rawRecovery !== null ? '<button type="button" class="btn" data-action="raw-export">異常データを退避</button>' : '') + '<button type="button" class="btn danger" data-action="ack-recovery"' + (S.lost ? ' disabled' : '') + '>表示中のデータで継続</button></div><p class="secondary-text">表示中のデータが正しいと確認できない場合は、「バックアップから復元」で読み込んでください。</p></section>' : '';
+   var status = S.blocked ? '保存データに異常があります。入力は止めています。' : S.lost ? '別の画面で入力中です。ここでは表示と出力だけできます。' : S.unsaved ? '端末に保存できていません。バックアップを保存してください。' : '入力のたびに自動保存しています。';
+   var warningControls = S.blocked ? '<section class="manage-section"><h3 class="danger-text">保存の異常</h3><p>' + esc(S.saveError) + '</p><div class="button-row">' + (S.rawRecovery !== null ? '<button type="button" class="btn" data-action="raw-export">異常データを書き出す</button>' : '') + '<button type="button" class="btn danger" data-action="ack-recovery"' + (S.lost ? ' disabled' : '') + '>表示中のデータで継続</button></div><p class="secondary-text">表示が正しいか分からないときは「バックアップから復元」を使ってください。</p></section>' : '';
    modal('保存・CSV・使い方',
      '<p class="scope-label">' + esc(who(m)) + ' ／ ' + esc(fmtDate(m.date)) + ' ／ ID ' + esc(data.id) + '<br>表示中：' + esc(dateLabel(ui.day)) + ' ／ ' + C.CONFIG[ui.type].name + '</p>' +
-     '<div class="local-status-box">' + esc(status) + '<br>同じデータは同時に1つの画面でだけ入力できます。別の端末とは自動同期しません。</div>' +
+     '<div class="local-status-box">' + esc(status) + '</div>' +
      (S.lost ? '<div class="button-row"><button type="button" class="btn danger" data-action="takeover">この画面で入力を再開</button></div>' : '') + warningControls +
-     '<div class="manage-grid"><div><section class="manage-section"><h3>集計CSV・バックアップ</h3>' + exportFieldsHtml() +
-     '<div class="button-row"><button type="button" class="btn primary" data-action="csv-export">CSV出力</button><button type="button" class="btn" data-action="json-export">バックアップ保存</button><button type="button" class="btn" data-action="print">表示中を印刷・PDF</button></div><p class="secondary-text">CSVはExcel向けのUTF-8（BOM付き）で、各行の先頭に ID・入力者・会社名・入力日 が付きます。バックアップ（JSON）は両日分をまとめて保存し、復元や別の端末への取り込みに使います。</p></section></div>' +
-     '<div><section class="manage-section"><h3>バックアップから復元</h3><p>このツールで保存したJSONを読み込み、選んだ日の票数を置き換えます（合算ではありません）。旧版のバックアップも読み込めます。</p><button type="button" class="btn" data-action="restore-pick"' + (restorable() ? '' : ' disabled') + '>JSONを選んで復元</button><p class="secondary-text">復元前に、いまのデータのバックアップを保存してください。</p></section>' +
-     '<section class="manage-section"><h3>入力者情報（IDは変わりません）</h3><label class="field"><span>入力者名</span><input id="meta-name" type="text" maxlength="80" autocomplete="name" value="' + esc(m.name) + '"' + (editable ? '' : ' disabled') + '></label><label class="field"><span>会社名</span><input id="meta-company" type="text" maxlength="120" autocomplete="organization" value="' + esc(m.company) + '"' + (editable ? '' : ' disabled') + '></label><label class="field"><span>日付</span><input id="meta-date" type="date" min="1900-01-01" max="2199-12-31" value="' + esc(m.date) + '"' + (editable ? '' : ' disabled') + '></label><div class="button-row"><button type="button" class="btn" data-action="meta-save"' + (editable ? '' : ' disabled') + '>入力者情報を保存</button></div></section>' +
+     '<div class="manage-grid"><div><section class="manage-section"><h3>CSV・バックアップ</h3>' + exportFieldsHtml() +
+     '<div class="button-row"><button type="button" class="btn primary" data-action="csv-export">CSV出力</button><button type="button" class="btn" data-action="json-export">バックアップ保存</button><button type="button" class="btn" data-action="print">印刷・PDF</button></div><p class="secondary-text">CSVはExcelで開けます。バックアップ（JSON）は復元や取り込みに使います。</p></section></div>' +
+     '<div><section class="manage-section"><h3>バックアップから復元</h3><p>バックアップ（JSON）で、選んだ日の票数を置き換えます。</p><button type="button" class="btn" data-action="restore-pick"' + (restorable() ? '' : ' disabled') + '>ファイルを選ぶ</button></section>' +
+     '<section class="manage-section"><h3>入力者情報</h3><label class="field"><span>入力者名</span><input id="meta-name" type="text" maxlength="80" autocomplete="name" value="' + esc(m.name) + '"' + (editable ? '' : ' disabled') + '></label><label class="field"><span>会社名</span><input id="meta-company" type="text" maxlength="120" autocomplete="organization" value="' + esc(m.company) + '"' + (editable ? '' : ' disabled') + '></label><label class="field"><span>日付</span><input id="meta-date" type="date" min="1900-01-01" max="2199-12-31" value="' + esc(m.date) + '"' + (editable ? '' : ' disabled') + '></label><div class="button-row"><button type="button" class="btn" data-action="meta-save"' + (editable ? '' : ' disabled') + '>入力者情報を保存</button></div></section>' +
      '<section class="manage-section"><h3>会期の日付（任意）</h3><label class="field"><span>1日目の日付</span><input type="date" min="1900-01-01" max="2199-12-31" id="day-date-1" value="' + esc(data.days['1'].date) + '"' + (editable ? '' : ' disabled') + '></label><label class="field"><span>2日目の日付</span><input type="date" min="1900-01-01" max="2199-12-31" id="day-date-2" value="' + esc(data.days['2'].date) + '"' + (editable ? '' : ' disabled') + '></label></section></div></div>' +
      howtoHtml() +
-     '<section class="manage-section"><h3>表示中の様式だけを初期化</h3><p>' + esc(dateLabel(ui.day)) + ' ／ ' + C.CONFIG[ui.type].name + ' だけを0票にします。他の日・他の対象は変更しません。</p><button type="button" class="btn danger" data-action="reset-prompt"' + (editable ? '' : ' disabled') + '>表示中の様式を初期化</button></section>' +
+     '<section class="manage-section"><h3>表示中の票数を初期化</h3><p>' + esc(dateLabel(ui.day)) + ' ／ ' + C.CONFIG[ui.type].name + ' だけを0票にします。</p><button type="button" class="btn danger" data-action="reset-prompt"' + (editable ? '' : ' disabled') + '>初期化</button></section>' +
      footerNoteHtml());
  }
  function sumManager(){
-   modal('合算のCSV・印刷', '<p class="scope-label">合算（' + S.sumIds.length + '件）／ 表示中：' + esc(dateLabel(ui.day)) + ' ／ ' + C.CONFIG[ui.type].name + '</p><div class="local-status-box">選んだデータの票数を足し合わせた読み取り専用の表示です。元のデータは変更しません。</div>' +
-     '<section class="manage-section"><h3>合算のCSV</h3>' + exportFieldsHtml() + '<div class="button-row"><button type="button" class="btn primary" data-action="csv-export">CSV出力</button><button type="button" class="btn" data-action="print">表示中を印刷・PDF</button></div><p class="secondary-text">入力者ごとの内訳が必要な場合は、保存一覧の「全件CSV」を使ってください。</p></section>' +
+   modal('合算のCSV・印刷', '<p class="scope-label">合算（' + S.sumIds.length + '件）／ 表示中：' + esc(dateLabel(ui.day)) + ' ／ ' + C.CONFIG[ui.type].name + '</p><div class="local-status-box">選んだデータの合計です（元のデータは変わりません）。</div>' +
+     '<section class="manage-section"><h3>合算のCSV</h3>' + exportFieldsHtml() + '<div class="button-row"><button type="button" class="btn primary" data-action="csv-export">CSV出力</button><button type="button" class="btn" data-action="print">印刷・PDF</button></div><p class="secondary-text">入力者ごとの内訳は「全件CSV」で出せます。</p></section>' +
      '<section class="manage-section"><h3>合算に含めたデータ</h3><ul>' + S.sumNames.map(function(n){ return '<li>' + esc(n) + '</li>'; }).join('') + '</ul><div class="button-row"><button type="button" class="btn" data-action="sum-reselect">対象を選び直す</button></div></section>');
  }
  function releaseExport(){ if (activeExport && activeExport.url) { var url = activeExport.url; setTimeout(function(){ URL.revokeObjectURL(url); }, 120000); } activeExport = null; }
@@ -1482,10 +1509,10 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    activeExport = {text:o.text, filename:o.filename, blob:blob, url:url, file:file};
    var canShare = false; try { canShare = !!(file && navigator.share && navigator.canShare && navigator.canShare({files:[file]})); } catch (ignore) {}
    var preview = !o.hidePreview && o.text.length <= PREVIEW_LIMIT;
-   modal('ファイルを保存', '<p>' + esc(o.description) + '</p><div class="export-box"><div class="export-name">' + esc(o.filename) + '</div><p class="secondary-text">' + num(blob.size) + ' バイト ／ ファイルを作成しました。保存先はブラウザー側で指定してください。</p><div class="button-row">' +
+   modal('ファイルを保存', '<p>' + esc(o.description) + '</p><div class="export-box"><div class="export-name">' + esc(o.filename) + '</div><p class="secondary-text">' + num(blob.size) + ' バイト</p><div class="button-row">' +
      (url ? '<a class="btn primary" id="download-link" href="' + esc(url) + '" download="' + esc(o.filename) + '" data-action="download">ダウンロード</a>' : '') + '<button type="button" class="btn" data-action="share-file"' + (canShare ? '' : ' disabled') + '>共有して保存</button></div></div>' +
-     '<p class="secondary-text">iPhone・iPadでダウンロードできない場合は「共有して保存」から「&quot;ファイル&quot;に保存」やAirDropを選んでください。共有に非対応のブラウザーではボタンが無効になります。</p>' +
-     (preview ? '<h3>内容を表示・コピー</h3><textarea id="export-preview" class="preview-text" readonly spellcheck="false" aria-label="保存ファイルの内容"></textarea><div class="button-row"><button type="button" class="btn" data-action="copy-export">内容をコピー</button></div>' : '') +
+     '<p class="secondary-text">iPhone・iPadでは「共有して保存」から「ファイルに保存」やLINE・AirDropが使えます。</p>' +
+     (preview ? '<h3>内容</h3><textarea id="export-preview" class="preview-text" readonly spellcheck="false" aria-label="保存ファイルの内容"></textarea><div class="button-row"><button type="button" class="btn" data-action="copy-export">内容をコピー</button></div>' : '') +
      '<div class="button-row"><button type="button" class="btn" data-action="back">' + esc(o.backLabel || '閉じる') + '</button></div>');
    modalBack = o.back || null;
    if ($('export-preview')) $('export-preview').value = o.text;
@@ -1493,25 +1520,25 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
  function sessionFileLabel(){ return S.route === 'sum' ? '合算' + S.sumIds.length + '件' : data.id + '_' + safePart(data.meta.name); }
  function csvExport(){
    var keys = readExportSettings(), entries = S.route === 'sum' ? [{cols:['合算', S.sumIds.length + '件の合算', '', ''], data:data}] : [{cols:[data.id, data.meta.name, data.meta.company, data.meta.date], data:data}];
-   exportFile({text:C.toCsv(C.csvRows(entries, keys, exportKind)), filename:'九州電力送配電_アンケート_' + sessionFileLabel() + '_' + scopeLabel(keys) + '_' + (exportKind === 'summary' ? 'サマリー' : '項目別集計') + '_' + fileStamp() + '.csv', mime:'text/csv;charset=utf-8',
-     description:(S.route === 'sum' ? '合算（' + S.sumIds.length + '件）の' : '') + scopeLabel(keys) + '・学生／一般社会人の集計です。項目別CSVは0票を含め、各マス・各選択肢を1行で出力します。', back:manager, backLabel:S.route === 'sum' ? '合算のCSVへ戻る' : '保存・CSVへ戻る'});
+   exportFile({text:C.toCsv(C.csvRows(entries, keys, exportKind)), filename:'アンケート_' + sessionFileLabel() + '_' + scopeLabel(keys) + '_' + (exportKind === 'summary' ? 'サマリー' : '項目別集計') + '_' + fileStamp() + '.csv', mime:'text/csv;charset=utf-8',
+     description:(S.route === 'sum' ? '合算（' + S.sumIds.length + '件）の' : '') + scopeLabel(keys) + '・学生／一般社会人の集計です。', back:manager, backLabel:S.route === 'sum' ? '合算のCSVへ戻る' : '保存・CSVへ戻る'});
  }
  function jsonExport(back, backLabel){
    if (S.route !== 'session') return;
-   exportFile({text:JSON.stringify(C.normalizeSession(data), null, 2), filename:'九州電力送配電_アンケート_' + sessionFileLabel() + '_' + fileStamp() + '.json', mime:'application/json;charset=utf-8',
-     description:who(data.meta) + '・' + fmtDate(data.meta.date) + '（ID ' + data.id + '）の両日分を含むバックアップです。復元や、別の端末の「データを取り込む」で使えます。', back:back || manager, backLabel:backLabel || '保存・CSVへ戻る'});
+   exportFile({text:JSON.stringify(C.normalizeSession(data), null, 2), filename:'アンケート_' + sessionFileLabel() + '_' + fileStamp() + '.json', mime:'application/json;charset=utf-8',
+     description:who(data.meta) + '・' + fmtDate(data.meta.date) + '（ID ' + data.id + '）のバックアップ（両日分）です。', back:back || manager, backLabel:backLabel || '保存・CSVへ戻る'});
  }
  function pickRestore(){ if (!restorable()) return; readExportSettings(); var f = $('restore-file'); f.value = ''; f.click(); }
  function previewRestore(){
    var p = pendingRestore; if (!p || S.route !== 'session') return;
    var keys = Object.keys(p.days).sort(), other = p.source.kind === 'v2' && p.source.id !== data.id;
    var html = '<p><strong>' + esc(p.name) + '</strong></p>' +
-     (other ? '<p class="danger-text"><strong>別のデータのバックアップです</strong>（' + esc(who(p.source.meta)) + '・' + esc(fmtDate(p.source.meta.date)) + '・ID ' + esc(p.source.id) + '）。取り込むと同じ票が2つのデータに入り、合算すると二重計上になります。</p>' : '') +
-     (p.source.kind === 'v1' ? '<p class="secondary-text">旧版（Ver.1）のバックアップです。</p>' : '') +
-     '<p>チェックした日の両様式（学生・一般社会人）を置き換えます。<strong>現在の票数とは合算しません。</strong></p><div class="table-scroll"><table class="plain-table"><thead><tr><th>復元する日</th><th>対象</th><th class="num">現在 ①／②</th><th class="num">ファイル ①／②</th></tr></thead><tbody>';
+     (other ? '<p class="danger-text"><strong>別のデータのバックアップです</strong>（' + esc(who(p.source.meta)) + '・' + esc(fmtDate(p.source.meta.date)) + '・ID ' + esc(p.source.id) + '）。復元すると、合算で二重に数えるおそれがあります。</p>' : '') +
+     (p.source.kind === 'v1' ? '<p class="secondary-text">旧版のバックアップです。</p>' : '') +
+     '<p>チェックした日の票数（学生・一般社会人）を置き換えます。<strong>足し算ではありません。</strong></p><div class="table-scroll"><table class="plain-table"><thead><tr><th>復元する日</th><th>対象</th><th class="num">現在 ①／②</th><th class="num">ファイル ①／②</th></tr></thead><tbody>';
    keys.forEach(function(k){ ['student','adult'].forEach(function(type, i){ var cur = C.stats(data.days[k][type]), inc = C.stats(p.days[k][type]); html += '<tr>' + (i === 0 ? '<td rowspan="2"><label class="check-inline"><input type="checkbox" class="restore-day" value="' + k + '" checked>' + k + '日目</label></td>' : '') + '<td>' + C.CONFIG[type].name + '</td><td class="num">' + num(cur.q1) + '／' + num(cur.q2) + '</td><td class="num">' + num(inc.q1) + '／' + num(inc.q2) + '</td></tr>'; }); });
-   html += '</tbody></table></div><div class="button-row"><button type="button" class="btn" data-action="before-restore-export">復元前のバックアップを保存</button></div><label class="field"><span>置き換えてよければ「復元」と入力</span><input id="restore-confirm-text" type="text" autocomplete="off" placeholder="復元" maxlength="4"></label><div class="button-row"><button type="button" class="btn primary" data-action="restore-confirm">確認して復元</button><button type="button" class="btn" data-action="manager">キャンセル</button></div>';
-   modal('バックアップの復元確認', html);
+   html += '</tbody></table></div><div class="button-row"><button type="button" class="btn" data-action="before-restore-export">今のバックアップを保存</button></div><label class="field"><span>置き換えてよければ「復元」と入力</span><input id="restore-confirm-text" type="text" autocomplete="off" placeholder="復元" maxlength="4"></label><div class="button-row"><button type="button" class="btn primary" data-action="restore-confirm">復元する</button><button type="button" class="btn" data-action="manager">キャンセル</button></div>';
+   modal('復元の確認', html);
  }
  function confirmRestore(){
    var p = pendingRestore; if (!p) return;
@@ -1522,37 +1549,37 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    keys.forEach(function(k){ data.days[k] = C.clone(p.days[k]); });
    S.blocked = false; S.saveError = ''; S.rawRecovery = null;
    clearUndo(keys); var ok = persist(keys); pendingRestore = null; closeModal(); render();
-   toast(ok ? scopeLabel(keys) + 'を復元し、端末内へ保存しました' : '復元しましたが端末内に未保存です。バックアップを保存してください');
+   toast(ok ? scopeLabel(keys) + 'を復元しました' : '復元しましたが端末に未保存です。バックアップを保存してください');
  }
  function resetPrompt(){
-   modal('表示中の様式を初期化', '<p><strong>' + esc(dateLabel(ui.day)) + ' ／ ' + C.CONFIG[ui.type].name + '</strong> の①・②を0票にします。他の日・他の対象は変更しません。</p><p class="danger-text">元に戻せません。先にバックアップを保存してください。</p><label class="field"><span>よければ「初期化」と入力</span><input id="reset-confirm-text" type="text" autocomplete="off" maxlength="5" placeholder="初期化"></label><div class="button-row"><button type="button" class="btn danger" data-action="reset-confirm">この様式だけ初期化</button><button type="button" class="btn" data-action="manager">キャンセル</button></div>');
+   modal('票数の初期化', '<p><strong>' + esc(dateLabel(ui.day)) + ' ／ ' + C.CONFIG[ui.type].name + '</strong> の①・②を0票にします。</p><p class="danger-text">元に戻せません。</p><label class="field"><span>よければ「初期化」と入力</span><input id="reset-confirm-text" type="text" autocomplete="off" maxlength="5" placeholder="初期化"></label><div class="button-row"><button type="button" class="btn danger" data-action="reset-confirm">初期化する</button><button type="button" class="btn" data-action="manager">キャンセル</button></div>');
  }
  function resetConfirm(){
    if ($('reset-confirm-text').value.trim() !== '初期化') { toast('確認欄に「初期化」と入力してください'); return; }
    if (!ensureEditable()) { closeModal(); render(); return; }
    data.days[ui.day][ui.type] = C.freshForm(ui.type); undoStacks[stackKey()] = []; lastTaps = {};
-   var ok = persist(); ui.remove = false; closeModal(); render(); toast(ok ? '表示中の様式だけ初期化しました' : '初期化しましたが、端末内に未保存です');
+   var ok = persist(); ui.remove = false; closeModal(); render(); toast(ok ? '初期化しました' : '初期化しましたが、端末に未保存です');
  }
- function recoveryPrompt(){ modal('保存データを確認して継続', '<p>現在画面に表示している票数を正として、このデータの保存を続けます。保存領域の異常データは上書きされます。</p><p class="danger-text">必要なら先に異常データを退避し、バックアップと照合してください。最新分が欠けている可能性があります。</p><label class="field"><span>確認した場合は「継続」と入力</span><input id="recovery-confirm-text" type="text" maxlength="4" autocomplete="off" placeholder="継続"></label><div class="button-row"><button type="button" class="btn danger" data-action="recovery-confirm">表示中のデータで継続</button><button type="button" class="btn" data-action="manager">キャンセル</button></div>'); }
+ function recoveryPrompt(){ modal('表示中のデータで継続', '<p>いま表示している票数で保存を続けます（異常データは上書き）。</p><p class="danger-text">最新分が欠けている可能性があります。必要なら先に異常データを書き出してください。</p><label class="field"><span>続けるなら「継続」と入力</span><input id="recovery-confirm-text" type="text" maxlength="4" autocomplete="off" placeholder="継続"></label><div class="button-row"><button type="button" class="btn danger" data-action="recovery-confirm">表示中のデータで継続</button><button type="button" class="btn" data-action="manager">キャンセル</button></div>'); }
  function recoveryConfirm(){
    if ($('recovery-confirm-text').value.trim() !== '継続') { toast('確認欄に「継続」と入力してください'); return; }
    if (!ensureEditable(true)) { closeModal(); render(); return; }
    S.blocked = false; S.saveError = ''; S.rawRecovery = null;
-   var ok = persist(['1','2']); closeModal(); render(); toast(ok ? '表示中のデータで継続します' : '端末内に未保存です。必ずバックアップを保存してください');
+   var ok = persist(['1','2']); closeModal(); render(); toast(ok ? '表示中のデータで継続します' : '端末に未保存です。必ずバックアップを保存してください');
  }
  function metaSave(){
    if (!ensureEditable()) { closeModal(); render(); return; }
    var m; try { m = C.normalizeMeta({name:$('meta-name').value, company:$('meta-company').value, date:$('meta-date').value, createdAt:data.meta.createdAt}); } catch (e) { toast(e.message); return; }
    var dup = listSessions().some(function(it){ return it.session && it.id !== data.id && C.identityKey(it.session.meta) === C.identityKey(m); });
    data.meta = m; var ok = persist([]); document.title = m.name + '｜' + APP_LABEL; render(); manager();
-   toast(!ok ? '端末内に未保存です。バックアップを保存してください' : dup ? '保存しました。同じ入力者・日付のデータが他にもあります' : '入力者情報を保存しました');
+   toast(!ok ? '端末に未保存です。バックアップを保存してください' : dup ? '保存しました。同じ人・同じ日のデータが他にもあります' : '保存しました');
  }
- async function shareFile(){ if (!activeExport || !activeExport.file || !navigator.share) return; try { await navigator.share({files:[activeExport.file], title:activeExport.filename}); } catch (e) { if (e && e.name !== 'AbortError') toast('共有できませんでした。ダウンロードをご利用ください'); } }
+ async function shareFile(){ if (!activeExport || !activeExport.file || !navigator.share) return; try { await navigator.share({files:[activeExport.file], title:activeExport.filename}); } catch (e) { if (e && e.name !== 'AbortError') toast('共有できませんでした。ダウンロードを使ってください'); } }
  async function copyExport(){
    if (!activeExport) return; var text = activeExport.text, success = false;
    try { if (navigator.clipboard && navigator.clipboard.writeText) { await navigator.clipboard.writeText(text); success = true; } } catch (ignore) {}
    if (!success && $('export-preview')) { try { $('export-preview').focus(); $('export-preview').select(); success = document.execCommand('copy'); } catch (ignore) {} }
-   toast(success ? '内容をコピーしました' : 'コピーできませんでした。表示された内容を選択してコピーしてください');
+   toast(success ? '内容をコピーしました' : 'コピーできませんでした。内容を選んでコピーしてください');
  }
 
  /* ---------- events ---------- */
@@ -1565,7 +1592,7 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    'restore-pick':pickRestore, 'restore-confirm':confirmRestore,
    'before-restore-export':function(){ jsonExport(previewRestore, '復元の確認へ戻る'); },
    'reset-prompt':resetPrompt, 'reset-confirm':resetConfirm,
-   'raw-export':function(){ exportFile({text:S.rawRecovery || '', filename:'九州電力送配電_アンケート_異常データ退避_' + fileStamp() + '.txt', mime:'text/plain;charset=utf-8', description:'保存領域に残っていた異常データの退避です。復元できるJSONとは限りません。', back:manager, backLabel:'保存・CSVへ戻る'}); },
+   'raw-export':function(){ exportFile({text:S.rawRecovery || '', filename:'アンケート_異常データ退避_' + fileStamp() + '.txt', mime:'text/plain;charset=utf-8', description:'異常データをそのまま書き出したものです。', back:manager, backLabel:'保存・CSVへ戻る'}); },
    'ack-recovery':recoveryPrompt, 'recovery-confirm':recoveryConfirm,
    'takeover':function(){ takeover(); }, 'meta-save':metaSave,
    'leave-anyway':function(){ closeModal(true); navigateHome(); },
@@ -1582,28 +1609,28 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    'sum-none':function(){ document.querySelectorAll('.sum-check').forEach(function(x){ x.checked = false; }); },
    'sum-open':sumOpen, 'sum-reselect':sumPrompt,
    'sync-setup':syncSetupPrompt, 'sync-connect':syncConnect, 'sync-share':function(){ shareLinkPrompt(false); }, 'sync-accept':syncAccept,
-   'sync-now':function(){ syncAll().then(function(r){ toast(r.ok ? (r.sent ? '共有サーバーに送信しました' : '送信待ちのデータはありません') : '送信できませんでした：' + (r.error || '')); if (!$('app-modal').hidden && document.getElementById('sync-url')) syncSetupPrompt(); }); },
-   'sync-disconnect':function(){ modal('共有サーバーとの接続を解除', '<p>この端末から共有サーバーへの送信を止めます。端末内のデータと、共有サーバー（スプレッドシート）にあるデータはそのまま残ります。</p><div class="button-row"><button type="button" class="btn danger" data-action="sync-disconnect-ok">接続を解除</button><button type="button" class="btn" data-action="sync-setup">キャンセル</button></div>'); },
-   'sync-disconnect-ok':function(){ setSyncUrl(''); sync.memUrl = ''; closeModal(); if (S.route === 'home') renderHome(); renderSyncState(); toast('共有サーバーとの接続を解除しました'); },
-   'gas-copy':function(){ copyText(gasCode()).then(function(ok){ toast(ok ? 'スクリプトをコピーしました。Apps Scriptのエディタに貼り付けてください' : 'コピーできませんでした。「スクリプトを表示」から選択してコピーしてください'); }); },
+   'sync-now':function(){ syncAll().then(function(r){ toast(r.ok ? (r.sent ? '送信しました' : '送信待ちのデータはありません') : '送信できませんでした：' + (r.error || '')); if (!$('app-modal').hidden && document.getElementById('sync-url')) syncSetupPrompt(); }); },
+   'sync-disconnect':function(){ modal('接続の解除', '<p>この端末からの送信を止めます。データは端末にもサーバーにも残ります。</p><div class="button-row"><button type="button" class="btn danger" data-action="sync-disconnect-ok">接続を解除</button><button type="button" class="btn" data-action="sync-setup">キャンセル</button></div>'); },
+   'sync-disconnect-ok':function(){ setSyncUrl(''); sync.memUrl = ''; closeModal(); if (S.route === 'home') renderHome(); renderSyncState(); toast('接続を解除しました'); },
+   'gas-copy':function(){ copyText(gasCode()).then(function(ok){ toast(ok ? 'コピーしました。Apps Scriptのエディタに貼り付けてください' : 'コピーできませんでした。「スクリプトを表示」から選んでコピーしてください'); }); },
    'gas-show':gasShow,
-   'share-link-copy':function(){ copyText(shareLink()).then(function(ok){ toast(ok ? '共有リンクをコピーしました' : 'コピーできませんでした。表示中のリンクを選択してコピーしてください'); }); },
-   'share-link-send':function(){ if (!navigator.share) return; navigator.share({title:'展示アンケート集約', text:'展示アンケートの入力用リンクです（開くと共有サーバーにつながります）', url:shareLink()}).catch(function(e){ if (e && e.name !== 'AbortError') toast('共有できませんでした。リンクをコピーしてください'); }); },
+   'share-link-copy':function(){ copyText(shareLink()).then(function(ok){ toast(ok ? '共有リンクをコピーしました' : 'コピーできませんでした。リンクを選んでコピーしてください'); }); },
+   'share-link-send':function(){ if (!navigator.share) return; navigator.share({title:'展示アンケート集約', text:'展示アンケートの入力用リンクです', url:shareLink()}).catch(function(e){ if (e && e.name !== 'AbortError') toast('共有できませんでした。リンクをコピーしてください'); }); },
    'server-list':serverListPrompt,
    'server-show-cache':function(){ renderServerList(); },
    'server-all':function(){ document.querySelectorAll('.server-check').forEach(function(x){ x.checked = true; }); },
    'server-none':function(){ document.querySelectorAll('.server-check').forEach(function(x){ x.checked = false; }); },
    'server-sum':function(){ var list = serverSelected(); if (!list.length) { toast('合算するデータを選んでください'); return; } S.sumSource = 'server'; S.sumIds = list.map(function(x){ return x.id; }); saveSumSelection(); closeModal(true); if (S.route === 'sum') { leaveCurrent(); openCombined(); } else go('#/sum', true); },
    'server-csv':function(){ var list = serverSelected(); if (!list.length) { toast('出力するデータを選んでください'); return; } sync.selected = list; serverCsvPrompt(); },
-   'server-csv-export':function(){ var list = (sync.selected || []).slice().sort(bySessionOrder), keys = readExportSettings(); if (!list.length) { toast('出力するデータがありません'); return; } exportFile({text:C.toCsv(C.csvRows(list.map(function(x){ return {cols:[x.id, x.meta.name, x.meta.company, x.meta.date], data:x}; }), keys, exportKind)), filename:'九州電力送配電_アンケート_全員分' + list.length + '件_' + scopeLabel(keys) + '_' + (exportKind === 'summary' ? 'サマリー' : '項目別集計') + '_' + fileStamp() + '.csv', mime:'text/csv;charset=utf-8', description:'共有サーバーの全員分から' + list.length + '件を、入力者ごとの行でまとめたCSVです（' + scopeLabel(keys) + '）。', back:renderServerList, backLabel:'全員分へ戻る'}); },
-   'server-json':function(){ var list = serverSelected(); if (!list.length) { toast('出力するデータを選んでください'); return; } exportFile({text:JSON.stringify(C.makeBundle(list, now()), null, 1), filename:'九州電力送配電_アンケート_全員分バックアップ_' + list.length + '件_' + fileStamp() + '.json', mime:'application/json;charset=utf-8', description:'共有サーバーの全員分から' + list.length + '件をまとめたバックアップです。', back:renderServerList, backLabel:'全員分へ戻る'}); }
+   'server-csv-export':function(){ var list = (sync.selected || []).slice().sort(bySessionOrder), keys = readExportSettings(); if (!list.length) { toast('出力するデータがありません'); return; } exportFile({text:C.toCsv(C.csvRows(list.map(function(x){ return {cols:[x.id, x.meta.name, x.meta.company, x.meta.date], data:x}; }), keys, exportKind)), filename:'アンケート_全員分' + list.length + '件_' + scopeLabel(keys) + '_' + (exportKind === 'summary' ? 'サマリー' : '項目別集計') + '_' + fileStamp() + '.csv', mime:'text/csv;charset=utf-8', description:'全員分から' + list.length + '件を入力者ごとにまとめたCSVです（' + scopeLabel(keys) + '）。', back:renderServerList, backLabel:'全員分へ戻る'}); },
+   'server-json':function(){ var list = serverSelected(); if (!list.length) { toast('出力するデータを選んでください'); return; } exportFile({text:JSON.stringify(C.makeBundle(list, now()), null, 1), filename:'アンケート_全員分バックアップ_' + list.length + '件_' + fileStamp() + '.json', mime:'application/json;charset=utf-8', description:'全員分から' + list.length + '件をまとめたバックアップです。', back:renderServerList, backLabel:'全員分へ戻る'}); }
  };
- function serverCsvPrompt(){ modal('全員分CSV', '<p>共有サーバーの全員分から選んだ ' + (sync.selected || []).length + '件を、1つのCSVにまとめます。各行の先頭に ID・入力者・会社名・入力日 が付きます。</p>' + exportFieldsHtml() + '<div class="button-row"><button type="button" class="btn primary" data-action="server-csv-export">CSV出力</button><button type="button" class="btn" data-action="server-show-cache">全員分へ戻る</button></div>'); }
+ function serverCsvPrompt(){ modal('全員分CSV', '<p>選んだ ' + (sync.selected || []).length + '件を1つのCSVにまとめます。</p>' + exportFieldsHtml() + '<div class="button-row"><button type="button" class="btn primary" data-action="server-csv-export">CSV出力</button><button type="button" class="btn" data-action="server-show-cache">全員分へ戻る</button></div>'); }
  function guard(fn){ return function(){ try { return fn.apply(this, arguments); } catch (e) { toast('操作を完了できませんでした：' + (e && e.message || e)); if (window.console) console.error(e); } }; }
  $('modal-body').addEventListener('click', function(event){
    var button = event.target.closest('[data-action]'); if (!button || button.disabled) return;
    var action = button.dataset.action;
-   if (action === 'download') { toast('ダウンロードを開始しました。保存先をご確認ください'); return; }
+   if (action === 'download') { toast('ダウンロードを開始しました'); return; }
    event.preventDefault();
    var fn = ACTIONS[action]; if (fn) guard(fn)(button);
  });
@@ -1615,18 +1642,18 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
      var k = id.slice(-1), value = event.target.value;
      if (!C.validDate(value)) { toast('日付を確認してください'); event.target.value = data.days[k].date; return; }
      if (!ensureEditable()) { event.target.value = data && data.days[k] ? data.days[k].date : ''; toast('この画面では変更できません'); return; }
-     data.days[k].date = value; var ok = persist([k]); render(); toast(ok ? '日付を保存しました' : '日付は端末内に未保存です');
+     data.days[k].date = value; var ok = persist([k]); render(); toast(ok ? '日付を保存しました' : '日付は端末に未保存です');
    }
  }));
  $('restore-file').addEventListener('change', async function(){
    var file = this.files && this.files[0]; if (!file) return;
    if (!restorable()) return;
-   if (file.size > C.IMPORT_LIMIT) { toast('8 MB以下のJSONバックアップを選択してください'); return; }
+   if (file.size > C.IMPORT_LIMIT) { toast('8 MB以下のバックアップ（JSON）を選んでください'); return; }
    try {
      var p = C.parseImport(await readFileAsText(file)), days, source;
      if (p.kind === 'v1') { days = p.data.days; source = {kind:'v1'}; }
      else {
-       if (p.sessions.length !== 1) throw new Error(p.sessions.length ? '複数のデータを含むファイルです。保存一覧の「データを取り込む」を使ってください。' : (p.errors[0] || 'データがありません。'));
+       if (p.sessions.length !== 1) throw new Error(p.sessions.length ? '複数人分のファイルです。保存一覧の「データを取り込む」を使ってください。' : (p.errors[0] || 'データがありません。'));
        days = p.sessions[0].days; source = {kind:'v2', id:p.sessions[0].id, meta:p.sessions[0].meta};
      }
      if (!restorable()) return;
@@ -1645,7 +1672,7 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
  $('start-date').addEventListener('keydown', function(e){ if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); guard(startNew)(); } });
  ['start-name','start-company','start-date'].forEach(function(id){ $(id).addEventListener('input', function(){ if (!$('start-error').hidden) showStartError(''); }); });
  $('home-filter').addEventListener('input', function(){ clearTimeout(homeTimer); homeTimer = setTimeout(renderHome, 100); });
- $('home-help').addEventListener('click', function(){ modal('使い方', howtoHtml() + footerNoteHtml()); });
+ $('home-help').addEventListener('click', function(){ modal('使い方', howtoHtml(false) + footerNoteHtml()); });
  $('sum-button').addEventListener('click', guard(sumPrompt));
  $('bulk-csv-button').addEventListener('click', guard(bulkCsvPrompt));
  $('bulk-json-button').addEventListener('click', guard(bulkJson));
@@ -1660,7 +1687,7 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
  document.querySelectorAll('[data-select-view]').forEach(function(button){ button.addEventListener('click', function(){ if (!data) return; ui.view = button.dataset.selectView; ui.remove = false; render(); }); });
  $('vote-view').addEventListener('click', guard(function(event){ var button = event.target.closest('.vote-hit[data-q]'); if (button && !button.disabled) vote(button); }));
  $('undo-button').addEventListener('click', guard(undo));
- $('remove-toggle').addEventListener('click', function(){ if (!canEdit()) return; ui.remove = !ui.remove; updateBoard(); if (ui.remove) toast('修正モード：タップしたマスから1票取り消します'); });
+ $('remove-toggle').addEventListener('click', function(){ if (!canEdit()) return; ui.remove = !ui.remove; updateBoard(); if (ui.remove) toast('修正モード：タップしたマスを1票減らします'); });
  $('manage-button').addEventListener('click', guard(manager)); $('warning-manager').addEventListener('click', guard(manager)); $('summary-export-button').addEventListener('click', guard(manager));
  $('modal-close').addEventListener('click', function(){ closeModal(); });
  $('app-modal').addEventListener('click', function(e){ if (e.target === $('app-modal')) closeModal(); });
@@ -1686,11 +1713,11 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
      if (S.route !== 'session' || !S.id) return;
      if (e.key === store.lockKey(S.id)) { if (!S.lost && e.newValue) { var l = null; try { l = JSON.parse(e.newValue); } catch (ignore) {} if (l && l.tab !== TAB_ID) markLost(); } return; }
      if (e.key === store.key(S.id)) {
-       if (S.unsaved) { toast('別の画面で変更がありました。この画面の未保存データを先にバックアップしてください'); return; }
+       if (S.unsaved) { toast('別の画面で変更されました。この画面の未保存分を先にバックアップしてください'); return; }
        var latest = store.load(S.id);
        if (latest.status === 'ok') { if (latest.data.revision > data.revision) { data = latest.data; S.hasSaved = true; clearUndo(); render(); toast('別の画面の保存内容を反映しました'); } }
-       else if (latest.status === 'missing') { if (S.hasSaved) { S.blocked = true; S.saveError = 'このデータが別の画面で削除されたため、入力を停止しました。表示中のデータをバックアップしてください。'; render(); } }
-       else if (latest.status === 'corrupt' || latest.status === 'recovered') { S.blocked = true; S.rawRecovery = latest.raw === undefined ? null : latest.raw; S.saveError = '保存領域が別の画面で変更されたため、入力を停止しました。「保存・CSV」で確認してください。'; render(); }
+       else if (latest.status === 'missing') { if (S.hasSaved) { S.blocked = true; S.saveError = '別の画面で削除されたため入力を止めました。表示中のデータをバックアップしてください。'; render(); } }
+       else if (latest.status === 'corrupt' || latest.status === 'recovered') { S.blocked = true; S.rawRecovery = latest.raw === undefined ? null : latest.raw; S.saveError = '別の画面で保存データが変わったため入力を止めました。「保存・CSV」で確認してください。'; render(); }
      }
    } catch (err) { if (window.console) console.error(err); }
  });
@@ -1715,7 +1742,7 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    var file = e && e.filename ? String(e.filename).split('#')[0] : '';
    if (file && file !== location.href.split('#')[0]) return;
    if (!file && !(e && e.error)) return;
-   if (S.route === 'session' && !S.blocked) { S.blocked = true; S.saveError = '画面の処理でエラーが発生したため、入力を停止しました。保存済みのデータはそのままです。「保存・CSV」からバックアップを保存し、ページを開き直してください。'; try { updateSaveStatus(); cellButtons.forEach(function(b){ b.disabled = true; }); } catch (ignore) {} }
+   if (S.route === 'session' && !S.blocked) { S.blocked = true; S.saveError = 'エラーのため入力を止めました。保存済みのデータは無事です。バックアップを保存してから、ページを開き直してください。'; try { updateSaveStatus(); cellButtons.forEach(function(b){ b.disabled = true; }); } catch (ignore) {} }
  });
  window.addEventListener('popstate', function(){ guard(route)(); });
  window.addEventListener('hashchange', function(){ guard(route)(); });

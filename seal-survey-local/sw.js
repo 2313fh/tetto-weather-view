@@ -40,19 +40,29 @@ self.addEventListener('fetch', function (event) {
   if (url.origin !== self.location.origin) return;
   var scopePath = new URL('./', self.location.href).pathname;
   if (url.pathname !== scopePath && url.pathname !== scopePath + 'index.html') return;
-  event.respondWith(
+  event.respondWith(networkFirst(url));
+});
+
+// Network first, but a slow network (over 4 s) or a server error page falls back to the saved copy.
+function networkFirst(url) {
+  return new Promise(function (resolve) {
+    var settled = false;
+    function finish(r) { if (!settled) { settled = true; resolve(r); } }
+    function cached() { return caches.open(CACHE).then(function (c) { return c.match(PAGE); }).catch(function () { return undefined; }); }
+    var timer = setTimeout(function () { cached().then(function (hit) { if (hit) finish(hit); }); }, 4000);
     fetch(new Request(url.origin + url.pathname + url.search, { cache: 'no-cache', credentials: 'same-origin' }))
       .then(function (res) {
         if (res && res.ok && res.type === 'basic') {
           var copy = res.clone();
           caches.open(CACHE).then(function (cache) { return cache.put(PAGE, copy); }).catch(function () {});
+          clearTimeout(timer);
+          return Promise.resolve(clean(res)).then(finish);
         }
-        return clean(res);
+        return cached().then(function (hit) { clearTimeout(timer); finish(hit || res); });
       })
       .catch(function () {
-        return caches.open(CACHE)
-          .then(function (cache) { return cache.match(PAGE); })
-          .then(function (hit) { return hit || Response.error(); });
-      })
-  );
-});
+        return cached().then(function (hit) { clearTimeout(timer); finish(hit || Response.error()); });
+      });
+  });
+}
+
