@@ -328,6 +328,14 @@ function readRows_(sh) {
   });
 }
 
+// 書き込み時はID列（A）だけを読み、比べる行のデータ（K）だけを1セル読む（行が増えても速い）
+function readIds_(sh) {
+  var last = sh.getLastRow();
+  if (last < 2) return [];
+  return sh.getRange(2, 1, last - 1, 1).getValues().map(function (r) { return String(r[0]).replace(/^'/, ''); });
+}
+function cellJson_(sh, r) { try { return JSON.parse(sh.getRange(r, 11).getValue()); } catch (err) { return null; } }
+
 function safe_(s) { s = String(s); return /^[=+\-@\t\r]/.test(s) ? "'" + s : s; }
 function stamp_(s) { return (s && s.updatedAt) || ''; }
 // 保存番号（revision）で新旧を決め、時刻は同じ番号のときだけ使う（端末の時計がずれていても正しく判定）
@@ -362,29 +370,25 @@ function check_(s) {
 function put_(sessions) {
   if (!Array.isArray(sessions)) return {ok: false, error: 'データがありません'};
   return withLock_(function () {
-    var sh = sheet_(), rows = readRows_(sh), index = {}, results = [];
-    var reindex = function () { index = {}; rows.forEach(function (r, k) { index[r.id] = k; }); };
-    reindex();
+    var sh = sheet_(), ids = readIds_(sh), index = {}, results = [];
+    ids.forEach(function (id, k) { if (index[id] === undefined) index[id] = k; });
     sessions.slice(0, 100).forEach(function (s) {
       var v = check_(s);
       if (!v) { results.push({id: s && s.id ? String(s.id).slice(0, 40) : '', status: 'invalid'}); return; }
       var row = [s.id, safe_(s.meta.name), safe_(s.meta.company), s.meta.date, v.q1, v.q2, stamp_(s), String(s.revision), new Date(), '', JSON.stringify(s)];
       var i = index[s.id];
-      // 手作業で並べ替え・編集されていても、その行が同じIDかを確かめてから書く
-      if (i !== undefined && String(sh.getRange(i + 2, 1).getValue()).replace(/^'/, '') !== s.id) { rows = readRows_(sh); reindex(); i = index[s.id]; }
       if (i === undefined) {
         sh.appendRow(row);
-        index[s.id] = rows.length;
-        rows.push({id: s.id, data: s, excluded: ''});
+        index[s.id] = ids.length;
+        ids.push(s.id);
         results.push({id: s.id, status: 'saved', revision: s.revision});
         return;
       }
-      var cur = rows[i].data;
+      var cur = cellJson_(sh, i + 2);
       if (cur && cur.meta && cur.meta.createdAt !== s.meta.createdAt) { results.push({id: s.id, status: 'conflict'}); return; }
-      if (cur && !newer_(s, cur)) { results.push({id: s.id, status: same_(s, cur) ? 'saved' : 'stale', revision: cur.revision}); return; }
+      if (cur && typeof cur.revision === 'number' && !newer_(s, cur)) { results.push({id: s.id, status: same_(s, cur) ? 'saved' : 'stale', revision: cur.revision}); return; }
       sh.getRange(i + 2, 1, 1, 9).setValues([row.slice(0, 9)]);   // 「除外」列（J）はそのまま
       sh.getRange(i + 2, 11).setValue(row[10]);
-      rows[i].data = s;
       results.push({id: s.id, status: 'saved', revision: s.revision});
     });
     return {ok: true, results: results, time: new Date().toISOString()};
@@ -392,7 +396,7 @@ function put_(sessions) {
 }
 
 function listAll_() {
-  return withLock_(function () {
+  var read = function () {
     var best = {}, order = [], sessions = [], excluded = 0;
     readRows_(sheet_()).forEach(function (r) {
       if (!r.data || typeof r.data !== 'object') return;
@@ -406,16 +410,17 @@ function listAll_() {
       sessions.push(r.data);
     });
     return {ok: true, sessions: sessions, excluded: excluded, time: new Date().toISOString()};
-  });
+  };
+  return PropertiesService.getScriptProperties().getProperty('SHEET_ID') ? read() : withLock_(read);
 }
 
 function exclude_(ids, flag) {
   if (!Array.isArray(ids)) return {ok: false, error: 'IDがありません'};
   return withLock_(function () {
-    var sh = sheet_(), rows = readRows_(sh), want = {}, changed = 0;
+    var sh = sheet_(), all = readIds_(sh), want = {}, changed = 0;
     ids.slice(0, 500).forEach(function (id) { if (ID_RE.test(String(id))) want[id] = true; });
-    rows.forEach(function (r, i) {
-      if (want[r.id]) { sh.getRange(i + 2, 10).setValue(flag ? '除外' : ''); changed++; }
+    all.forEach(function (id, i) {
+      if (want[id]) { sh.getRange(i + 2, 10).setValue(flag ? '除外' : ''); changed++; }
     });
     return {ok: true, changed: changed, time: new Date().toISOString()};
   });
