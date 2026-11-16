@@ -152,6 +152,7 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
 @media screen and (max-width:380px){.header-tools .btn,.back-btn{padding:8px 8px;font-size:12px}.save-state{max-width:88px}}
 @media print{#home-view,.back-btn,#state-banner,.home-tools,#sync-chip{display:none!important}.session-bar{font-size:10px;padding:4px 0 0}.session-bar strong{font-size:12px}}
 @media (pointer:coarse){.preview-text{font-size:16px}}
+.hour-lead{font-size:14px;line-height:1.7;margin:6px 0 10px;color:var(--artifact-muted)}.hour-table{min-width:360px}.hour-table td.num{position:relative;min-width:84px}.hour-table .hour-bar{position:absolute;left:6px;top:50%;height:14px;max-width:calc(100% - 12px);transform:translateY(-50%);background:rgba(0,114,206,.2);border-radius:3px}.hour-table .hour-num{position:relative}.hour-table td.is-peak .hour-bar{background:rgba(0,114,206,.42)}.hour-table td.is-peak .hour-num{font-weight:800}.hour-table tr.hour-untimed th,.hour-table tr.hour-untimed td{color:var(--artifact-muted)}
 </style>
 </head>
 <body>
@@ -227,6 +228,7 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    <p id="summary-gap-note" class="summary-note"></p>
    <div class="summary-charts"><section><h3 id="summary-industry-heading">① 気になる業界</h3><div id="summary-industry"></div></section><section><h3 id="summary-choices-heading">② 送電の仕事を、就職先として考えたい？</h3><div id="summary-choices"></div></section></div>
    <h2 class="section-subtitle">1日目・2日目の一覧</h2><div id="summary-day-table" class="table-scroll" tabindex="0" aria-label="日別集計一覧"></div>
+   <h2 class="section-subtitle">時間帯別の来場者数（1時間ごと）</h2><div id="summary-hour-table"></div><p class="summary-note">①をタップした時刻で数えます（学生＋一般・社会人）。</p>
    <p class="summary-note">回答者数は①の合計です。</p>
    <div class="button-row interactive-only"><button type="button" class="btn primary" id="summary-export-button">CSV・バックアップを保存</button></div>
   </section>
@@ -297,9 +299,21 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
   }
 
   /* ---------- survey forms (same structure as Ver.1) ---------- */
+  /* hours[h] = ① votes tapped between h:00 and h:59 (device time). Older data has none: those votes count as 時間不明. */
+  var HOURS = 24;
+  function freshHours() { var h = []; for (var i = 0; i < HOURS; i++) h.push(0); return h; }
   function freshForm(type) {
     var c = CONFIG[type]; if (!c) throw new Error('様式が不正です。');
-    return {matrix:c.rows.map(function(){ return c.cols.map(function(){ return 0; }); }), unknown:0, q2:c.choices.map(function(){ return 0; })};
+    return {matrix:c.rows.map(function(){ return c.cols.map(function(){ return 0; }); }), unknown:0, q2:c.choices.map(function(){ return 0; }), hours:freshHours()};
+  }
+  function q1Of(form) { var n = form.unknown; form.matrix.forEach(function(row){ row.forEach(function(v){ n += v; }); }); return n; }
+  // Keep hours within the ① total: anything over it (hand-edited files) is trimmed from the latest hours.
+  function normalizeHours(input, q1) {
+    var h = freshHours();
+    if (Array.isArray(input) && input.length === HOURS) input.forEach(function(v, i){ if (integer(v)) h[i] = v; });
+    var over = h.reduce(function(a, b){ return a + b; }, 0) - q1;
+    for (var i = HOURS - 1; i >= 0 && over > 0; i--) { var cut = Math.min(h[i], over); h[i] -= cut; over -= cut; }
+    return h;
   }
   function freshDay() { return {date:'', updatedAt:null, student:freshForm('student'), adult:freshForm('adult')}; }
   function freshData() { return {format:FORMAT, version:VERSION, revision:0, updatedAt:null, days:{'1':freshDay(), '2':freshDay()}}; }
@@ -311,7 +325,9 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
       return row.slice();
     });
     if (!input.q2.every(integer) || (!c.hasUnknown && input.unknown !== 0)) throw new Error(c.name + 'の票数が不正です。');
-    return {matrix:matrix, unknown:input.unknown, q2:input.q2.slice()};
+    var form = {matrix:matrix, unknown:input.unknown, q2:input.q2.slice()};
+    form.hours = normalizeHours(input.hours, q1Of(form));
+    return form;
   }
   function normalizeDay(input) {
     if (!plain(input) || !validDate(input.date)) throw new Error('日付が不正です。');
@@ -422,7 +438,8 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
   function sum(xs) { return xs.reduce(function(a, b){ return a + b; }, 0); }
   function stats(form) {
     var rows = form.matrix.map(sum), cols = form.matrix[0].map(function(_, i){ return sum(form.matrix.map(function(r){ return r[i]; })); });
-    return {rows:rows, cols:cols, known:sum(rows), unknown:form.unknown, q1:sum(rows) + form.unknown, q2:sum(form.q2), difference:sum(rows) + form.unknown - sum(form.q2)};
+    var hours = form.hours || freshHours(), timed = sum(hours);
+    return {rows:rows, cols:cols, known:sum(rows), unknown:form.unknown, q1:sum(rows) + form.unknown, q2:sum(form.q2), difference:sum(rows) + form.unknown - sum(form.q2), hours:hours.slice(), timed:timed, untimed:Math.max(0, sum(rows) + form.unknown - timed)};
   }
   function sessionTotals(data) {
     var q1 = 0, q2 = 0;
@@ -433,7 +450,17 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
     source.matrix.forEach(function(row, r){ row.forEach(function(v, c){ target.matrix[r][c] += v; }); });
     target.unknown += source.unknown;
     source.q2.forEach(function(v, i){ target.q2[i] += v; });
+    (source.hours || freshHours()).forEach(function(v, i){ target.hours[i] += v; });
   }
+  /* Visitors per hour for one day (学生＋一般): first/last hour with visitors and the busiest hour. */
+  function dayHours(day) {
+    var hours = freshHours(), untimed = 0, total = 0;
+    ['student','adult'].forEach(function(t){ var s = stats(day[t]); s.hours.forEach(function(v, i){ hours[i] += v; }); untimed += s.untimed; total += s.q1; });
+    var first = -1, last = -1, peak = -1;
+    hours.forEach(function(v, i){ if (!v) return; if (first < 0) first = i; last = i; if (peak < 0 || v > hours[peak]) peak = i; });
+    return {hours:hours, untimed:untimed, total:total, first:first, last:last, peak:peak};
+  }
+  function hourLabel(h) { return pad2(h) + ':00-' + pad2(h) + ':59'; }
   function sumSessions(list) {
     var out = freshData();
     ['1','2'].forEach(function(k) {
@@ -454,13 +481,23 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
     if (target.q === 'unknown' && c.hasUnknown) return form.unknown;
     throw new Error('投票先が不正です。');
   }
-  function change(form, type, target, delta) {
+  /* stamp (optional): {hour:0-23} = the hour to count a ① vote in (or to take it from).
+     After the call stamp.used is the hour actually changed, or null (時間不明), so an undo can put it back exactly. */
+  function change(form, type, target, delta, stamp) {
     if (delta !== 1 && delta !== -1) throw new Error('票数の変更が不正です。');
     var value = valueAt(form, type, target), next = value + delta;
     if (!integer(next)) return false;
+    var first = target.q !== 'q2', hours = form.hours || (form.hours = freshHours()), want = stamp && Number.isInteger(stamp.hour) && stamp.hour >= 0 && stamp.hour < HOURS ? stamp.hour : null, used = null;
+    if (first && delta > 0 && want !== null) { hours[want] += 1; used = want; }
+    if (first && delta < 0) {
+      if (want !== null && hours[want] > 0) used = want;
+      else if (q1Of(form) - sum(hours) <= 0) { for (var i = HOURS - 1; i >= 0; i--) if (hours[i] > 0) { used = i; break; } }
+      if (used !== null) hours[used] -= 1;
+    }
     if (target.q === 'matrix') form.matrix[target.r][target.c] = next;
     else if (target.q === 'q2') form.q2[target.c] = next;
     else form.unknown = next;
+    if (stamp) stamp.used = used;
     return true;
   }
   function targetLabel(type, t) {
@@ -493,9 +530,18 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
     keys.forEach(function(k){ ['student','adult'].forEach(function(type){ var d = data.days[k], f = d[type], s = stats(f); rows.push([k + '日目', d.date, CONFIG[type].name, s.q1, s.q2, s.difference, s.unknown, type === 'adult' ? f.q2[8] : 0]); }); });
     return rows;
   }
+  function hourlyRows(data, keys) {
+    var rows = [['日別','日付','対象','時間帯','来場者数（①の回答者数）']];
+    keys.forEach(function(k){ ['student','adult'].forEach(function(type){
+      var d = data.days[k], s = stats(d[type]);
+      s.hours.forEach(function(v, h){ if (v) rows.push([k + '日目', d.date, CONFIG[type].name, hourLabel(h), v]); });
+      if (s.untimed) rows.push([k + '日目', d.date, CONFIG[type].name, '時間不明', s.untimed]);
+    }); });
+    return rows;
+  }
   /* entries: [{cols:[id,name,company,date], data:{days:...}}] */
   function csvRows(entries, keys, kind) {
-    var base = kind === 'summary' ? summaryRows : detailRows;
+    var base = kind === 'summary' ? summaryRows : kind === 'hourly' ? hourlyRows : detailRows;
     var rows = [META_HEAD.concat(base(freshData(), [])[0])];
     entries.forEach(function(e){ base(e.data, keys).slice(1).forEach(function(r){ rows.push(e.cols.concat(r)); }); });
     return rows;
@@ -600,7 +646,8 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
     normalizeMeta:normalizeMeta, randomCode:randomCode, makeId:makeId, newSession:newSession, normalizeSession:normalizeSession,
     parseSession:parseSession, parseImport:parseImport, makeBundle:makeBundle, sameContent:sameContent, isNewer:isNewer,
     stats:stats, sessionTotals:sessionTotals, sumSessions:sumSessions, change:change, valueAt:valueAt, targetKey:targetKey,
-    targetLabel:targetLabel, dayKeys:dayKeys, detailRows:detailRows, summaryRows:summaryRows, csvRows:csvRows, toCsv:toCsv,
+    targetLabel:targetLabel, dayKeys:dayKeys, detailRows:detailRows, summaryRows:summaryRows, hourlyRows:hourlyRows, csvRows:csvRows, toCsv:toCsv,
+    HOURS:HOURS, dayHours:dayHours, hourLabel:hourLabel,
     csvCell:csvCell, SessionStore:SessionStore
   };
 })(typeof globalThis !== 'undefined' ? globalThis : this);
@@ -1029,7 +1076,8 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    if (raw === null) { toast('退避できる内容がありません'); return; }
    exportFile({text:raw, filename:'アンケート_読み取れないデータ_' + id + '_' + fileStamp() + '.txt', mime:'text/plain;charset=utf-8', description:'残っていた内容をそのまま書き出します。', back:back || null, backLabel:back ? '戻る' : '閉じる'});
  }
- function exportFieldsHtml(){ return '<label class="field"><span>出力する日</span><span class="select-wrap"><select id="export-scope" class="select-control">' + selectOptions([['all','1日目・2日目'],['1','1日目だけ'],['2','2日目だけ']], exportScope) + '</select></span></label><label class="field"><span>CSVの種類</span><span class="select-wrap"><select id="csv-kind" class="select-control">' + selectOptions([['detail','項目別（各マスの票数）'],['summary','日別サマリー']], exportKind) + '</select></span></label>'; }
+ function exportFieldsHtml(){ return '<label class="field"><span>出力する日</span><span class="select-wrap"><select id="export-scope" class="select-control">' + selectOptions([['all','1日目・2日目'],['1','1日目だけ'],['2','2日目だけ']], exportScope) + '</select></span></label><label class="field"><span>CSVの種類</span><span class="select-wrap"><select id="csv-kind" class="select-control">' + selectOptions([['detail','項目別（各マスの票数）'],['summary','日別サマリー'],['hourly','時間帯別（1時間ごとの来場者数）']], exportKind) + '</select></span></label>'; }
+ function kindLabel(){ return exportKind === 'summary' ? 'サマリー' : exportKind === 'hourly' ? '時間帯別' : '項目別集計'; }
  function readExportSettings(){ if ($('export-scope')) exportScope = $('export-scope').value; if ($('csv-kind')) exportKind = $('csv-kind').value; return C.dayKeys(exportScope, ui.day); }
  function bulkCsvPrompt(){
    var n = validSessions().length; if (!n) { toast('保存データがありません'); return; }
@@ -1039,7 +1087,7 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    var keys = readExportSettings(), list = validSessions().sort(bySessionOrder);
    if (!list.length) { toast('保存データがありません'); return; }
    var entries = list.map(function(s){ return {cols:[s.id, s.meta.name, s.meta.company, s.meta.date], data:s}; });
-   exportFile({text:C.toCsv(C.csvRows(entries, keys, exportKind)), filename:'アンケート_全件' + list.length + '件_' + scopeLabel(keys) + '_' + (exportKind === 'summary' ? 'サマリー' : '項目別集計') + '_' + fileStamp() + '.csv', mime:'text/csv;charset=utf-8',
+   exportFile({text:C.toCsv(C.csvRows(entries, keys, exportKind)), filename:'アンケート_全件' + list.length + '件_' + scopeLabel(keys) + '_' + kindLabel() + '_' + fileStamp() + '.csv', mime:'text/csv;charset=utf-8',
      description:list.length + '件を入力者ごとにまとめたCSVです（' + scopeLabel(keys) + '）。', back:bulkCsvPrompt, backLabel:'戻る'});
  }
  function bulkJson(){
@@ -1410,6 +1458,22 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    var html = '<table class="plain-table"><thead><tr><th>日別</th><th>日付</th><th>対象</th><th class="num">①回答者数</th><th class="num">②票数</th><th class="num">差</th></tr></thead><tbody>';
    ['1','2'].forEach(function(k){ ['student','adult'].forEach(function(type){ var day = data.days[k], v = C.stats(day[type]); html += '<tr' + (k === ui.day && type === ui.type ? ' class="is-current"' : '') + '><td>' + k + '日目</td><td>' + esc(day.date || '未設定') + '</td><td>' + C.CONFIG[type].name + '</td><td class="num">' + num(v.q1) + '</td><td class="num">' + num(v.q2) + '</td><td class="num">' + (v.difference > 0 ? '+' : '') + num(v.difference) + '</td></tr>'; }); });
    html += '</tbody></table>'; $('summary-day-table').innerHTML = html;
+   updateHourTable();
+ }
+ function hourName(h){ return h + '時台'; }
+ function updateHourTable(){
+   var d = {'1':C.dayHours(data.days['1']), '2':C.dayHours(data.days['2'])}, first = 24, last = -1, max = 1;
+   ['1','2'].forEach(function(k){ var x = d[k]; if (x.first >= 0) { first = Math.min(first, x.first); last = Math.max(last, x.last); } x.hours.forEach(function(v){ max = Math.max(max, v); }); });
+   var lines = ['1','2'].map(function(k){ var x = d[k]; var day = k + '日目：'; if (x.first < 0) return day + (x.total ? '時刻の記録なし' : 'まだ記録がありません'); return day + '最初 ' + hourName(x.first) + '、最後 ' + hourName(x.last) + '、ピーク ' + hourName(x.peak) + '（' + num(x.hours[x.peak]) + '人）'; });
+   var html = '<p class="hour-lead">' + lines.map(esc).join('<br>') + '</p>';
+   if (last >= 0 || d['1'].untimed || d['2'].untimed) {
+     html += '<div class="table-scroll" tabindex="0" aria-label="時間帯別の来場者数"><table class="plain-table hour-table"><thead><tr><th>時間帯</th><th class="num">1日目</th><th class="num">2日目</th><th class="num">計</th></tr></thead><tbody>';
+     var cell = function(v, k){ return '<td class="num' + (v && d[k].peak >= 0 && v === d[k].hours[d[k].peak] ? ' is-peak' : '') + '"><span class="hour-bar" style="width:' + (v / max * 100).toFixed(1) + '%"></span><span class="hour-num">' + num(v) + '</span></td>'; };
+     for (var h = first; h <= last; h++) html += '<tr><th scope="row">' + hourName(h) + '</th>' + cell(d['1'].hours[h], '1') + cell(d['2'].hours[h], '2') + '<td class="num">' + num(d['1'].hours[h] + d['2'].hours[h]) + '</td></tr>';
+     if (d['1'].untimed || d['2'].untimed) html += '<tr class="hour-untimed"><th scope="row">時間不明</th><td class="num">' + num(d['1'].untimed) + '</td><td class="num">' + num(d['2'].untimed) + '</td><td class="num">' + num(d['1'].untimed + d['2'].untimed) + '</td></tr>';
+     html += '<tr class="total-row"><th scope="row">計</th><td class="num">' + num(d['1'].total) + '</td><td class="num">' + num(d['2'].total) + '</td><td class="num">' + num(d['1'].total + d['2'].total) + '</td></tr></tbody></table></div>';
+   }
+   $('summary-hour-table').innerHTML = html;
  }
  function render(){
    if ((S.route !== 'session' && S.route !== 'sum') || !data) return;
@@ -1431,12 +1495,12 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
  function vote(button){
    if (ui.view !== 'vote' || !$('app-modal').hidden || S.route !== 'session') return;
    var t = targetFromButton(button), key = ui.day + ':' + C.targetKey(ui.type, t), time = Date.now();
-   if (lastTaps[key] !== undefined && time - lastTaps[key] < TAP_GAP) return;
+   if (lastTaps[key] !== undefined && time >= lastTaps[key] && time - lastTaps[key] < TAP_GAP) return;   // a clock moved back must not block taps
    if (!ensureEditable()) { render(); return; }
    lastTaps[key] = time;
-   var delta = ui.remove ? -1 : 1;
-   if (!C.change(activeForm(), ui.type, t, delta)) { toast(delta < 0 ? '0票のため取り消せません' : '票数の上限に達しました'); updateBoard(); return; }
-   var h = undoStack(); h.push({target:C.clone(t), delta:delta}); if (h.length > UNDO_LIMIT) h.shift();
+   var delta = ui.remove ? -1 : 1, stamp = {hour:new Date(time).getHours()};
+   if (!C.change(activeForm(), ui.type, t, delta, stamp)) { toast(delta < 0 ? '0票のため取り消せません' : '票数の上限に達しました'); updateBoard(); return; }
+   var h = undoStack(); h.push({target:C.clone(t), delta:delta, hour:stamp.used}); if (h.length > UNDO_LIMIT) h.shift();
    persist(); updateBoard();
    button.classList.remove('just-tapped'); void button.offsetWidth; button.classList.add('just-tapped'); setTimeout(function(){ button.classList.remove('just-tapped'); }, 200);
    toast(C.targetLabel(ui.type, t) + ' ' + (delta > 0 ? '＋1票' : '−1票'));
@@ -1445,7 +1509,7 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    if (S.route !== 'session') return;
    if (!ensureEditable()) { render(); return; }
    var h = undoStack(), action = h[h.length - 1]; if (!action) { updateBoard(); return; }
-   if (!C.change(activeForm(), ui.type, action.target, -action.delta)) { toast('元に戻せませんでした。票数を確認してください。'); return; }
+   if (!C.change(activeForm(), ui.type, action.target, -action.delta, {hour:action.hour === undefined ? null : action.hour})) { toast('元に戻せませんでした。票数を確認してください。'); return; }
    h.pop(); delete lastTaps[ui.day + ':' + C.targetKey(ui.type, action.target)]; persist(); updateBoard(); toast('1つ戻しました');
  }
 
@@ -1473,7 +1537,7 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
      '<li>続きは保存一覧の「再開」から。</li>' +
      '<li>1日の終わりに「全件バックアップ」を集計担当へ送る。集計担当は「データを取り込む」で読み込み、「合算を見る」「全件CSV」。</li>' +
      '<li>iPhone・iPadは、しばらく開かないとデータが消えることがあります。</li>') +
-     '<li>回答者数は①の合計です。</li></ol></section>';
+     '<li>回答者数は①の合計です。①をタップした時刻で、1時間ごとの来場者数も数えます（「集計」で確認）。</li></ol></section>';
  }
  function footerNoteHtml(){ return '<p class="footer-note">' + (SYNC_ENABLED ? '入力者名・会社名・票数は、この端末と共有サーバー（集計担当のGoogleスプレッドシート）に保存されます。' : '入力者名・会社名・票数は、この端末の中だけに保存されます。') + '</p>'; }
  function manager(){
@@ -1520,7 +1584,7 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
  function sessionFileLabel(){ return S.route === 'sum' ? '合算' + S.sumIds.length + '件' : data.id + '_' + safePart(data.meta.name); }
  function csvExport(){
    var keys = readExportSettings(), entries = S.route === 'sum' ? [{cols:['合算', S.sumIds.length + '件の合算', '', ''], data:data}] : [{cols:[data.id, data.meta.name, data.meta.company, data.meta.date], data:data}];
-   exportFile({text:C.toCsv(C.csvRows(entries, keys, exportKind)), filename:'アンケート_' + sessionFileLabel() + '_' + scopeLabel(keys) + '_' + (exportKind === 'summary' ? 'サマリー' : '項目別集計') + '_' + fileStamp() + '.csv', mime:'text/csv;charset=utf-8',
+   exportFile({text:C.toCsv(C.csvRows(entries, keys, exportKind)), filename:'アンケート_' + sessionFileLabel() + '_' + scopeLabel(keys) + '_' + kindLabel() + '_' + fileStamp() + '.csv', mime:'text/csv;charset=utf-8',
      description:(S.route === 'sum' ? '合算（' + S.sumIds.length + '件）の' : '') + scopeLabel(keys) + '・学生／一般社会人の集計です。', back:manager, backLabel:S.route === 'sum' ? '合算のCSVへ戻る' : '保存・CSVへ戻る'});
  }
  function jsonExport(back, backLabel){
@@ -1622,7 +1686,7 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    'server-none':function(){ document.querySelectorAll('.server-check').forEach(function(x){ x.checked = false; }); },
    'server-sum':function(){ var list = serverSelected(); if (!list.length) { toast('合算するデータを選んでください'); return; } S.sumSource = 'server'; S.sumIds = list.map(function(x){ return x.id; }); saveSumSelection(); closeModal(true); if (S.route === 'sum') { leaveCurrent(); openCombined(); } else go('#/sum', true); },
    'server-csv':function(){ var list = serverSelected(); if (!list.length) { toast('出力するデータを選んでください'); return; } sync.selected = list; serverCsvPrompt(); },
-   'server-csv-export':function(){ var list = (sync.selected || []).slice().sort(bySessionOrder), keys = readExportSettings(); if (!list.length) { toast('出力するデータがありません'); return; } exportFile({text:C.toCsv(C.csvRows(list.map(function(x){ return {cols:[x.id, x.meta.name, x.meta.company, x.meta.date], data:x}; }), keys, exportKind)), filename:'アンケート_全員分' + list.length + '件_' + scopeLabel(keys) + '_' + (exportKind === 'summary' ? 'サマリー' : '項目別集計') + '_' + fileStamp() + '.csv', mime:'text/csv;charset=utf-8', description:'全員分から' + list.length + '件を入力者ごとにまとめたCSVです（' + scopeLabel(keys) + '）。', back:renderServerList, backLabel:'全員分へ戻る'}); },
+   'server-csv-export':function(){ var list = (sync.selected || []).slice().sort(bySessionOrder), keys = readExportSettings(); if (!list.length) { toast('出力するデータがありません'); return; } exportFile({text:C.toCsv(C.csvRows(list.map(function(x){ return {cols:[x.id, x.meta.name, x.meta.company, x.meta.date], data:x}; }), keys, exportKind)), filename:'アンケート_全員分' + list.length + '件_' + scopeLabel(keys) + '_' + kindLabel() + '_' + fileStamp() + '.csv', mime:'text/csv;charset=utf-8', description:'全員分から' + list.length + '件を入力者ごとにまとめたCSVです（' + scopeLabel(keys) + '）。', back:renderServerList, backLabel:'全員分へ戻る'}); },
    'server-json':function(){ var list = serverSelected(); if (!list.length) { toast('出力するデータを選んでください'); return; } exportFile({text:JSON.stringify(C.makeBundle(list, now()), null, 1), filename:'アンケート_全員分バックアップ_' + list.length + '件_' + fileStamp() + '.json', mime:'application/json;charset=utf-8', description:'全員分から' + list.length + '件をまとめたバックアップです。', back:renderServerList, backLabel:'全員分へ戻る'}); }
  };
  function serverCsvPrompt(){ modal('全員分CSV', '<p>選んだ ' + (sync.selected || []).length + '件を1つのCSVにまとめます。</p>' + exportFieldsHtml() + '<div class="button-row"><button type="button" class="btn primary" data-action="server-csv-export">CSV出力</button><button type="button" class="btn" data-action="server-show-cache">全員分へ戻る</button></div>'); }
