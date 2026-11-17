@@ -212,8 +212,8 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
   <div id="vote-view">
    <div id="correction-banner" class="correction-banner" role="status" hidden>修正モード：タップしたマスを1票減らします。終わったら「修正モードを終了」。</div>
    <section class="board-section" aria-labelledby="q1-heading">
-    <div class="section-heading"><h2 id="q1-heading">① 気になる業界 × 一番興味がわいた展示</h2><div class="question-total">合計 <strong id="q1-total">0</strong>票</div></div>
-    <p id="q1-hint" class="question-hint">一番気になる業界の行と、一番興味がわいた展示の列が交わるマスを1回タップ</p>
+    <div class="section-heading"><h2 id="q1-heading">① 興味のある業界 × 一番興味がわいた展示</h2><div class="question-total">合計 <strong id="q1-total">0</strong>票</div></div>
+    <p id="q1-hint" class="question-hint">一番興味のある業界の行と、一番興味がわいた展示の列が交わるマスを1回タップ</p>
     <p id="student-guide" class="scroll-guide student-guide">表は横にスワイプできます →</p><p id="adult-guide" class="scroll-guide" hidden>表は横にスワイプできます →</p>
     <div id="matrix-host" class="table-scroll" tabindex="0" aria-label="①投票表。横スクロール可能"></div>
    </section>
@@ -228,7 +228,7 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
   <section id="summary-view" hidden aria-label="集計結果">
    <div class="summary-kpis"><div class="kpi"><div class="kpi-label">回答者数（①合計）<button type="button" class="info" aria-label="①集計方法">ⓘ<span class="tooltip" role="tooltip">①の全マスの合計です（シール集計不可も含む）。</span></button></div><div class="kpi-value"><span id="summary-q1">0</span><small>人</small></div></div><div class="kpi"><div class="kpi-label">②の回答票数<button type="button" class="info" aria-label="②集計方法">ⓘ<span class="tooltip" role="tooltip">②の全選択肢の合計です。</span></button></div><div class="kpi-value"><span id="summary-q2">0</span><small>票</small></div></div><div class="kpi"><div class="kpi-label">①と②の差<button type="button" class="info" aria-label="差の計算方法">ⓘ<span class="tooltip" role="tooltip">①合計（シール集計不可を除く）− ②です。</span></button></div><div class="kpi-value"><span id="summary-gap">0</span><small>票</small></div></div></div>
    <p id="summary-gap-note" class="summary-note"></p>
-   <div class="summary-charts"><section><h3 id="summary-industry-heading">① 気になる業界</h3><div id="summary-industry"></div></section><section><h3 id="summary-choices-heading">② 送電業界に興味がある？</h3><div id="summary-choices"></div></section></div>
+   <div class="summary-charts"><section><h3 id="summary-industry-heading">① 興味のある業界</h3><div id="summary-industry"></div></section><section><h3 id="summary-choices-heading">② 送電業界に興味がある？</h3><div id="summary-choices"></div></section></div>
    <h2 class="section-subtitle">1日目・2日目の一覧</h2><div id="summary-day-table" class="table-scroll" tabindex="0" aria-label="日別集計一覧"></div>
    <h2 class="section-subtitle">時間帯別の来場者数（1時間ごと）</h2><div id="summary-hour-table"></div><p class="summary-note">①（シール集計不可を含む）をタップした時刻で数えます（学生＋一般・社会人）。</p>
    <p class="summary-note">回答者数は①の合計です。</p>
@@ -447,22 +447,34 @@ function exclude_(ids, flag) {
   var NAME_MAX = 40, COMPANY_MAX = 60;
   var EXHIBITS = ['超軽量型クレーン','重機用遠隔操作システム','バランスリフト','四足歩行ロボット','のぼれーる','ローニン','送配電事業PR','ラインマンPR'];
   var UNKNOWN = 'シール集計不可／業界不明';
+  // 来場者分類一覧（会場の紙）と同じ業界・同じ色。学生の①と一般・社会人の①で共通。
+  var INDUSTRIES = ['官公庁','建設・土木','製造業・メーカー','流通・サービス業','設計・調査・コンサルタント','学術・研究機関','ライフライン・IT・通信','運輸・運送・倉庫','食品・農林水産業'];
+  var INDUSTRY_COLORS = ['#D4A72C','#7DC3EA','#EBA6C9','#CDD84F','#C3B4DD','#F3EB60','#C9C9C6','#E8850C','#F0C514'];
+  // Rows used until 11/17, and where each old row goes (null = シール集計不可／業界不明).
+  var ROWS_MOVE = {
+    student: {old:['電力・エネルギー','建設・土木','機械・ものづくり','IT・ロボット','その他の業界','まだ決まっていない'],
+              to:['ライフライン・IT・通信','建設・土木','製造業・メーカー','ライフライン・IT・通信',null,null]},
+    adult: {old:['社内関係者','電力・インフラ','建設・土木・設計','製造・機械・商社','IT・通信','官公庁・教育・団体','その他・一般'],
+            to:['社内関係者','ライフライン・IT・通信','建設・土木','製造業・メーカー','ライフライン・IT・通信','官公庁','一般']}
+  };
   var CONFIG = {
     student: {
       name:'学生', audience:'学生の方へ', title:'どの業界・展示に興味がわいた？',
-      q1:'気になる業界 × 一番興味がわいた展示', first:'気になる業界',
-      hint:'一番気になる業界の行と、一番興味がわいた展示の列が交わるマスを1回タップ',
-      rows:['電力・エネルギー','建設・土木','機械・ものづくり','IT・ロボット','その他の業界','まだ決まっていない'],
+      q1:'興味のある業界 × 一番興味がわいた展示', first:'興味のある業界',
+      hint:'一番興味のある業界の行と、一番興味がわいた展示の列が交わるマスを1回タップ',
+      rows:INDUSTRIES.slice(), rowColors:INDUSTRY_COLORS.slice(), rowsId:'gyoshu-20261117',
       cols:EXHIBITS.slice(),
       heads:['超軽量型<br>クレーン','重機用<br>遠隔操作<br>システム','バランス<br>リフト','四足歩行<br>ロボット','のぼれーる','ローニン','送配電事業<br>PR','ラインマン<br>PR'],
       q2:'送電業界に興味がある？',
       choices:['とても興味がある','少し興味がある','あまり興味がない','興味がない'], hasUnknown:true
     },
-    adult: {
+    adult: {   // rows: ご所属の業種. Change rowsId whenever the rows change (older data is moved over with ROWS_MOVE).
       name:'一般・社会人', audience:'一般・社会人の方へ', title:'ご所属と、ご来場の目的は？',
       q1:'ご所属の業界 × 主な来場目的', first:'ご所属',
       hint:'ご所属の行と、主な来場目的の列が交わるマスを1回タップ',
-      rows:['社内関係者','電力・インフラ','建設・土木・設計','製造・機械・商社','IT・通信','官公庁・教育・団体','その他・一般'],
+      // 社内関係者は先頭で固定（色なし）。一般・来賓も来場者分類一覧の色。
+      rows:['社内関係者'].concat(INDUSTRIES, ['一般','来賓']),
+      rowColors:[null].concat(INDUSTRY_COLORS, ['#1D8A3A','#C8410B']), rowsId:'gyoshu-20261117',
       cols:['技術の情報収集','導入・活用の検討','交流・連携','一般見学・体験'],
       heads:['技術の情報収集','導入・活用の検討','交流・連携','一般見学・体験'],
       q2:'一番興味がわいた展示は？', choices:EXHIBITS.slice(), hasUnknown:true
@@ -493,7 +505,9 @@ function exclude_(ids, flag) {
   function freshHours() { var h = []; for (var i = 0; i < HOURS; i++) h.push(0); return h; }
   function freshForm(type) {
     var c = CONFIG[type]; if (!c) throw new Error('様式が不正です。');
-    return {matrix:c.rows.map(function(){ return c.cols.map(function(){ return 0; }); }), unknown:0, q2:c.choices.map(function(){ return 0; }), hours:freshHours()};
+    var f = {matrix:c.rows.map(function(){ return c.cols.map(function(){ return 0; }); }), unknown:0, q2:c.choices.map(function(){ return 0; }), hours:freshHours()};
+    if (c.rowsId) f.rowsId = c.rowsId;
+    return f;
   }
   /* シール集計不可 (visitors who did not answer) is the tall box at the right of ① in both forms (form.unknown).
      ① total = answers + シール集計不可 = visitors. The ①/② check leaves シール集計不可 out. */
@@ -510,6 +524,19 @@ function exclude_(ids, flag) {
   function freshData() { return {format:FORMAT, version:VERSION, revision:0, updatedAt:null, days:{'1':freshDay(), '2':freshDay()}}; }
   function normalizeForm(input, type) {
     var c = CONFIG[type];
+    // ①の行を来場者分類一覧の業界に変えた（11/17）: rowsId の無い以前の区分のデータは、対応する業界の行へ移す。
+    // 対応する業界が無い行（学生の「その他の業界」「まだ決まっていない」）は、シール集計不可／業界不明へ。
+    var mv = ROWS_MOVE[type];
+    if (mv && c.rowsId && plain(input) && input.rowsId !== c.rowsId && integer(input.unknown) && Array.isArray(input.matrix) && input.matrix.length === mv.old.length &&
+        input.matrix.every(function(row){ return Array.isArray(row) && row.length === c.cols.length && row.every(integer); })) {
+      var prev = input, moved = 0; input = {}; Object.keys(prev).forEach(function(k){ input[k] = prev[k]; });
+      input.matrix = c.rows.map(function(){ return c.cols.map(function(){ return 0; }); });
+      prev.matrix.forEach(function(row, r){
+        var to = mv.to[r] === null ? -1 : c.rows.indexOf(mv.to[r]);
+        row.forEach(function(v, col){ if (to < 0) moved += v; else input.matrix[to][col] += v; });
+      });
+      input.unknown = prev.unknown + moved;
+    }
     // Older data kept シール集計不可 as the last ② choice (一般・社会人, and both forms on the morning of 11/17): move it to ①.
     if (plain(input) && Array.isArray(input.q2) && input.q2.length === c.choices.length + 1 && integer(input.unknown) && integer(input.q2[c.choices.length])) {
       var old = input; input = {}; Object.keys(old).forEach(function(k){ input[k] = old[k]; }); input.q2 = old.q2.slice(0, c.choices.length); input.unknown = old.unknown + old.q2[c.choices.length];
@@ -521,6 +548,7 @@ function exclude_(ids, flag) {
     });
     if (!input.q2.every(integer) || (!c.hasUnknown && input.unknown !== 0)) throw new Error(c.name + 'の票数が不正です。');
     var form = {matrix:matrix, unknown:input.unknown, q2:input.q2.slice()};
+    if (c.rowsId) form.rowsId = c.rowsId;
     form.hours = normalizeHours(input.hours, q1Of(form));
     return form;
   }
@@ -1587,16 +1615,21 @@ function exclude_(ids, flag) {
  }
  function targetFromButton(button){ var t = {q:button.dataset.q}; if (button.dataset.r !== undefined) t.r = Number(button.dataset.r); if (button.dataset.c !== undefined) t.c = Number(button.dataset.c); return t; }
  function hitButton(t, id, extra){ return '<button type="button" class="vote-hit empty' + (extra ? ' ' + extra : '') + '" id="' + id + '" data-q="' + t.q + '"' + (t.r === undefined ? '' : ' data-r="' + t.r + '"') + (t.c === undefined ? '' : ' data-c="' + t.c + '"') + ' aria-label="投票を追加"></button>'; }
+ // Text color for a colored cell: whichever of dark ink / white reads better on it.
+ function inkOn(hex){ var m = /^#([0-9a-f]{6})$/i.exec(hex); if (!m) return 'inherit'; var lum = [0, 2, 4].map(function(i){ var v = parseInt(m[1].substr(i, 2), 16) / 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+   var L = 0.2126 * lum[0] + 0.7152 * lum[1] + 0.0722 * lum[2], dark = 0.0118;   // #14273a
+   return (L + 0.05) / (dark + 0.05) >= 1.05 / (L + 0.05) ? '#14273a' : '#ffffff'; }
  function buildMatrix(){
    var c = C.CONFIG[ui.type], type = ui.type;
    var html = '<table class="vote-table ' + type + '" aria-label="① ' + esc(c.q1) + '"><colgroup>';
-   if (type === 'student') { html += '<col style="width:15.8%">'; c.cols.forEach(function(){ html += '<col style="width:8.25%">'; }); html += '<col style="width:6.5%"><col style="width:11.7%">'; }
-   else { html += '<col style="width:22%">'; c.cols.forEach(function(){ html += '<col style="width:14.5%">'; }); html += '<col style="width:9%"><col style="width:11%">'; }
+   if (type === 'student') { html += '<col style="width:18%">'; c.cols.forEach(function(){ html += '<col style="width:8%">'; }); html += '<col style="width:6.5%"><col style="width:11.5%">'; }
+   else { html += '<col style="width:24%">'; c.cols.forEach(function(){ html += '<col style="width:14%">'; }); html += '<col style="width:9%"><col style="width:11%">'; }
    html += '</colgroup><thead><tr><th scope="col">' + esc(c.first) + '</th>';
    c.heads.forEach(function(head){ html += '<th scope="col">' + head + '</th>'; });
    html += '<th scope="col">集計</th>' + (c.hasUnknown ? '<th scope="col">シール集計不可<br>業界不明</th>' : '') + '</tr></thead><tbody>';
    c.rows.forEach(function(label, r){
-     html += '<tr><th scope="row" class="row-name">' + esc(label) + '</th>';
+     var paint = c.rowColors && c.rowColors[r] ? ' style="background:' + c.rowColors[r] + ';color:' + inkOn(c.rowColors[r]) + '"' : '';
+     html += '<tr><th scope="row" class="row-name"' + paint + '>' + esc(label) + '</th>';
      c.cols.forEach(function(col, v){ html += '<td>' + hitButton({q:'matrix', r:r, c:v}, 'vote-m-' + r + '-' + v) + '</td>'; });
      html += '<td class="sum-cell"><span id="row-total-' + r + '">0</span><small>人</small></td>';
      if (c.hasUnknown && r === 0) html += '<td class="unknown-td" rowspan="' + (c.rows.length + 1) + '">' + hitButton({q:'unknown'}, 'vote-unknown', 'unknown-hit') + '</td>';
@@ -1656,7 +1689,7 @@ function exclude_(ids, flag) {
    $('summary-q1').textContent = num(s.q1); $('summary-q2').textContent = num(s.q2); $('summary-gap').textContent = (s.difference > 0 ? '+' : '') + num(s.difference);
    $('summary-gap-note').textContent = s.difference === 0 ? '①と②の票数は一致しています。' : '①と②の票数が合っていません。入力を確認してください。';
    var industry = c.rows.map(function(label, i){ return {label:label, value:s.rows[i]}; }); if (c.hasUnknown) industry.push({label:'シール集計不可', value:f.unknown});
-   $('summary-industry-heading').textContent = '① ' + (ui.type === 'student' ? '気になる業界' : 'ご所属の業界');
+   $('summary-industry-heading').textContent = '① ' + (ui.type === 'student' ? '興味のある業界' : 'ご所属の業界');
    $('summary-industry').innerHTML = bars(industry, s.q1); $('summary-choices-heading').textContent = '② ' + c.q2;
    $('summary-choices').innerHTML = bars(c.choices.map(function(label, i){ return {label:label, value:f.q2[i]}; }), s.q2);
    var html = '<table class="plain-table"><thead><tr><th>日別</th><th>日付</th><th>対象</th><th class="num">①回答者数</th><th class="num">②票数</th><th class="num">差</th><th class="num">集計不可</th></tr></thead><tbody>';
