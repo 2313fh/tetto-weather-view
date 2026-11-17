@@ -153,6 +153,7 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
 @media print{#home-view,.back-btn,#state-banner,.home-tools,#sync-chip{display:none!important}.session-bar{font-size:10px;padding:4px 0 0}.session-bar strong{font-size:12px}}
 @media (pointer:coarse){.preview-text{font-size:16px}}
 .hour-lead{font-size:14px;line-height:1.7;margin:6px 0 10px;color:var(--artifact-muted)}.hour-table{min-width:360px}.hour-table td.num{position:relative;min-width:84px}.hour-table .hour-bar{position:absolute;left:6px;top:50%;height:14px;max-width:calc(100% - 12px);transform:translateY(-50%);background:rgba(0,114,206,.2);border-radius:3px}.hour-table .hour-num{position:relative}.hour-table td.is-peak .hour-bar{background:rgba(0,114,206,.42)}.hour-table td.is-peak .hour-num{font-weight:800}.hour-table tr.hour-untimed th,.hour-table tr.hour-untimed td{color:var(--artifact-muted)}
+.choice-grid.student{grid-template-columns:repeat(4,minmax(0,1fr)) 112px;min-width:740px}.choice-grid.student .choice-card.unknown-choice{grid-row:1}.choice-grid.student .unknown-choice .choice-label{font-size:12px}@media print{.choice-grid.student{grid-template-columns:repeat(4,minmax(0,1fr)) 12%;min-width:0!important}}
 </style>
 </head>
 <body>
@@ -216,7 +217,7 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
     <div id="matrix-host" class="table-scroll" tabindex="0" aria-label="①投票表。横スクロール可能"></div>
    </section>
    <section class="board-section" aria-labelledby="q2-heading">
-    <div class="section-heading"><h2 id="q2-heading">② 送電の仕事を、就職先として考えたい？</h2><div class="question-total">合計 <strong id="q2-total">0</strong>票</div></div>
+    <div class="section-heading"><h2 id="q2-heading">② 送電業界に興味がある？</h2><div class="question-total">合計 <strong id="q2-total">0</strong>票</div></div>
     <p id="q2-hint" class="question-hint">1つだけ選んで1回タップ</p>
     <div id="choices-host" class="choice-scroll" tabindex="0" aria-label="②選択肢。横スクロール可能"></div>
    </section>
@@ -224,11 +225,11 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    <p id="unknown-note" class="small-note">学生①の「業界不明」は行・列の計に入れず、①の合計にだけ含めます。</p>
   </div>
   <section id="summary-view" hidden aria-label="集計結果">
-   <div class="summary-kpis"><div class="kpi"><div class="kpi-label">回答者数（①合計）<button type="button" class="info" aria-label="①集計方法">ⓘ<span class="tooltip" role="tooltip">①の全マスの合計です（学生は業界不明も含む）。</span></button></div><div class="kpi-value"><span id="summary-q1">0</span><small>人</small></div></div><div class="kpi"><div class="kpi-label">②の回答票数<button type="button" class="info" aria-label="②集計方法">ⓘ<span class="tooltip" role="tooltip">②の全選択肢の合計です（社会人は集計不可も含む）。</span></button></div><div class="kpi-value"><span id="summary-q2">0</span><small>票</small></div></div><div class="kpi"><div class="kpi-label">①と②の差<button type="button" class="info" aria-label="差の計算方法">ⓘ<span class="tooltip" role="tooltip">①合計 − ②合計です。</span></button></div><div class="kpi-value"><span id="summary-gap">0</span><small>票</small></div></div></div>
+   <div class="summary-kpis"><div class="kpi"><div class="kpi-label">回答者数（①合計）<button type="button" class="info" aria-label="①集計方法">ⓘ<span class="tooltip" role="tooltip">①の全マスの合計です。</span></button></div><div class="kpi-value"><span id="summary-q1">0</span><small>人</small></div></div><div class="kpi"><div class="kpi-label">②の回答票数<button type="button" class="info" aria-label="②集計方法">ⓘ<span class="tooltip" role="tooltip">②の合計です（シール集計不可は除く）。</span></button></div><div class="kpi-value"><span id="summary-q2">0</span><small>票</small></div></div><div class="kpi"><div class="kpi-label">①と②の差<button type="button" class="info" aria-label="差の計算方法">ⓘ<span class="tooltip" role="tooltip">①合計 − ②の回答票数です。</span></button></div><div class="kpi-value"><span id="summary-gap">0</span><small>票</small></div></div></div>
    <p id="summary-gap-note" class="summary-note"></p>
-   <div class="summary-charts"><section><h3 id="summary-industry-heading">① 気になる業界</h3><div id="summary-industry"></div></section><section><h3 id="summary-choices-heading">② 送電の仕事を、就職先として考えたい？</h3><div id="summary-choices"></div></section></div>
+   <div class="summary-charts"><section><h3 id="summary-industry-heading">① 気になる業界</h3><div id="summary-industry"></div></section><section><h3 id="summary-choices-heading">② 送電業界に興味がある？</h3><div id="summary-choices"></div></section></div>
    <h2 class="section-subtitle">1日目・2日目の一覧</h2><div id="summary-day-table" class="table-scroll" tabindex="0" aria-label="日別集計一覧"></div>
-   <h2 class="section-subtitle">時間帯別の来場者数（1時間ごと）</h2><div id="summary-hour-table"></div><p class="summary-note">①をタップした時刻で数えます（学生＋一般・社会人）。</p>
+   <h2 class="section-subtitle">時間帯別の来場者数（1時間ごと）</h2><div id="summary-hour-table"></div><p class="summary-note">①とシール集計不可（答えなかった方）をタップした時刻で数えます（学生＋一般・社会人）。</p>
    <p class="summary-note">回答者数は①の合計です。</p>
    <div class="button-row interactive-only"><button type="button" class="btn primary" id="summary-export-button">CSV・バックアップを保存</button></div>
   </section>
@@ -256,7 +257,7 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
   var ID_CHARS = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
   var ID_RE = /^\d{8}-[0-9A-HJKMNP-TV-Z]{6}$/;
   var NAME_MAX = 40, COMPANY_MAX = 60;
-  var EXHIBITS = ['超軽量型クレーン','重機用遠隔操作システム','バランスリフト','四足歩行ロボット','ノボレール','ローニン','送配電事業PR','ラインマンPR'];
+  var EXHIBITS = ['超軽量型クレーン','重機用遠隔操作システム','バランスリフト','四足歩行ロボット','のぼれーる','ローニン','送配電事業PR','ラインマンPR'];
   var UNKNOWN = 'シール集計不可／業界不明';
   var CONFIG = {
     student: {
@@ -265,15 +266,15 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
       hint:'一番気になる業界の行と、一番興味がわいた展示の列が交わるマスを1回タップ',
       rows:['電力・エネルギー','建設・土木','機械・ものづくり','IT・ロボット','その他の業界','まだ決まっていない'],
       cols:EXHIBITS.slice(),
-      heads:['超軽量型<br>クレーン','重機用<br>遠隔操作<br>システム','バランス<br>リフト','四足歩行<br>ロボット','ノボレール','ローニン','送配電事業<br>PR','ラインマン<br>PR'],
-      q2:'送電の仕事を、就職先として考えたい？',
-      choices:['考えたい','少し気になる','まだわからない','今は考えていない'], hasUnknown:true
+      heads:['超軽量型<br>クレーン','重機用<br>遠隔操作<br>システム','バランス<br>リフト','四足歩行<br>ロボット','のぼれーる','ローニン','送配電事業<br>PR','ラインマン<br>PR'],
+      q2:'送電業界に興味がある？',
+      choices:['とても興味がある','少し興味がある','あまり興味がない','興味がない',UNKNOWN], hasUnknown:false
     },
     adult: {
       name:'一般・社会人', audience:'一般・社会人の方へ', title:'ご所属と、ご来場の目的は？',
       q1:'ご所属の業界 × 主な来場目的', first:'ご所属',
       hint:'ご所属の行と、主な来場目的の列が交わるマスを1回タップ',
-      rows:['送電関係','電力・インフラ','建設・土木・設計','製造・機械・商社','IT・通信','官公庁・教育・団体','その他・一般'],
+      rows:['社内関係者','電力・インフラ','建設・土木・設計','製造・機械・商社','IT・通信','官公庁・教育・団体','その他・一般'],
       cols:['技術の情報収集','導入・活用の検討','交流・連携','一般見学・体験'],
       heads:['技術の情報収集','導入・活用の検討','交流・連携','一般見学・体験'],
       q2:'一番興味がわいた展示は？', choices:EXHIBITS.concat([UNKNOWN]), hasUnknown:false
@@ -299,15 +300,20 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
   }
 
   /* ---------- survey forms (same structure as Ver.1) ---------- */
-  /* hours[h] = ① votes tapped between h:00 and h:59 (device time). Older data has none: those votes count as 時間不明. */
+  /* hours[h] = visitors (① answers and シール集計不可) tapped between h:00 and h:59 (device time). Older data has none: those count as 時間不明. */
   var HOURS = 24;
   function freshHours() { var h = []; for (var i = 0; i < HOURS; i++) h.push(0); return h; }
   function freshForm(type) {
     var c = CONFIG[type]; if (!c) throw new Error('様式が不正です。');
     return {matrix:c.rows.map(function(){ return c.cols.map(function(){ return 0; }); }), unknown:0, q2:c.choices.map(function(){ return 0; }), hours:freshHours()};
   }
+  /* The last ② choice of both forms is シール集計不可 = visitors who did not answer.
+     Visitors = ① answers + シール集計不可; ② answers and the ①/② check leave it out. */
+  ['student','adult'].forEach(function(t){ var ch = CONFIG[t].choices; if (ch[ch.length - 1] !== UNKNOWN) throw new Error('config: ' + t); });
+  function unansweredOf(form) { return form.q2[form.q2.length - 1]; }
+  function visitorsOf(form) { return q1Of(form) + unansweredOf(form); }
   function q1Of(form) { var n = form.unknown; form.matrix.forEach(function(row){ row.forEach(function(v){ n += v; }); }); return n; }
-  // Keep hours within the ① total: anything over it (hand-edited files) is trimmed from the latest hours.
+  // Keep hours within the visitor total: anything over it (hand-edited files) is trimmed from the latest hours.
   function normalizeHours(input, q1) {
     var h = freshHours();
     if (Array.isArray(input) && input.length === HOURS) input.forEach(function(v, i){ if (integer(v)) h[i] = v; });
@@ -319,6 +325,10 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
   function freshData() { return {format:FORMAT, version:VERSION, revision:0, updatedAt:null, days:{'1':freshDay(), '2':freshDay()}}; }
   function normalizeForm(input, type) {
     var c = CONFIG[type];
+    // Saved before 11/17: the student ② had 4 choices and シール集計不可 sat in ①. Keep the 4 answers in place, move ①不可 to ② シール集計不可.
+    if (type === 'student' && plain(input) && Array.isArray(input.q2) && input.q2.length === c.choices.length - 1 && integer(input.unknown)) {
+      var old = input; input = {}; Object.keys(old).forEach(function(k){ input[k] = old[k]; }); input.q2 = old.q2.concat([old.unknown]); input.unknown = 0;
+    }
     if (!plain(input) || !Array.isArray(input.matrix) || input.matrix.length !== c.rows.length || !Array.isArray(input.q2) || input.q2.length !== c.choices.length || !integer(input.unknown)) throw new Error(c.name + 'のデータ形式が異なります。');
     var matrix = input.matrix.map(function(row) {
       if (!Array.isArray(row) || row.length !== c.cols.length || !row.every(integer)) throw new Error(c.name + 'の行列または票数が不正です。');
@@ -326,7 +336,7 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
     });
     if (!input.q2.every(integer) || (!c.hasUnknown && input.unknown !== 0)) throw new Error(c.name + 'の票数が不正です。');
     var form = {matrix:matrix, unknown:input.unknown, q2:input.q2.slice()};
-    form.hours = normalizeHours(input.hours, q1Of(form));
+    form.hours = normalizeHours(input.hours, visitorsOf(form));
     return form;
   }
   function normalizeDay(input) {
@@ -438,8 +448,8 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
   function sum(xs) { return xs.reduce(function(a, b){ return a + b; }, 0); }
   function stats(form) {
     var rows = form.matrix.map(sum), cols = form.matrix[0].map(function(_, i){ return sum(form.matrix.map(function(r){ return r[i]; })); });
-    var hours = form.hours || freshHours(), timed = sum(hours);
-    return {rows:rows, cols:cols, known:sum(rows), unknown:form.unknown, q1:sum(rows) + form.unknown, q2:sum(form.q2), difference:sum(rows) + form.unknown - sum(form.q2), hours:hours.slice(), timed:timed, untimed:Math.max(0, sum(rows) + form.unknown - timed)};
+    var hours = form.hours || freshHours(), timed = sum(hours), q1 = sum(rows) + form.unknown, unanswered = unansweredOf(form), q2 = sum(form.q2) - unanswered;
+    return {rows:rows, cols:cols, known:sum(rows), unknown:form.unknown, q1:q1, q2:q2, unanswered:unanswered, visitors:q1 + unanswered, difference:q1 - q2, hours:hours.slice(), timed:timed, untimed:Math.max(0, q1 + unanswered - timed)};
   }
   function sessionTotals(data) {
     var q1 = 0, q2 = 0;
@@ -455,7 +465,7 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
   /* Visitors per hour for one day (学生＋一般): first/last hour with visitors and the busiest hour. */
   function dayHours(day) {
     var hours = freshHours(), untimed = 0, total = 0;
-    ['student','adult'].forEach(function(t){ var s = stats(day[t]); s.hours.forEach(function(v, i){ hours[i] += v; }); untimed += s.untimed; total += s.q1; });
+    ['student','adult'].forEach(function(t){ var s = stats(day[t]); s.hours.forEach(function(v, i){ hours[i] += v; }); untimed += s.untimed; total += s.visitors; });
     var first = -1, last = -1, peak = -1;
     hours.forEach(function(v, i){ if (!v) return; if (first < 0) first = i; last = i; if (peak < 0 || v > hours[peak]) peak = i; });
     return {hours:hours, untimed:untimed, total:total, first:first, last:last, peak:peak};
@@ -481,17 +491,17 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
     if (target.q === 'unknown' && c.hasUnknown) return form.unknown;
     throw new Error('投票先が不正です。');
   }
-  /* stamp (optional): {hour:0-23} = the hour to count a ① vote in (or to take it from).
+  /* stamp (optional): {hour:0-23} = the hour to count a visitor in (① or シール集計不可), or to take one from.
      After the call stamp.used is the hour actually changed, or null (時間不明), so an undo can put it back exactly. */
   function change(form, type, target, delta, stamp) {
     if (delta !== 1 && delta !== -1) throw new Error('票数の変更が不正です。');
     var value = valueAt(form, type, target), next = value + delta;
     if (!integer(next)) return false;
-    var first = target.q !== 'q2', hours = form.hours || (form.hours = freshHours()), want = stamp && Number.isInteger(stamp.hour) && stamp.hour >= 0 && stamp.hour < HOURS ? stamp.hour : null, used = null;
+    var first = target.q !== 'q2' || target.c === form.q2.length - 1, hours = form.hours || (form.hours = freshHours()), want = stamp && Number.isInteger(stamp.hour) && stamp.hour >= 0 && stamp.hour < HOURS ? stamp.hour : null, used = null;
     if (first && delta > 0 && want !== null) { hours[want] += 1; used = want; }
     if (first && delta < 0) {
       if (want !== null && hours[want] > 0) used = want;
-      else if (q1Of(form) - sum(hours) <= 0) { for (var i = HOURS - 1; i >= 0; i--) if (hours[i] > 0) { used = i; break; } }
+      else if (visitorsOf(form) - sum(hours) <= 0) { for (var i = HOURS - 1; i >= 0; i--) if (hours[i] > 0) { used = i; break; } }
       if (used !== null) hours[used] -= 1;
     }
     if (target.q === 'matrix') form.matrix[target.r][target.c] = next;
@@ -526,12 +536,12 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
     return rows;
   }
   function summaryRows(data, keys) {
-    var rows = [['日別','日付','対象','回答者数（①合計）','②回答票数','①と②の差','①うち業界不明','②うち集計不可']];
-    keys.forEach(function(k){ ['student','adult'].forEach(function(type){ var d = data.days[k], f = d[type], s = stats(f); rows.push([k + '日目', d.date, CONFIG[type].name, s.q1, s.q2, s.difference, s.unknown, type === 'adult' ? f.q2[8] : 0]); }); });
+    var rows = [['日別','日付','対象','回答者数（①合計）','②回答票数','①と②の差','シール集計不可（未回答）','来場者数']];
+    keys.forEach(function(k){ ['student','adult'].forEach(function(type){ var d = data.days[k], s = stats(d[type]); rows.push([k + '日目', d.date, CONFIG[type].name, s.q1, s.q2, s.difference, s.unanswered, s.visitors]); }); });
     return rows;
   }
   function hourlyRows(data, keys) {
-    var rows = [['日別','日付','対象','時間帯','来場者数（①の回答者数）']];
+    var rows = [['日別','日付','対象','時間帯','来場者数（①＋シール集計不可）']];
     keys.forEach(function(k){ ['student','adult'].forEach(function(type){
       var d = data.days[k], s = stats(d[type]);
       s.hours.forEach(function(v, h){ if (v) rows.push([k + '日目', d.date, CONFIG[type].name, hourLabel(h), v]); });
@@ -685,6 +695,9 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
  var exportScope = 'all', exportKind = 'detail', heartbeatTimer = null, homeTimer = null, sumTimer = null, persistAsked = false, navSeq = 0, unloading = false;
  var SYNC_KEY = C.PREFIX + 'sync.config', SYNC_STATE = C.PREFIX + 'sync.state.', SERVER_CACHE = C.PREFIX + 'server.cache', SUM_SEL = C.PREFIX + 'sum';
  var SYNC_URL_RE = /^https:\/\/script\.google\.com\/(?:a\/macros\/[A-Za-z0-9.\-]+\/|macros\/)s\/[A-Za-z0-9_\-]{20,200}\/exec$/;
+ /* Built with a fixed server (スプレッドシート登録版): opening the app connects it; the server cannot be changed or disconnected.
+    The URL is base64 only to keep it out of plain-text scans of the public repo. It is not a secret. */
+ var FIXED_SYNC = (function(){ if (!SYNC_ENABLED || typeof VARIANT.fixedSync64 !== 'string') return ''; try { var u = atob(VARIANT.fixedSync64); return SYNC_URL_RE.test(u) ? u : ''; } catch (e) { return ''; } })();
  var SYNC_DEBOUNCE = 8000, SYNC_MAXWAIT = 45000, SYNC_RETRY = [15000, 30000, 60000, 120000];
  var sync = {url:'', timer:null, firstDirtyAt:0, busy:false, busyPromise:null, again:false, lastOkAt:null, lastError:'', failures:0, retryTimer:null, conflicts:{}, cache:null, loadToken:0, mem:{}};
  var pendingSyncUrl = '';
@@ -712,7 +725,7 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
  /* ---------- shared server (Google Apps Script + Sheets) ---------- */
  function fmtTime(iso){ var d = new Date(iso); return isNaN(d.getTime()) ? '' : pad(d.getHours()) + ':' + pad(d.getMinutes()); }
  function shortUrl(u){ var m = /\/s\/([A-Za-z0-9_\-]+)\/exec$/.exec(u || ''); return m ? 'script.google.com/…/s/' + m[1].slice(0, 6) + '…' + m[1].slice(-4) + '/exec' : String(u || ''); }
- function loadSyncConfig(){ sync.url = ''; if (!SYNC_ENABLED) return; try { var v = JSON.parse(storage && storage.getItem(SYNC_KEY) || 'null'); if (v && typeof v.url === 'string' && SYNC_URL_RE.test(v.url)) sync.url = v.url; } catch (ignore) {} if (!sync.url && sync.memUrl) sync.url = sync.memUrl; }
+ function loadSyncConfig(){ sync.url = ''; if (!SYNC_ENABLED) return; if (FIXED_SYNC) { sync.url = FIXED_SYNC; return; } try { var v = JSON.parse(storage && storage.getItem(SYNC_KEY) || 'null'); if (v && typeof v.url === 'string' && SYNC_URL_RE.test(v.url)) sync.url = v.url; } catch (ignore) {} if (!sync.url && sync.memUrl) sync.url = sync.memUrl; }
  function setSyncUrl(url){
    sync.url = url || ''; sync.memUrl = sync.url; sync.lastError = ''; sync.failures = 0; sync.cache = null; sync.conflicts = {}; sync.mem = {};
    clearTimeout(sync.timer); sync.timer = null; clearTimeout(sync.retryTimer); sync.retryTimer = null;
@@ -819,16 +832,23 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    host.classList.toggle('sync-off', !sync.url);
    var html;
    if (!sync.url) html = '<div class="sync-text"><strong><span class="sync-dot problem"></span>共有サーバーに未接続</strong><br>このままだと入力はこの端末にしか残りません。集計担当から届いた<strong>共有リンク</strong>を1回開いてください。</div><div class="button-row"><button type="button" class="btn" data-sync="setup">共有サーバーの設定（集計担当）</button></div>';
-   else { var s = syncSummary(); html = '<div class="sync-text"><strong><span class="sync-dot ' + (s.cls === 'problem' ? 'problem' : 'on') + '"></span>共有サーバーに接続中</strong><br><span class="' + (s.cls === 'problem' ? 'danger-text' : 'secondary-text') + '">' + esc(s.text) + '</span></div><div class="button-row"><button type="button" class="btn primary" data-sync="list">全員分を見る</button><button type="button" class="btn" data-sync="share">共有リンクを送る</button><button type="button" class="btn" data-sync="setup">設定</button></div>'; }
+   else { var s = syncSummary(); html = '<div class="sync-text"><strong><span class="sync-dot ' + (s.cls === 'problem' ? 'problem' : 'on') + '"></span>共有サーバーに接続中</strong><br><span class="' + (s.cls === 'problem' ? 'danger-text' : 'secondary-text') + '">' + esc(s.text) + '</span></div><div class="button-row"><button type="button" class="btn primary" data-sync="list">全員分を見る</button><button type="button" class="btn" data-sync="share">共有リンクを送る</button>' + (FIXED_SYNC ? '' : '<button type="button" class="btn" data-sync="setup">設定</button>') + '</div>'; }
    host.innerHTML = html;
+ }
+ // A device that was on another server (or none) switches to the fixed one and sends everything again.
+ function pinFixedSync(){
+   if (!FIXED_SYNC) return;
+   var stored = null; try { stored = JSON.parse(storage && storage.getItem(SYNC_KEY) || 'null'); } catch (ignore) {}
+   if (!stored || stored.url !== FIXED_SYNC) { setSyncUrl(FIXED_SYNC); clearAllSyncedRev(); }
  }
  function gasCode(){ var el = $('gas-code'); return el ? el.textContent.replace(/^\s+/, '') : ''; }
  function copyText(text){
    var p = navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(text).then(function(){ return true; }, function(){ return false; }) : Promise.resolve(false);
    return p.then(function(ok){ if (ok) return true; try { var ta = document.createElement('textarea'); ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.left = '-9999px'; document.body.appendChild(ta); ta.select(); var r = document.execCommand('copy'); document.body.removeChild(ta); return !!r; } catch (e) { return false; } });
  }
- function shareLink(){ return location.origin + location.pathname + '?sync=' + encodeURIComponent(sync.url) + '&openExternalBrowser=1'; }
+ function shareLink(){ return location.origin + location.pathname + (FIXED_SYNC ? '?openExternalBrowser=1' : '?sync=' + encodeURIComponent(sync.url) + '&openExternalBrowser=1'); }
  function syncSetupPrompt(){
+   if (FIXED_SYNC) { shareLinkPrompt(false); return; }
    var connected = !!sync.url;
    modal('共有サーバーの設定',
      (connected ? '<div class="local-status-box">接続中：<span class="session-id">' + esc(shortUrl(sync.url)) + '</span><br>' + esc(syncSummary().text) + '</div><div class="button-row"><button type="button" class="btn primary" data-action="sync-share">共有リンクを送る</button><button type="button" class="btn" data-action="sync-now">今すぐ送信</button><button type="button" class="btn danger" data-action="sync-disconnect">接続を解除</button></div>' : '') +
@@ -849,6 +869,7 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    $('gas-text').value = gasCode();
  }
  function syncConnect(){
+   if (FIXED_SYNC) return;
    var input = $('sync-url'), url = (input && input.value || '').trim();
    if (!SYNC_URL_RE.test(url)) { toast('https://script.google.com/…/exec の形のURLを貼り付けてください'); return; }
    var btn = document.querySelector('[data-action="sync-connect"]'); if (btn) { btn.disabled = true; btn.textContent = '接続を確認中…'; }
@@ -861,7 +882,7 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
  function shareLinkPrompt(justConnected){
    if (!sync.url) return;
    modal('共有リンク', (justConnected ? '<p><strong>接続しました。</strong>入力は自動で送られます。</p>' : '') +
-     '<p>入力する人全員にこのリンクを送ってください。各端末で1回開けば接続されます。</p>' +
+     '<p>入力する人全員にこのリンクを送ってください。' + (FIXED_SYNC ? '開くだけで、集計担当のスプレッドシートに送られます。' : '各端末で1回開けば接続されます。') + '</p>' +
      '<textarea id="share-link" class="preview-text link-text" readonly spellcheck="false" aria-label="共有リンク"></textarea>' +
      '<div class="button-row"><button type="button" class="btn primary" data-action="share-link-copy">リンクをコピー</button>' + (navigator.share ? '<button type="button" class="btn" data-action="share-link-send">LINE・メールで送る</button>' : '') + '</div>' +
      '<p class="secondary-text">リンクを知っている人は誰でも書き込めます。関係者以外に送らないでください。</p><div class="button-row"><button type="button" class="btn" data-action="close">閉じる</button></div>');
@@ -874,6 +895,7 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    try { history.replaceState(history.state, '', location.pathname + (rest ? '?' + rest : '') + location.hash); } catch (ignore) {}
    if (!SYNC_ENABLED) { toast('スマホ完結版は共有サーバーに接続しません'); return; }
    url = url.trim();
+   if (FIXED_SYNC) { if (url !== FIXED_SYNC) toast('送信先は決まっています（変更できません）'); return; }
    if (!SYNC_URL_RE.test(url)) { toast('共有リンクが正しくありません'); return; }
    if (url === sync.url) { toast('接続済みです'); return; }
    pendingSyncUrl = url;
@@ -881,7 +903,7 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
  }
  function syncAccept(){
    var url = pendingSyncUrl; pendingSyncUrl = ''; closeModal(true);
-   if (!url) return;
+   if (!url || FIXED_SYNC) return;
    toast('接続を確認中…');
    serverGet('ping', url).then(function(res){
      if (res.ok && !/(^|-)seal-survey$/.test(String(res.app || ''))) throw Object.assign(new Error('このアプリ用の共有サーバーではありません'), {fatal:true});
@@ -1386,7 +1408,7 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
  function buildMatrix(){
    var c = C.CONFIG[ui.type], type = ui.type;
    var html = '<table class="vote-table ' + type + '" aria-label="① ' + esc(c.q1) + '"><colgroup>';
-   if (type === 'student') { html += '<col style="width:15.8%">'; c.cols.forEach(function(){ html += '<col style="width:8.25%">'; }); html += '<col style="width:6.5%"><col style="width:11.7%">'; }
+   if (type === 'student') { html += '<col style="width:17%">'; c.cols.forEach(function(){ html += '<col style="width:9.5%">'; }); html += '<col style="width:7%">'; }
    else { html += '<col style="width:24%">'; c.cols.forEach(function(){ html += '<col style="width:16%">'; }); html += '<col style="width:12%">'; }
    html += '</colgroup><thead><tr><th scope="col">' + esc(c.first) + '</th>';
    c.heads.forEach(function(head){ html += '<th scope="col">' + head + '</th>'; });
@@ -1407,7 +1429,7 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    var c = C.CONFIG[ui.type], type = ui.type;
    var html = '<div class="choice-grid ' + type + '">';
    c.choices.forEach(function(label, i){
-     var unknown = type === 'adult' && i === 8;
+     var unknown = i === c.choices.length - 1;
      var position = type === 'adult' && !unknown ? ' style="grid-column:' + (i % 4 + 1) + ';grid-row:' + (Math.floor(i / 4) + 1) + '"' : '';
      html += '<div class="choice-card' + (unknown ? ' unknown-choice' : '') + '"' + position + '><div class="choice-label">' + (unknown ? 'シール集計不可<br>業界不明' : esc(label)) + '</div>' + hitButton({q:'q2', c:i}, 'vote-q2-' + i) + '</div>';
    });
@@ -1454,9 +1476,9 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    var industry = c.rows.map(function(label, i){ return {label:label, value:s.rows[i]}; }); if (c.hasUnknown) industry.push({label:'業界不明', value:f.unknown});
    $('summary-industry-heading').textContent = '① ' + (ui.type === 'student' ? '気になる業界' : 'ご所属の業界');
    $('summary-industry').innerHTML = bars(industry, s.q1); $('summary-choices-heading').textContent = '② ' + c.q2;
-   $('summary-choices').innerHTML = bars(c.choices.map(function(label, i){ return {label:label, value:f.q2[i]}; }), s.q2);
-   var html = '<table class="plain-table"><thead><tr><th>日別</th><th>日付</th><th>対象</th><th class="num">①回答者数</th><th class="num">②票数</th><th class="num">差</th></tr></thead><tbody>';
-   ['1','2'].forEach(function(k){ ['student','adult'].forEach(function(type){ var day = data.days[k], v = C.stats(day[type]); html += '<tr' + (k === ui.day && type === ui.type ? ' class="is-current"' : '') + '><td>' + k + '日目</td><td>' + esc(day.date || '未設定') + '</td><td>' + C.CONFIG[type].name + '</td><td class="num">' + num(v.q1) + '</td><td class="num">' + num(v.q2) + '</td><td class="num">' + (v.difference > 0 ? '+' : '') + num(v.difference) + '</td></tr>'; }); });
+   $('summary-choices').innerHTML = bars(c.choices.map(function(label, i){ return {label:label, value:f.q2[i]}; }), s.q2 + s.unanswered);
+   var html = '<table class="plain-table"><thead><tr><th>日別</th><th>日付</th><th>対象</th><th class="num">①回答者数</th><th class="num">②票数</th><th class="num">差</th><th class="num">集計不可</th></tr></thead><tbody>';
+   ['1','2'].forEach(function(k){ ['student','adult'].forEach(function(type){ var day = data.days[k], v = C.stats(day[type]); html += '<tr' + (k === ui.day && type === ui.type ? ' class="is-current"' : '') + '><td>' + k + '日目</td><td>' + esc(day.date || '未設定') + '</td><td>' + C.CONFIG[type].name + '</td><td class="num">' + num(v.q1) + '</td><td class="num">' + num(v.q2) + '</td><td class="num">' + (v.difference > 0 ? '+' : '') + num(v.difference) + '</td><td class="num">' + num(v.unanswered) + '</td></tr>'; }); });
    html += '</tbody></table>'; $('summary-day-table').innerHTML = html;
    updateHourTable();
  }
@@ -1537,7 +1559,8 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
      '<li>続きは保存一覧の「再開」から。</li>' +
      '<li>1日の終わりに「全件バックアップ」を集計担当へ送る。集計担当は「データを取り込む」で読み込み、「合算を見る」「全件CSV」。</li>' +
      '<li>iPhone・iPadは、しばらく開かないとデータが消えることがあります。</li>') +
-     '<li>回答者数は①の合計です。①をタップした時刻で、1時間ごとの来場者数も数えます（「集計」で確認）。</li></ol></section>';
+     '<li>アンケートに答えなかった方は、②の「シール集計不可」を1回タップ。</li>' +
+     '<li>回答者数は①の合計、来場者数は①＋シール集計不可です。タップした時刻で、1時間ごとの来場者数も数えます（「集計」で確認）。</li></ol></section>';
  }
  function footerNoteHtml(){ return '<p class="footer-note">' + (SYNC_ENABLED ? '入力者名・会社名・票数は、この端末と共有サーバー（集計担当のGoogleスプレッドシート）に保存されます。' : '入力者名・会社名・票数は、この端末の中だけに保存されます。') + '</p>'; }
  function manager(){
@@ -1674,8 +1697,8 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    'sum-open':sumOpen, 'sum-reselect':sumPrompt,
    'sync-setup':syncSetupPrompt, 'sync-connect':syncConnect, 'sync-share':function(){ shareLinkPrompt(false); }, 'sync-accept':syncAccept,
    'sync-now':function(){ syncAll().then(function(r){ toast(r.ok ? (r.sent ? '送信しました' : '送信待ちのデータはありません') : '送信できませんでした：' + (r.error || '')); if (!$('app-modal').hidden && document.getElementById('sync-url')) syncSetupPrompt(); }); },
-   'sync-disconnect':function(){ modal('接続の解除', '<p>この端末からの送信を止めます。データは端末にもサーバーにも残ります。</p><div class="button-row"><button type="button" class="btn danger" data-action="sync-disconnect-ok">接続を解除</button><button type="button" class="btn" data-action="sync-setup">キャンセル</button></div>'); },
-   'sync-disconnect-ok':function(){ setSyncUrl(''); sync.memUrl = ''; closeModal(); if (S.route === 'home') renderHome(); renderSyncState(); toast('接続を解除しました'); },
+   'sync-disconnect':function(){ if (FIXED_SYNC) return; modal('接続の解除', '<p>この端末からの送信を止めます。データは端末にもサーバーにも残ります。</p><div class="button-row"><button type="button" class="btn danger" data-action="sync-disconnect-ok">接続を解除</button><button type="button" class="btn" data-action="sync-setup">キャンセル</button></div>'); },
+   'sync-disconnect-ok':function(){ if (FIXED_SYNC) return; setSyncUrl(''); sync.memUrl = ''; closeModal(); if (S.route === 'home') renderHome(); renderSyncState(); toast('接続を解除しました'); },
    'gas-copy':function(){ copyText(gasCode()).then(function(ok){ toast(ok ? 'コピーしました。Apps Scriptのエディタに貼り付けてください' : 'コピーできませんでした。「スクリプトを表示」から選んでコピーしてください'); }); },
    'gas-show':gasShow,
    'share-link-copy':function(){ copyText(shareLink()).then(function(ok){ toast(ok ? '共有リンクをコピーしました' : 'コピーできませんでした。リンクを選んでコピーしてください'); }); },
@@ -1821,6 +1844,7 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
 
  $('start-date').value = C.localDate();
  loadSyncConfig();
+ pinFixedSync();
  route();
  handleSyncParam();
  if (sync.url) setTimeout(function(){ syncNow(); }, 1500);
