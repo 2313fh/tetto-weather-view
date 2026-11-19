@@ -156,6 +156,7 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
 .choice-grid.adult{grid-template-columns:repeat(4,minmax(0,1fr));min-width:640px}.vote-table.adult .unknown-td{border-bottom:0}@media print{.choice-grid.adult{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .vote-table thead th small{display:block;margin-top:3px;font-size:10.5px;font-weight:500;color:var(--artifact-muted)}.vote-table.adult{min-width:760px}.vote-table .noanswer{box-shadow:inset 2px 0 0 var(--artifact-line)}@media print{.vote-table thead th small{font-size:7px}}
 .vote-table .unknown-td{position:relative}.vote-table .unknown-td>.unknown-hit{position:absolute;inset:0;min-height:0!important;height:auto}
+.server-row{display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--artifact-line)}.server-row .check-row{flex:1;min-width:0;border-bottom:0}.server-row .removed-who{flex:1;min-width:0;padding:8px 4px;font-size:13px;line-height:1.5}.btn.remove-btn{flex:none;min-height:44px;padding:0 14px}.removed-box{margin:12px 0;padding:8px 12px;border:1px solid var(--artifact-line);border-radius:8px}.removed-box summary{cursor:pointer;font-weight:700;font-size:13px;min-height:32px;display:list-item}.mix-panel{padding-bottom:8px;margin-bottom:8px;border-bottom:2px solid var(--artifact-line)}.mix-head{display:flex;align-items:center;justify-content:space-between;gap:8px 12px;flex-wrap:wrap}.mix-head .section-subtitle{margin:14px 0 6px}.mix-kpis{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--artifact-line);border-bottom:1px solid var(--artifact-line);margin:8px 0 10px}.mix-kpis .kpi{padding:12px 12px 12px 0}.mix-kpis .kpi+.kpi{padding-left:12px;border-left:1px solid var(--artifact-line)}.mix-legend{display:flex;gap:16px;font-size:12px;color:var(--artifact-muted);margin:0 0 12px}.mix-swatch{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px;vertical-align:-1px}.mix-swatch.student,.bar-fill.mix-student{background:var(--artifact-blue-ink)}.mix-swatch.adult,.bar-fill.mix-adult{background:color-mix(in srgb,var(--artifact-blue-ink) 38%,var(--artifact-bg))}.mix-record .bar-track{display:flex}.bar-fill.mix-adult{box-shadow:inset 1px 0 0 var(--artifact-bg)}.mix-split{display:block;font-size:10.5px;color:var(--artifact-muted);line-height:1.35}@media screen and (max-width:720px){.mix-kpis{grid-template-columns:repeat(2,1fr)}.mix-kpis .kpi{padding:10px 8px 10px 0}.mix-kpis .kpi:nth-child(3){border-left:0;padding-left:0}.mix-kpis .kpi:nth-child(n+3){border-top:1px solid var(--artifact-line)}}@media print{.mix-scope,.remove-btn{display:none}.mix-kpis .kpi{padding:8px}.mix-split{font-size:7px}}
 </style>
 </head>
 <body>
@@ -228,6 +229,14 @@ html[data-variant="local"] .variant-tag{border-color:var(--artifact-orange);colo
    <p id="unknown-note" class="small-note">答えてもらえなかった方：一般・社会人は名札の色の行の「回答なし」、名札が見えない方と学生は右端の「業界不明」。どちらも来場者数に入り、①と②の差の確認からは除きます。</p>
   </div>
   <section id="summary-view" hidden aria-label="集計結果">
+   <section id="mix-panel" class="mix-panel" aria-labelledby="mix-heading" hidden>
+    <div class="mix-head"><h2 id="mix-heading" class="section-subtitle">学生＋一般・社会人の合計（1日目）</h2><div class="segmented mix-scope" role="group" aria-label="合計する日"><button type="button" data-mix-scope="day" aria-pressed="true">選んだ日</button><button type="button" data-mix-scope="all" aria-pressed="false">2日間</button></div></div>
+    <div class="mix-kpis"><div class="kpi"><div class="kpi-label">来場者数</div><div class="kpi-value"><span id="mix-visitors">0</span><small>人</small></div></div><div class="kpi"><div class="kpi-label">うち学生</div><div class="kpi-value"><span id="mix-student">0</span><small>人</small></div></div><div class="kpi"><div class="kpi-label">うち一般・社会人</div><div class="kpi-value"><span id="mix-adult">0</span><small>人</small></div></div><div class="kpi"><div class="kpi-label">回答なし・業界不明</div><div class="kpi-value"><span id="mix-unanswered">0</span><small>人</small></div></div></div>
+    <div class="mix-legend" aria-hidden="true"><span><i class="mix-swatch student"></i>学生</span><span><i class="mix-swatch adult"></i>一般・社会人</span></div>
+    <div class="summary-charts"><section><h3>一番興味がわいた展示</h3><div id="mix-exhibits"></div></section><section><h3>業界</h3><div id="mix-industry"></div></section></div>
+    <p class="summary-note">展示は、学生の①（一番興味がわいた展示）と一般・社会人の②を足しています。業界は、学生が興味のある業界、一般・社会人がご所属（回答なしを含む）です。</p>
+   </section>
+   <h2 id="summary-type-heading" class="section-subtitle" hidden>学生だけの集計（1日目）</h2>
    <div class="summary-kpis"><div class="kpi"><div class="kpi-label">来場者数（①合計）<button type="button" class="info" aria-label="①集計方法">ⓘ<span class="tooltip" role="tooltip">①の全マスの合計です（回答なし・業界不明も含む）。</span></button></div><div class="kpi-value"><span id="summary-q1">0</span><small>人</small></div></div><div class="kpi"><div class="kpi-label">②の回答票数<button type="button" class="info" aria-label="②集計方法">ⓘ<span class="tooltip" role="tooltip">②の全選択肢の合計です。</span></button></div><div class="kpi-value"><span id="summary-q2">0</span><small>票</small></div></div><div class="kpi"><div class="kpi-label">①と②の差<button type="button" class="info" aria-label="差の計算方法">ⓘ<span class="tooltip" role="tooltip">①の回答（回答なし・業界不明を除く）− ②です。</span></button></div><div class="kpi-value"><span id="summary-gap">0</span><small>票</small></div></div></div>
    <p id="summary-gap-note" class="summary-note"></p>
    <div class="summary-charts"><section><h3 id="summary-industry-heading">① 興味のある業界</h3><div id="summary-industry"></div></section><section><h3 id="summary-choices-heading">② 送電業界に興味がある？</h3><div id="summary-choices"></div></section></div>
@@ -697,6 +706,29 @@ function exclude_(ids, flag) {
     (source.hours || freshHours()).forEach(function(v, i){ target.hours[i] += v; });
   }
   /* Visitors per hour for one day (学生＋一般): first/last hour with visitors and the busiest hour. */
+  /* 学生＋一般・社会人の合計 (dashboard only; data is not changed).
+     展示: 学生は①の列（一番興味がわいた展示）、一般・社会人は②。業界: 学生は①の行（興味のある業界）、一般・社会人は①の行（ご所属・回答なしを含む）。
+     Both are matched by name, so a renamed row or exhibit simply shows on its own line. */
+  function mixStats(data, keys) {
+    var st = CONFIG.student, ad = CONFIG.adult, out = {visitors:0, unanswered:0, student:{q1:0, unanswered:0}, adult:{q1:0, unanswered:0}, exhibits:[], industries:[]};
+    var ex = {}, ind = {};
+    function slot(list, map, label){ if (!map[label]) { map[label] = {label:label, student:0, adult:0}; list.push(map[label]); } return map[label]; }
+    EXHIBITS.forEach(function(label){ slot(out.exhibits, ex, label); });
+    ad.rows.concat(st.rows).forEach(function(label){ slot(out.industries, ind, label); });
+    (keys || []).forEach(function(k){
+      var day = data.days[k]; if (!day) return;
+      var s = stats(day.student, 'student'), a = stats(day.adult, 'adult');
+      out.student.q1 += s.q1; out.adult.q1 += a.q1; out.student.unanswered += s.unanswered; out.adult.unanswered += a.unanswered;
+      st.cols.forEach(function(label, i){ slot(out.exhibits, ex, label).student += s.cols[i]; });
+      ad.choices.forEach(function(label, i){ slot(out.exhibits, ex, label).adult += day.adult.q2[i]; });
+      st.rows.forEach(function(label, i){ slot(out.industries, ind, label).student += s.rows[i]; });
+      ad.rows.forEach(function(label, i){ slot(out.industries, ind, label).adult += a.rows[i]; });
+      var u = slot(out.industries, ind, '業界不明'); u.student += day.student.unknown; u.adult += day.adult.unknown;
+    });
+    slot(out.industries, ind, '業界不明');
+    out.visitors = out.student.q1 + out.adult.q1; out.unanswered = out.student.unanswered + out.adult.unanswered;
+    return out;
+  }
   function dayHours(day) {
     var hours = freshHours(), untimed = 0, total = 0;
     ['student','adult'].forEach(function(t){ var s = stats(day[t], t); s.hours.forEach(function(v, i){ hours[i] += v; }); untimed += s.untimed; total += s.visitors; });
@@ -891,7 +923,7 @@ function exclude_(ids, flag) {
     parseSession:parseSession, parseImport:parseImport, makeBundle:makeBundle, sameContent:sameContent, isNewer:isNewer,
     stats:stats, sessionTotals:sessionTotals, sumSessions:sumSessions, change:change, valueAt:valueAt, targetKey:targetKey,
     targetLabel:targetLabel, dayKeys:dayKeys, detailRows:detailRows, summaryRows:summaryRows, hourlyRows:hourlyRows, csvRows:csvRows, toCsv:toCsv,
-    HOURS:HOURS, dayHours:dayHours, hourLabel:hourLabel,
+    HOURS:HOURS, dayHours:dayHours, hourLabel:hourLabel, mixStats:mixStats,
     csvCell:csvCell, SessionStore:SessionStore
   };
 })(typeof globalThis !== 'undefined' ? globalThis : this);
@@ -928,6 +960,8 @@ function exclude_(ids, flag) {
  var pendingRestore = null, pendingImport = null, pendingMeta = null, pendingV1 = null, modalBack = null;
  var exportScope = 'all', exportKind = 'detail', heartbeatTimer = null, homeTimer = null, sumTimer = null, persistAsked = false, navSeq = 0, unloading = false;
  var SYNC_KEY = C.PREFIX + 'sync.config', SYNC_STATE = C.PREFIX + 'sync.state.', SERVER_CACHE = C.PREFIX + 'server.cache', SUM_SEL = C.PREFIX + 'sum';
+var REMOVED_KEY = C.PREFIX + 'server.removed';   // 全員分から外したデータ（この端末で外した分。戻すため）
+var mixScope = 'day';   // 学生＋一般・社会人の合計: 'day' = 選んだ日, 'all' = 2日間
  var SYNC_URL_RE = /^https:\/\/script\.google\.com\/(?:a\/macros\/[A-Za-z0-9.\-]+\/|macros\/)s\/[A-Za-z0-9_\-]{20,200}\/exec$/;
  /* Built with a default server (スプレッドシート登録版): opening the app connects to it. 設定 can switch to another server
     (共有リンク then spreads it), and 「最初の送信先に戻す」 comes back. The URL is base64 only to keep it out of plain-text scans; it is not a secret. */
@@ -1167,11 +1201,61 @@ function exclude_(ids, flag) {
    var c = sync.cache; if (!c) return;
    var items = c.sessions.slice().sort(bySessionOrder), counts = {}, q1 = 0, q2 = 0;
    items.forEach(function(x){ var k = C.identityKey(x.meta), t = C.sessionTotals(x); counts[k] = (counts[k] || 0) + 1; q1 += t.q1; q2 += t.q2; });
-   var rows = items.map(function(x){ var t = C.sessionTotals(x), dup = counts[C.identityKey(x.meta)] > 1; return '<label class="check-row"><input type="checkbox" class="server-check" value="' + esc(x.id) + '" checked><span><span class="who">' + esc(x.meta.name) + '</span>（' + esc(x.meta.company) + '）' + (dup ? ' <span class="badge warn">同じ人・同じ日が複数</span>' : '') + '<br><span class="secondary-text">' + esc(fmtDate(x.meta.date)) + '・ID ' + esc(x.id) + '・①' + num(t.q1) + '人・②' + num(t.q2) + '票・更新 ' + esc(fmtDateTime(x.updatedAt)) + '</span></span></label>'; }).join('');
+   var rows = items.map(function(x){ var t = C.sessionTotals(x), dup = counts[C.identityKey(x.meta)] > 1; return '<div class="server-row"><label class="check-row"><input type="checkbox" class="server-check" value="' + esc(x.id) + '" checked><span><span class="who">' + esc(x.meta.name) + '</span>（' + esc(x.meta.company) + '）' + (dup ? ' <span class="badge warn">同じ人・同じ日が複数</span>' : '') + '<br><span class="secondary-text">' + esc(fmtDate(x.meta.date)) + '・ID ' + esc(x.id) + '・①' + num(t.q1) + '人・②' + num(t.q2) + '票・更新 ' + esc(fmtDateTime(x.updatedAt)) + '</span></span></label><button type="button" class="btn remove-btn" data-action="server-remove" data-id="' + esc(x.id) + '" aria-label="' + esc(x.meta.name) + 'さんのデータを一覧から削除">削除</button></div>'; }).join('');
    modal('全員分', '<p><strong>' + items.length + '件</strong>（①合計 ' + num(q1) + '人・②合計 ' + num(q2) + '票）／ 読み込み ' + esc(fmtDateTime(c.at)) + (c.excluded ? '／ 除外 ' + num(c.excluded) + '件' : '') + (c.bad ? '／ 読めないデータ ' + num(c.bad) + '件' : '') + '</p>' +
      (items.length ? '<div class="button-row"><button type="button" class="btn primary" data-action="server-sum">合算を表示</button><button type="button" class="btn" data-action="server-csv">全員分CSV</button><button type="button" class="btn" data-action="server-json">全員分バックアップ</button><button type="button" class="btn" data-action="server-list">再読み込み</button></div><p class="secondary-text">チェックしたデータだけを合算・出力します。</p><div class="button-row"><button type="button" class="btn" data-action="server-all">すべて選択</button><button type="button" class="btn" data-action="server-none">すべて解除</button></div><div class="check-list">' + rows + '</div>'
        : '<p>まだデータがありません。</p><div class="button-row"><button type="button" class="btn" data-action="server-list">再読み込み</button></div>') +
+     removedBoxHtml() +
      '<div class="button-row"><button type="button" class="btn" data-action="close">閉じる</button></div>');
+ }
+ /* 全員分の一覧から削除 = the server's existing 「除外」 (the spreadsheet row stays, so it can be put back). Nothing on any device is deleted. */
+ function loadRemoved(){ var v = []; try { v = JSON.parse(storage && storage.getItem(REMOVED_KEY) || '[]'); } catch (ignore) {} return Array.isArray(v) ? v.filter(function(r){ return r && C.ID_RE.test(String(r.id)) && typeof r.url === 'string'; }).slice(0, 50) : []; }
+ function saveRemoved(list){ try { if (storage) { if (list.length) storage.setItem(REMOVED_KEY, JSON.stringify(list.slice(0, 50))); else storage.removeItem(REMOVED_KEY); } } catch (ignore) {} }
+ function removedHere(){ return loadRemoved().filter(function(r){ return r.url === sync.url; }); }
+ function removedBoxHtml(){
+   var list = removedHere(); if (!list.length) return '';
+   return '<details class="removed-box"><summary>この端末で削除したデータ（' + list.length + '件）</summary><p class="secondary-text">「戻す」を押すと、全員分の一覧と合算に戻ります。</p><div class="check-list">' +
+     list.map(function(r){ return '<div class="server-row"><span class="removed-who"><span class="who">' + esc(r.name || '（名前なし）') + '</span>' + (r.company ? '（' + esc(r.company) + '）' : '') + '<br><span class="secondary-text">' + (r.date ? esc(fmtDate(r.date)) + '・' : '') + 'ID ' + esc(r.id) + '・削除 ' + esc(fmtDateTime(r.at)) + '</span></span><button type="button" class="btn remove-btn" data-action="server-restore" data-id="' + esc(r.id) + '">戻す</button></div>'; }).join('') +
+     '</div></details>';
+ }
+ function serverError(res){ return new Error(res && res.busy ? '混み合っています。少し待ってからもう一度押してください' : (res && res.error) || '共有サーバーの応答が正しくありません'); }
+ function serverRemovePrompt(id){
+   var x = sync.cache ? sync.cache.sessions.filter(function(s){ return s.id === id; })[0] : null;
+   if (!x) { toast('一覧を読み込み直してください'); return; }
+   var t = C.sessionTotals(x), mine = !!findItem(id);
+   modal('一覧から削除', '<p><strong>' + esc(x.meta.name) + '</strong>（' + esc(x.meta.company) + '）<br><span class="secondary-text">' + esc(fmtDate(x.meta.date)) + '・ID ' + esc(x.id) + '・①' + num(t.q1) + '人・②' + num(t.q2) + '票</span></p>' +
+     '<p>全員分の一覧と合算から外します。スプレッドシートの行は消さずに「除外」の印を付けるので、あとで戻せます（この端末の「全員分」→「この端末で削除したデータ」）。</p>' +
+     '<p class="danger-text">この人がまだ入力中なら、このあと入力した分も全員分に入りません。</p>' +
+     '<p class="secondary-text">' + (mine ? 'この端末のデータです。' : '入力した人の') + '端末の中のデータは消えません。</p>' +
+     '<div class="button-row"><button type="button" class="btn danger" data-action="server-remove-ok" data-id="' + esc(id) + '">一覧から削除する</button><button type="button" class="btn" data-action="server-back">やめる</button></div>');
+ }
+ function serverRemove(id, button){
+   if (!sync.url) { syncSetupPrompt(); return; }
+   var x = sync.cache ? sync.cache.sessions.filter(function(s){ return s.id === id; })[0] : null, url = sync.url;
+   button.disabled = true; button.textContent = '削除中…';
+   serverPost({action:'exclude', ids:[id]}).then(function(res){
+     if (!res || !res.ok) throw serverError(res);
+     if (res.changed) saveRemoved([{id:id, url:url, name:x ? x.meta.name : '', company:x ? x.meta.company : '', date:x ? x.meta.date : '', at:now()}].concat(loadRemoved().filter(function(r){ return !(r.id === id && r.url === url); })));
+     if (sync.cache) { sync.cache.sessions = sync.cache.sessions.filter(function(s){ return s.id !== id; }); if (res.changed) sync.cache.excluded += 1; saveServerCache(); }
+     toast(res.changed ? '一覧から削除しました' : 'サーバーにこのデータはありませんでした');
+     if (!$('app-modal').hidden) renderServerList();
+   }).catch(function(e){
+     toast('削除できませんでした：' + e.message);
+     if (!$('app-modal').hidden && button.isConnected) { button.disabled = false; button.textContent = '一覧から削除する'; }
+   });
+ }
+ function serverRestore(id, button){
+   if (!sync.url) { syncSetupPrompt(); return; }
+   var url = sync.url; button.disabled = true; button.textContent = '戻し中…';
+   serverPost({action:'exclude', ids:[id], exclude:false}).then(function(res){
+     if (!res || !res.ok) throw serverError(res);
+     saveRemoved(loadRemoved().filter(function(r){ return !(r.id === id && r.url === url); }));
+     toast(res.changed ? '一覧に戻しました' : 'サーバーにこのデータはありませんでした');
+     if (!$('app-modal').hidden) serverListPrompt();
+   }).catch(function(e){
+     toast('戻せませんでした：' + e.message);
+     if (!$('app-modal').hidden && button.isConnected) { button.disabled = false; button.textContent = '戻す'; }
+   });
  }
  function serverSelected(){ var set = {}; Array.prototype.slice.call(document.querySelectorAll('.server-check:checked')).forEach(function(x){ set[x.value] = 1; }); return (sync.cache ? sync.cache.sessions : []).filter(function(x){ return set[x.id]; }); }
  function askPersist(){ if (persistAsked) return; persistAsked = true; try { if (navigator.storage && navigator.storage.persisted && navigator.storage.persist) navigator.storage.persisted().then(function(p){ if (!p) return navigator.storage.persist(); }).catch(function(){}); } catch (ignore) {} }
@@ -1716,7 +1800,27 @@ function exclude_(ids, flag) {
    var html = '<table class="plain-table"><thead><tr><th>日別</th><th>日付</th><th>対象</th><th class="num">①来場者数</th><th class="num">②票数</th><th class="num">差</th><th class="num">回答なし</th></tr></thead><tbody>';
    ['1','2'].forEach(function(k){ ['student','adult'].forEach(function(type){ var day = data.days[k], v = C.stats(day[type], type); html += '<tr' + (k === ui.day && type === ui.type ? ' class="is-current"' : '') + '><td>' + k + '日目</td><td>' + esc(day.date || '未設定') + '</td><td>' + C.CONFIG[type].name + '</td><td class="num">' + num(v.q1) + '</td><td class="num">' + num(v.q2) + '</td><td class="num">' + (v.difference > 0 ? '+' : '') + num(v.difference) + '</td><td class="num">' + num(v.unanswered) + '</td></tr>'; }); });
    html += '</tbody></table>'; $('summary-day-table').innerHTML = html;
+   var inSum = S.route === 'sum';   // 学生＋一般・社会人の合計 is shown on the 合算 (全員分) dashboard only; a person's own 集計 stays as it was
+   $('mix-panel').hidden = !inSum; $('summary-type-heading').hidden = !inSum;
+   $('summary-type-heading').textContent = (ui.type === 'student' ? '学生' : '一般・社会人') + 'だけの集計（' + ui.day + '日目）';
+   if (inSum) updateMix();
    updateHourTable();
+ }
+ function stackBars(items){
+   var max = Math.max.apply(null, [1].concat(items.map(function(x){ return x.student + x.adult; }))), total = 0, html = '';
+   items.forEach(function(x){ total += x.student + x.adult; });
+   if (!total) html += '<p class="empty-chart">まだ票はありません。</p>';
+   items.forEach(function(x){
+     html += '<div class="bar-record mix-record"><div>' + esc(x.label) + '<span class="mix-split">学生 ' + num(x.student) + '・一般・社会人 ' + num(x.adult) + '</span></div><div class="bar-track"><div class="bar-fill mix-student" style="width:' + (x.student / max * 100).toFixed(4) + '%"></div><div class="bar-fill mix-adult" style="width:' + (x.adult / max * 100).toFixed(4) + '%"></div></div><div class="bar-number">' + num(x.student + x.adult) + '</div></div>';
+   });
+   return html;
+ }
+ function updateMix(){
+   var all = mixScope === 'all', m = C.mixStats(data, all ? ['1', '2'] : [ui.day]);
+   document.querySelectorAll('[data-mix-scope]').forEach(function(b){ b.setAttribute('aria-pressed', String(b.dataset.mixScope === mixScope)); });
+   $('mix-heading').textContent = '学生＋一般・社会人の合計（' + (all ? '2日間' : ui.day + '日目') + '）';
+   $('mix-visitors').textContent = num(m.visitors); $('mix-student').textContent = num(m.student.q1); $('mix-adult').textContent = num(m.adult.q1); $('mix-unanswered').textContent = num(m.unanswered);
+   $('mix-exhibits').innerHTML = stackBars(m.exhibits); $('mix-industry').innerHTML = stackBars(m.industries);
  }
  function hourName(h){ return h + '時台'; }
  function updateHourTable(){
@@ -1944,6 +2048,10 @@ function exclude_(ids, flag) {
    'share-link-send':function(){ if (!navigator.share) return; navigator.share({title:'展示アンケート集約', text:'展示アンケートの入力用リンクです', url:shareLink()}).catch(function(e){ if (e && e.name !== 'AbortError') toast('共有できませんでした。リンクをコピーしてください'); }); },
    'server-list':serverListPrompt,
    'server-show-cache':function(){ renderServerList(); },
+   'server-remove':function(b){ serverRemovePrompt(b.dataset.id); },
+   'server-remove-ok':function(b){ serverRemove(b.dataset.id, b); },
+   'server-restore':function(b){ serverRestore(b.dataset.id, b); },
+   'server-back':function(){ if (sync.cache) renderServerList(); else closeModal(); },
    'server-all':function(){ document.querySelectorAll('.server-check').forEach(function(x){ x.checked = true; }); },
    'server-none':function(){ document.querySelectorAll('.server-check').forEach(function(x){ x.checked = false; }); },
    'server-sum':function(){ var list = serverSelected(); if (!list.length) { toast('合算するデータを選んでください'); return; } S.sumSource = 'server'; S.sumIds = list.map(function(x){ return x.id; }); saveSumSelection(); closeModal(true); if (S.route === 'sum') { leaveCurrent(); openCombined(); } else go('#/sum', true); },
@@ -2009,6 +2117,7 @@ function exclude_(ids, flag) {
  window.addEventListener('online', function(){ if (sync.url) syncNow(); });
  setInterval(function(){ if (sync.url && !sync.busy && !sync.timer && !sync.retryTimer && document.visibilityState !== 'hidden' && pendingSessions().length) syncNow(); }, 60000);
  document.querySelectorAll('[data-select-day]').forEach(function(button){ button.addEventListener('click', function(){ if (!data) return; ui.day = button.dataset.selectDay; ui.remove = false; rememberUI(); render(); }); });
+document.querySelectorAll('[data-mix-scope]').forEach(function(button){ button.addEventListener('click', function(){ mixScope = button.dataset.mixScope === 'all' ? 'all' : 'day'; if (data && ui.view === 'summary' && S.route === 'sum') updateMix(); }); });
  document.querySelectorAll('[data-select-type]').forEach(function(button){ button.addEventListener('click', function(){ if (!data) return; ui.type = button.dataset.selectType; ui.remove = false; rememberUI(); render(); }); });
  document.querySelectorAll('[data-select-view]').forEach(function(button){ button.addEventListener('click', function(){ if (!data) return; ui.view = button.dataset.selectView; ui.remove = false; render(); }); });
  $('vote-view').addEventListener('click', guard(function(event){ var button = event.target.closest('.vote-hit[data-q]'); if (button && !button.disabled) vote(button); }));
